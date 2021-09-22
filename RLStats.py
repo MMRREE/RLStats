@@ -27,10 +27,14 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
+
         self._after_id = None
         self.user_cache = {}
+
         self.pack()
         self.create_widgets()
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_exit)
     # End __init__
 
     def create_widgets(self):
@@ -41,7 +45,7 @@ class Application(tk.Frame):
         # Create an interface menu
         self.menu = tk.Menu(self)
         self.m_file = tk.Menu(self, tearoff=0)
-        self.m_file.add_command(label="Exit", command=self.master.quit())
+        self.m_file.add_command(label="Exit", command=self.on_exit)
         self.menu.add_cascade(label="File", menu=self.m_file)
         self.master.config(menu=self.menu)
 
@@ -402,6 +406,10 @@ class Application(tk.Frame):
         self.goalsCanvas.get_tk_widget().pack()
         # self.goalsFigure.tight_layout()
     # End search_replays(self)
+
+    def on_exit(self):
+        self.master.destroy()
+    # End of on_exit
 # End Application(Frame)
 
 
