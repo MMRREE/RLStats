@@ -18,6 +18,7 @@ def reformatMajorTicks(axes, dateFormat="%H:%M", locatorFrame="Hour", byperiod=[
     else:
         locator = mdates.DayLocator(bymonthday=byperiod)
     axes.get_xaxis().set_major_locator(locator)
+# End of reformatMajorTicks
 
 
 def repaintMajorTicks(axes, ls='--', color='black', lw=0.25):
@@ -26,3 +27,4 @@ def repaintMajorTicks(axes, ls='--', color='black', lw=0.25):
     for xmaj in axes.xaxis.get_majorticklocs():
         axes.axvline(
             x=xmaj, ls=ls, color=color, lw=lw)
+# End of repaintMajorTicks

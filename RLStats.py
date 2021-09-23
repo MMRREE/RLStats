@@ -1,20 +1,20 @@
-from io import BytesIO
-import tkinter as tk
-from tkinter import ttk
+# As imports
+from tkImageURL import tkLabelImageURL, tkRawImageURL
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from matplotlib.widgets import Slider
-from matplotlib.backends.backend_tkagg import *
-from tkinter.ttk import Progressbar
+import GraphFormat as gf
 import requests as req
-import numpy as np
+import tkinter as tk
+
+# From imports
+from matplotlib.backends.backend_tkagg import *
+from dateutil.parser import parse
+from datetime import timezone
+from tkinter import ttk
+from io import BytesIO
+
+# Direct imports
 import time
 import json
-from dateutil.parser import parse
-from requests.api import head
-import GraphFormat as gf
-from datetime import timezone
-from PIL import Image, ImageTk
 
 # Initialise data from stored files
 gamesFile = open('games.json', 'r+')
@@ -25,17 +25,18 @@ gamesFile.close()
 
 class Application(tk.Frame):
     def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master
+        super().__init__(master=master)
 
+        self.master = master
         self._after_id = None
         self.user_cache = {}
 
         self.pack()
+
         self.create_widgets()
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_exit)
-    # End __init__
+    # End of __init__
 
     def create_widgets(self):
         # Setting up window name and icon
@@ -49,23 +50,18 @@ class Application(tk.Frame):
         self.menu.add_cascade(label="File", menu=self.m_file)
         self.master.config(menu=self.menu)
 
+        # Create a frame
         self.topFrame = tk.Frame(self)
         self.topFrame.pack(side='top')
 
         # Create a user image
-        imageURL = 'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png'
-        imageReq = req.get(imageURL)
-        photo = Image.open(BytesIO(imageReq.content))
-        photo = photo.resize((120, 120), Image.ANTIALIAS)
-        imageRaw = ImageTk.PhotoImage(photo)
-        self.userImage = tk.Label(
-            self.topFrame, image=imageRaw, width=120, height=120)
-        self.userImage.image = imageRaw
-        self.userImage.pack(side='left', padx=10, pady=10)
+        self.userImage = tkLabelImageURL(
+            'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png', self.topFrame)
+        self.userImage.pack(side="left", padx=10, pady=10)
 
         # Get a list of available stats from
         exampleGame = next(iter(games.values()))
-        #print(json.dumps(exampleGame, indent=4, sort_keys=True))
+        print(json.dumps(exampleGame, indent=4, sort_keys=True))
 
         self.graphSelectionVar = tk.StringVar(name="GraphSelection")
         self.graphSelectionVar.trace('w', self.graphSelectionHandler)
@@ -73,34 +69,7 @@ class Application(tk.Frame):
             self.topFrame, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
 
-        def exploreDict(dictionary, parentTags="", menu=tk.Menu()):
-            for tag, val in dictionary.items():
-                if(parentTags != ""):
-                    currentTags = parentTags + "." + tag
-                else:
-                    currentTags = tag
-
-                if(type(val) is dict):
-                    newMenu = tk.Menu(self.graphMenu, tearoff=False)
-                    menu.add_cascade(label=tag, menu=newMenu)
-                    exploreDict(val, currentTags, newMenu)
-                elif(type(val) is list):
-                    for obj in val:
-                        if(type(obj) is dict):
-                            currentTags += "[" + str(val.index(obj)) + "]"
-                            newMenu = tk.Menu(self.graphMenu, tearoff=False)
-                            menu.add_cascade(label=tag, menu=newMenu)
-                            exploreDict(obj, currentTags, newMenu)
-                        else:
-                            # Add to list
-                            menu.add_radiobutton(
-                                value=currentTags, label=tag, indicatoron=True, variable=self.graphSelectionVar)
-                else:
-                    # Add to list
-                    menu.add_radiobutton(
-                        value=currentTags, label=tag, indicatoron=True, variable=self.graphSelectionVar)
-
-        exploreDict(exampleGame, menu=self.gM)
+        self.exploreDict(exampleGame, menu=self.gM)
 
         self.graphMenu.configure(menu=self.gM)
         self.graphMenu.pack(side='left', padx=10, pady=10)
@@ -117,7 +86,37 @@ class Application(tk.Frame):
 
         # Automatically run search
         self.search_replays('76561198072178785')
-    # End create_widgets(self)
+    # End of create_widgets(self)
+
+    def exploreDict(self, dictionary, parentTags="", menu=None):
+        if(menu == None):
+            menu = tk.Menu(self.graphMenu)
+        for tag, val in dictionary.items():
+            if(parentTags != ""):
+                currentTags = parentTags + "." + tag
+            else:
+                currentTags = tag
+
+            if(type(val) is dict):
+                newMenu = tk.Menu(self.graphMenu, tearoff=False)
+                menu.add_cascade(label=tag, menu=newMenu)
+                self.exploreDict(val, currentTags, newMenu)
+            elif(type(val) is list):
+                for obj in val:
+                    if(type(obj) is dict):
+                        currentTags += "[" + str(val.index(obj)) + "]"
+                        newMenu = tk.Menu(self.graphMenu, tearoff=False)
+                        menu.add_cascade(label=tag, menu=newMenu)
+                        self.exploreDict(obj, currentTags, newMenu)
+                    else:
+                        # Add to list
+                        menu.add_radiobutton(
+                            value=currentTags, label=tag, indicatoron=True, variable=self.graphSelectionVar)
+            else:
+                # Add to list
+                menu.add_radiobutton(
+                    value=currentTags, label=tag, indicatoron=True, variable=self.graphSelectionVar)
+        # End of exploreDict
 
     def graphSelectionHandler(self, name, index, mode):
         exampleGame = next(iter(games.values()))
@@ -136,18 +135,14 @@ class Application(tk.Frame):
 
     def comboSelectUser(self, event):
         user = self.user_cache[self.search.get()]
-        print(user)
         imageURL = user['avatarUrl']
-        print(imageURL)
-        imageReq = req.get(imageURL)
-        photo = Image.open(BytesIO(imageReq.content))
-        photo = photo.resize((120, 120), Image.ANTIALIAS)
-        newImage = ImageTk.PhotoImage(photo)
+        newImage = tkRawImageURL(imageURL)
         self.userImage.configure(image=newImage)
         self.userImage.image = newImage
         self.master.update()
         # 76561198072178785
         self.search_replays(user['platformUserIdentifier'])
+    # End of comboSelectUser
 
     def check_input(self, event):
         if(event.keysym == "Escape"):
@@ -158,6 +153,7 @@ class Application(tk.Frame):
 
         # Create a new job to run after the use has typed
         self._after_id = self.after(600, self.autocompleteSearch)
+    # End of check_input
 
     def autocompleteSearch(self):
         if(self.search.get() != ""):
@@ -181,10 +177,11 @@ class Application(tk.Frame):
             self.search.event_generate('<Down>')
         else:
             self.search['values'] = []
+    # End of autocompleteSearch
 
     def search_replays(self, steamId):
         # UI Element to update user of progress
-        self.progressBar = Progressbar(
+        self.progressBar = ttk.Progressbar(
             self.master, orient="horizontal", length=200)
         self.progressBar.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -193,6 +190,7 @@ class Application(tk.Frame):
         headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
         searchGames = req.get(url, headers=headers)
         result = searchGames.json()
+        print(json.dumps(result['list'], indent=4, sort_keys=True))
 
         # Configuring UI with the relelvant progress
         self.progressBar.configure(maximum=len(result['list']))
@@ -202,6 +200,8 @@ class Application(tk.Frame):
         blueGoals = []
         gameTimes = []
         gameLengths = []
+        results = []
+        resultsCols = []
 
         seenGUIDs = {}
 
@@ -230,10 +230,10 @@ class Application(tk.Frame):
                 # replayResult['match_guid'])
                 seenGUIDs[replayResult['match_guid']] = True
             else:
-                #print("Seen this replay before!", replayResult['match_guid'])
+                # print("Seen this replay before!", replayResult['match_guid'])
                 continue
 
-            #print("reached past the continue")
+            # print("reached past the continue")
             # Data processing on the replay
             orangeGoals.append(
                 replayResult['orange']['stats']['core']['goals'])
@@ -242,13 +242,19 @@ class Application(tk.Frame):
                 parse(replayResult['date']).astimezone(timezone.utc))
             # print(gameTimes[len(gameTimes)-1])
             gameLengths.append(replayResult['duration'])
+            if('Win' in replay['replay_title']):
+                results.append(1)
+                resultsCols.append('g')
+            else:
+                results.append(-1)
+                resultsCols.append('r')
             # print(gameTimes)
 
             # Wait 500 ms before looking at the next (rate limiter on api calls)
             if fetched:
                 time.sleep(0.5)
         # Print an example of a game json
-        #exampleGame = next(iter(games.values()))
+        # exampleGame = next(iter(games.values()))
 
         # Save the updated games list to file
         gamesFile = open('games.json', 'w+')
@@ -268,16 +274,18 @@ class Application(tk.Frame):
         self.goalsAx = self.goalsFigure.add_subplot(111)
 
         # Plot the data
-        self.goalsAx.bar(gameTimes, orangeGoals,
+        '''self.goalsAx.bar(gameTimes, orangeGoals,
                          color='r', width=barLengths, alpha=0.5, align='edge')
         self.goalsAx.bar(gameTimes, blueGoals, color='b',
-                         width=barLengths, alpha=0.5, align='edge')
+                         width=barLengths, alpha=0.5, align='edge')'''
+        self.goalsAx.bar(gameTimes, results, color=resultsCols, width=barLengths,
+                         align='edge', alpha=0.5)
 
         # Format the axis and add a title
         self.goalsAx.set_xticklabels(self.goalsAx.get_xticks(), rotation=30)
-        self.goalsAx.set_ylabel("Team Goals")
+        self.goalsAx.set_ylabel("Wins/Loss")
         self.goalsAx.set_xlabel("Time")
-        self.goalsAx.set_title("Testing")
+        self.goalsAx.set_title("Wins Vs Losses")
         gf.reformatMajorTicks(
             self.goalsAx, "%d/%m", "Day", range(32))
         self.goalsFigure.tight_layout()
@@ -291,126 +299,133 @@ class Application(tk.Frame):
         self.mouse_down = False
         self.lastevent = None
 
-        def onclick(event):
-            if(event.button == 1):
-                self.mouse_down = True
-
-        def onrelease(event):
-            if(event.button == 1):
-                self.mouse_down = False
-
-        def onscroll(event):
-            if(event.inaxes):
-                # Find the mid point of the graph as it is
-                xlimLow, xlimHigh = self.goalsAx.get_xlim()
-                xlimWidth = xlimHigh - xlimLow
-
-                # Find the position of the mouse
-                lowestPixelAxes = self.goalsAx.get_position(
-                ).x0 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
-                highestPixelAxes = self.goalsAx.get_position(
-                ).x1 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
-                axesWidthPixels = highestPixelAxes - lowestPixelAxes
-                mousePosition = event.x - lowestPixelAxes
-
-                # Caclulate where the mouse is
-                mousePercentageAcross = mousePosition/axesWidthPixels
-                newxlimHigh = xlimHigh
-                newxlimLow = xlimLow
-
-                if(event.button == "up"):
-                    # Zoom in
-                    if(mousePercentageAcross > 0.66):
-                        newxlimLow = xlimHigh - xlimWidth * 0.9
-                    elif(mousePercentageAcross < 0.33):
-                        newxlimHigh = xlimLow + xlimWidth * 0.9
-                    else:
-                        newxlimLow = xlimHigh - xlimWidth * 0.95
-                        newxlimHigh = xlimLow + xlimWidth * 0.95
-                elif(event.button == "down"):
-                    # Zoom out
-                    if(mousePercentageAcross > 0.66):
-                        newxlimLow = xlimHigh - xlimWidth * 1.1
-                    elif(mousePercentageAcross < 0.33):
-                        newxlimHigh = xlimLow + xlimWidth * 1.1
-                    else:
-                        newxlimLow = xlimHigh - xlimWidth * 1.05
-                        newxlimHigh = xlimLow + xlimWidth * 1.05
-
-                # Reformat with new limits
-                self.goalsAx.set_xlim(
-                    newxlimLow, newxlimHigh)
-                newxlimWidth = newxlimHigh - newxlimLow
-
-                # Calculate the major ticks requirement
-                if(newxlimWidth < 0.000694*2):
-                    gf.reformatMajorTicks(
-                        self.goalsAx, "%M:%S", "Second", [0, 15, 30, 45])
-                elif(newxlimWidth < 0.041*2):
-                    gf.reformatMajorTicks(
-                        self.goalsAx, "%H:%M", "Minute", [0, 15, 30, 45])
-                elif(newxlimWidth < 0.041*6):
-                    gf.reformatMajorTicks(
-                        self.goalsAx, "%H:%M", "Hour", range(24))
-                elif(newxlimWidth < 0.041*12):
-                    gf.reformatMajorTicks(
-                        self.goalsAx, "%H:%M", "Hour", [0, 3, 6, 9, 12, 15, 18, 21])
-                elif(newxlimWidth < 1.5):
-                    gf.reformatMajorTicks(
-                        self.goalsAx, "%d/%m, %H:%M", "Hour", [0, 6, 12, 18])
-                else:
-                    gf.reformatMajorTicks(
-                        self.goalsAx, "%d/%m", "Day", range(31))
-
-                # Recalculate the major ticks
-                gf.repaintMajorTicks(self.goalsAx)
-                self.goalsFigure.tight_layout()
-                self.goalsCanvas.draw()
-
-        def onmousemove(event):
-            if(self.mouse_down and event.inaxes and self.lastevent != None):
-                # Find the data points of the current limit
-                xlimLow, xlimHigh = self.goalsAx.get_xlim()
-                xlimWidth = xlimHigh - xlimLow
-                mouseMovement = event.x - self.lastevent.x
-
-                # Find the current pixels limits of the subplot
-                lowestPixelAxes = self.goalsAx.get_position(
-                ).x0 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
-                highestPixelAxes = self.goalsAx.get_position(
-                ).x1 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
-                axesWidthPixels = highestPixelAxes - lowestPixelAxes
-
-                # Calculate and update the limits
-                axMovement = mouseMovement * \
-                    xlimWidth / axesWidthPixels
-                self.goalsAx.set_xlim(
-                    xlimLow-axMovement, xlimHigh-axMovement)
-
-                # Recalculate the major ticks
-                gf.repaintMajorTicks(self.goalsAx)
-                self.goalsFigure.tight_layout()
-                self.goalsCanvas.draw()
-            self.lastevent = event
-
         cid = self.goalsFigure.canvas.mpl_connect(
-            'button_press_event', onclick)
+            'button_press_event', self.onclick)
         rid = self.goalsFigure.canvas.mpl_connect(
-            'button_release_event', onrelease)
+            'button_release_event', self.onrelease)
         mid = self.goalsFigure.canvas.mpl_connect(
-            'motion_notify_event', onmousemove)
-        sid = self.goalsFigure.canvas.mpl_connect('scroll_event', onscroll)
+            'motion_notify_event', self.onmousemove)
+        sid = self.goalsFigure.canvas.mpl_connect(
+            'scroll_event', self.onscroll)
 
         # Add the grpah to the window
         self.goalsCanvas = FigureCanvasTkAgg(self.goalsFigure, self.master)
         self.goalsCanvas.get_tk_widget().pack()
         # self.goalsFigure.tight_layout()
-    # End search_replays(self)
+
+        print(results)
+    # End search_replays
+
+    def onclick(self, event):
+        if(event.button == 1):
+            self.mouse_down = True
+    # End of onclick
+
+    def onrelease(self, event):
+        if(event.button == 1):
+            self.mouse_down = False
+    # End of onrelease
+
+    def onscroll(self, event):
+        if(event.inaxes):
+            # Find the mid point of the graph as it is
+            xlimLow, xlimHigh = self.goalsAx.get_xlim()
+            xlimWidth = xlimHigh - xlimLow
+
+            # Find the position of the mouse
+            lowestPixelAxes = self.goalsAx.get_position(
+            ).x0 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
+            highestPixelAxes = self.goalsAx.get_position(
+            ).x1 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
+            axesWidthPixels = highestPixelAxes - lowestPixelAxes
+            mousePosition = event.x - lowestPixelAxes
+
+            # Caclulate where the mouse is
+            mousePercentageAcross = mousePosition/axesWidthPixels
+            newxlimHigh = xlimHigh
+            newxlimLow = xlimLow
+
+            if(event.button == "up"):
+                # Zoom in
+                if(mousePercentageAcross > 0.66):
+                    newxlimLow = xlimHigh - xlimWidth * 0.9
+                elif(mousePercentageAcross < 0.33):
+                    newxlimHigh = xlimLow + xlimWidth * 0.9
+                else:
+                    newxlimLow = xlimHigh - xlimWidth * 0.95
+                    newxlimHigh = xlimLow + xlimWidth * 0.95
+            elif(event.button == "down"):
+                # Zoom out
+                if(mousePercentageAcross > 0.66):
+                    newxlimLow = xlimHigh - xlimWidth * 1.1
+                elif(mousePercentageAcross < 0.33):
+                    newxlimHigh = xlimLow + xlimWidth * 1.1
+                else:
+                    newxlimLow = xlimHigh - xlimWidth * 1.05
+                    newxlimHigh = xlimLow + xlimWidth * 1.05
+
+            # Reformat with new limits
+            self.goalsAx.set_xlim(
+                newxlimLow, newxlimHigh)
+            newxlimWidth = newxlimHigh - newxlimLow
+
+            # Calculate the major ticks requirement
+            if(newxlimWidth < 0.000694*2):
+                gf.reformatMajorTicks(
+                    self.goalsAx, "%M:%S", "Second", [0, 15, 30, 45])
+            elif(newxlimWidth < 0.041*2):
+                gf.reformatMajorTicks(
+                    self.goalsAx, "%H:%M", "Minute", [0, 15, 30, 45])
+            elif(newxlimWidth < 0.041*6):
+                gf.reformatMajorTicks(
+                    self.goalsAx, "%H:%M", "Hour", range(24))
+            elif(newxlimWidth < 0.041*12):
+                gf.reformatMajorTicks(
+                    self.goalsAx, "%H:%M", "Hour", [0, 3, 6, 9, 12, 15, 18, 21])
+            elif(newxlimWidth < 1.5):
+                gf.reformatMajorTicks(
+                    self.goalsAx, "%d/%m, %H:%M", "Hour", [0, 6, 12, 18])
+            else:
+                gf.reformatMajorTicks(
+                    self.goalsAx, "%d/%m", "Day", range(31))
+
+            # Recalculate the major ticks
+            gf.repaintMajorTicks(self.goalsAx)
+            self.goalsFigure.tight_layout()
+            self.goalsCanvas.draw()
+    # End of onscroll
+
+    def onmousemove(self, event):
+        if(self.mouse_down and event.inaxes and self.lastevent != None):
+            # Find the data points of the current limit
+            xlimLow, xlimHigh = self.goalsAx.get_xlim()
+            xlimWidth = xlimHigh - xlimLow
+            mouseMovement = event.x - self.lastevent.x
+
+            # Find the current pixels limits of the subplot
+            lowestPixelAxes = self.goalsAx.get_position(
+            ).x0 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
+            highestPixelAxes = self.goalsAx.get_position(
+            ).x1 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
+            axesWidthPixels = highestPixelAxes - lowestPixelAxes
+
+            # Calculate and update the limits
+            axMovement = mouseMovement * \
+                xlimWidth / axesWidthPixels
+            self.goalsAx.set_xlim(
+                xlimLow-axMovement, xlimHigh-axMovement)
+
+            # Recalculate the major ticks
+            gf.repaintMajorTicks(self.goalsAx)
+            self.goalsFigure.tight_layout()
+            self.goalsCanvas.draw()
+        self.lastevent = event
+    # End of onmousemove
 
     def on_exit(self):
         self.master.destroy()
     # End of on_exit
-# End Application(Frame)
+# End Application
 
 
 root = tk.Tk()
