@@ -1,4 +1,5 @@
 # As imports
+from PIL.Image import new
 from tkImageURL import tkLabelImageURL, tkRawImageURL
 import matplotlib.pyplot as plt
 import GraphFormat as gf
@@ -21,6 +22,11 @@ gamesFile = open('games.json', 'r+')
 gamesData = gamesFile.read()
 games = json.loads(gamesData)
 gamesFile.close()
+
+statsFile = open('StatSelection.json', 'r+')
+statsData = statsFile.read()
+statsSelection = json.loads(statsData)
+statsFile.close()
 
 
 class Application(tk.Frame):
@@ -61,21 +67,21 @@ class Application(tk.Frame):
 
         # Get a list of available stats from
         exampleGame = next(iter(games.values()))
-        print(json.dumps(exampleGame, indent=4, sort_keys=True))
+        #print(json.dumps(exampleGame, indent=4, sort_keys=True))
 
         self.graphSelectionVar = tk.StringVar(name="GraphSelection")
-        self.graphSelectionVar.trace('w', self.graphSelectionHandler)
         self.graphMenu = tk.Menubutton(
             self.topFrame, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
 
-        self.exploreDict(exampleGame, menu=self.gM)
+        self.populateMenuFromDict(statsSelection, menu=self.gM)
+        self.graphSelectionVar.trace('w', self.graphSelectionHandler)
 
         self.graphMenu.configure(menu=self.gM)
         self.graphMenu.pack(side='left', padx=10, pady=10)
 
         self.labelValue = tk.Label(self.topFrame)
-        self.labelValue.configure(text="test")
+        self.labelValue.configure(text="Wins/Losses")
         self.labelValue.pack(side='left', padx=10, pady=10)
 
         # Create a basic search entry
@@ -88,50 +94,35 @@ class Application(tk.Frame):
         self.search_replays('76561198072178785')
     # End of create_widgets(self)
 
-    def exploreDict(self, dictionary, parentTags="", menu=None):
+    def populateMenuFromDict(self, dictionary, menu=None):
         if(menu == None):
             menu = tk.Menu(self.graphMenu)
-        for tag, val in dictionary.items():
-            if(parentTags != ""):
-                currentTags = parentTags + "." + tag
-            else:
-                currentTags = tag
-
-            if(type(val) is dict):
-                newMenu = tk.Menu(self.graphMenu, tearoff=False)
-                menu.add_cascade(label=tag, menu=newMenu)
-                self.exploreDict(val, currentTags, newMenu)
-            elif(type(val) is list):
-                for obj in val:
-                    if(type(obj) is dict):
-                        currentTags += "[" + str(val.index(obj)) + "]"
-                        newMenu = tk.Menu(self.graphMenu, tearoff=False)
-                        menu.add_cascade(label=tag, menu=newMenu)
-                        self.exploreDict(obj, currentTags, newMenu)
-                    else:
-                        # Add to list
-                        menu.add_radiobutton(
-                            value=currentTags, label=tag, indicatoron=True, variable=self.graphSelectionVar)
-            else:
-                # Add to list
-                menu.add_radiobutton(
-                    value=currentTags, label=tag, indicatoron=True, variable=self.graphSelectionVar)
-        # End of exploreDict
+        if(type(dictionary) is dict):
+            for tag, val in dictionary.items():
+                if(type(val) is dict or type(val) is list):
+                    newMenu = tk.Menu(self.graphMenu, tearoff=False)
+                    menu.add_cascade(label=tag, menu=newMenu)
+                    self.populateMenuFromDict(dictionary=val, menu=newMenu)
+                else:
+                    menu.add_radiobutton(
+                        value=val, label=tag, indicatoron=True, variable=self.graphSelectionVar)
+                    if(self.graphSelectionVar.get() is None):
+                        self.graphSelectionVar.set(tag)
+        elif(type(dictionary) is list):
+            for obj in dictionary:
+                self.populateMenuFromDict(obj, menu=menu)
+        else:
+            menu.add_radiobutton(
+                value=dictionary, label=dictionary, indicatoron=True, variable=self.graphSelectionVar)
+            if(self.graphSelectionVar.get() == ""):
+                self.graphSelectionVar.set(dictionary)
+    # End of populateMenuFromDict
 
     def graphSelectionHandler(self, name, index, mode):
-        exampleGame = next(iter(games.values()))
-        keys = self.graphSelectionVar.get().split(".")
-        gotLabel = exampleGame
-        for key in keys:
-            if("[" in key):
-                tempLabel = key.split("]")[0]
-                newKey, ind = tempLabel.split("[")
-                gotLabel = gotLabel.get(newKey)
-                gotLabel = gotLabel[int(ind)]
-            else:
-                gotLabel = gotLabel.get(key)
-        self.labelValue.configure(
-            text=gotLabel)
+        #print(name, index, mode)
+        newValue = self.graphSelectionVar.get()
+        # print(newValue)
+        self.labelValue.configure(text=newValue)
 
     def comboSelectUser(self, event):
         user = self.user_cache[self.search.get()]
@@ -190,7 +181,7 @@ class Application(tk.Frame):
         headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
         searchGames = req.get(url, headers=headers)
         result = searchGames.json()
-        print(json.dumps(result['list'], indent=4, sort_keys=True))
+        #print(json.dumps(result['list'], indent=4, sort_keys=True))
 
         # Configuring UI with the relelvant progress
         self.progressBar.configure(maximum=len(result['list']))
@@ -286,14 +277,13 @@ class Application(tk.Frame):
         self.goalsAx.set_ylabel("Wins/Loss")
         self.goalsAx.set_xlabel("Time")
         self.goalsAx.set_title("Wins Vs Losses")
-        gf.reformatMajorTicks(
-            self.goalsAx, "%d/%m", "Day", range(32))
-        self.goalsFigure.tight_layout()
 
         # Calculate major ticks
-        gf.repaintMajorTicks(self.goalsAx)
         self.goalsAx.set_xlim(
-            self.goalsAx.get_xlim()[1]-4, self.goalsAx.get_xlim()[1])
+            self.goalsAx.get_xlim()[1]-1, self.goalsAx.get_xlim()[1])
+        gf.dateGraphMajorTicksCalculation(self.goalsAx)
+        gf.repaintMajorTicks(self.goalsAx)
+        self.goalsFigure.tight_layout()
 
         # Mouse handle event variable initialisaiton
         self.mouse_down = False
@@ -313,7 +303,7 @@ class Application(tk.Frame):
         self.goalsCanvas.get_tk_widget().pack()
         # self.goalsFigure.tight_layout()
 
-        print(results)
+        # print(results)
     # End search_replays
 
     def onclick(self, event):
@@ -367,27 +357,8 @@ class Application(tk.Frame):
             # Reformat with new limits
             self.goalsAx.set_xlim(
                 newxlimLow, newxlimHigh)
-            newxlimWidth = newxlimHigh - newxlimLow
 
-            # Calculate the major ticks requirement
-            if(newxlimWidth < 0.000694*2):
-                gf.reformatMajorTicks(
-                    self.goalsAx, "%M:%S", "Second", [0, 15, 30, 45])
-            elif(newxlimWidth < 0.041*2):
-                gf.reformatMajorTicks(
-                    self.goalsAx, "%H:%M", "Minute", [0, 15, 30, 45])
-            elif(newxlimWidth < 0.041*6):
-                gf.reformatMajorTicks(
-                    self.goalsAx, "%H:%M", "Hour", range(24))
-            elif(newxlimWidth < 0.041*12):
-                gf.reformatMajorTicks(
-                    self.goalsAx, "%H:%M", "Hour", [0, 3, 6, 9, 12, 15, 18, 21])
-            elif(newxlimWidth < 1.5):
-                gf.reformatMajorTicks(
-                    self.goalsAx, "%d/%m, %H:%M", "Hour", [0, 6, 12, 18])
-            else:
-                gf.reformatMajorTicks(
-                    self.goalsAx, "%d/%m", "Day", range(31))
+            gf.dateGraphMajorTicksCalculation(self.goalsAx)
 
             # Recalculate the major ticks
             gf.repaintMajorTicks(self.goalsAx)

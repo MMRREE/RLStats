@@ -1,0 +1,82 @@
+[
+    "Wins/Losses",
+    {
+        "Individual": [{
+            "General": [
+                "Goals",
+                "Saves",
+                "Assists",
+                "Shots",
+                "Demos Inflicted/Received",
+                "Score",
+                "Shooting Percent",
+                "Goals against while last defender"
+            ]
+        }, {
+            "Boost": [
+                "Average boost used per minute",
+                "Average boost collected per minute",
+                "Average boost amount",
+                "Second with 0 boost",
+                "Seconds with 100 boost",
+                "Big pads taken",
+                "Big pads stolen (in opponents half)",
+                "Small pads taken",
+                "Small pads stolen (in opponents half)",
+                "Boost overfill",
+                "Stolen overfill",
+                "Time at 0-25% boost",
+                "Time at 25-50% boost",
+                "Time at 50-75% boost",
+                "Time at 75-100% boost",
+                "Amount of boost used at supersonic",
+                "Amount of boost collected"
+            ]
+        }, {
+            "Positioning": [
+                "Average distance to teammates",
+                "% of time spent most back",
+                "% of time spent most forward",
+                "% of time in defensive third",
+                "% of time in neutral third",
+                "% of time in offensive third",
+                "% of time in defensive half",
+                "% of time in offensive half",
+                "% of time closest to ball (overall)",
+                "% of time farthest from ball (overall)",
+                "% of time behind the ball",
+                "% of time in front of the ball",
+                "Average distance to the ball",
+                "Average distance to the ball in possesion",
+                "Average distance to the ball out of possesion"
+            ]
+        }, {
+            "Movement": [
+                "Average speed (as a % of max speed)",
+                "Total distance travelled",
+                "% of time supersonic",
+                "% of time at boost speed (between boosting and supersonic)",
+                "% of time at slow speed (below boosting)",
+                "% of time on the ground",
+                "% of time in low air (below crossbar)",
+                "% of time in high air (above crossbar)",
+                "Powerslide total duration",
+                "Powerslide average duration",
+                "Number of powerslides"
+            ]
+        }],
+        "Teams": [
+            "Goals For/Against",
+            "Saves",
+            "Assists",
+            "Shots",
+            "Demos Inflicted/Received",
+            "Total Score",
+            "Average Score",
+            "Average Shooting Percent",
+            "Time in possesion",
+            "Time in half"
+        ]
+
+    }
+]
