@@ -8,8 +8,6 @@ import tkinter as tk
 
 # From imports
 from matplotlib.backends.backend_tkagg import *
-from dateutil.parser import parse
-from datetime import timezone
 from tkinter import ttk
 from io import BytesIO
 
@@ -17,16 +15,13 @@ from io import BytesIO
 import time
 import json
 
+from data import statMenuChoices, GameStat
+
 # Initialise data from stored files
 gamesFile = open('games.json', 'r+')
 gamesData = gamesFile.read()
 games = json.loads(gamesData)
 gamesFile.close()
-
-statsFile = open('StatSelection.json', 'r+')
-statsData = statsFile.read()
-statsSelection = json.loads(statsData)
-statsFile.close()
 
 
 class Application(tk.Frame):
@@ -74,15 +69,11 @@ class Application(tk.Frame):
             self.topFrame, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
 
-        self.populateMenuFromDict(statsSelection, menu=self.gM)
+        self.populateMenuFromDict(statMenuChoices, menu=self.gM)
         self.graphSelectionVar.trace('w', self.graphSelectionHandler)
 
         self.graphMenu.configure(menu=self.gM)
         self.graphMenu.pack(side='left', padx=10, pady=10)
-
-        self.labelValue = tk.Label(self.topFrame)
-        self.labelValue.configure(text="Wins/Losses")
-        self.labelValue.pack(side='left', padx=10, pady=10)
 
         # Create a basic search entry
         self.search = ttk.Combobox(self.topFrame)
@@ -121,8 +112,15 @@ class Application(tk.Frame):
     def graphSelectionHandler(self, name, index, mode):
         #print(name, index, mode)
         newValue = self.graphSelectionVar.get()
-        # print(newValue)
-        self.labelValue.configure(text=newValue)
+        if("Wins/Losses" in newValue):
+            print("win/loss")
+        elif("Demos Inflicted/Received" in newValue):
+            print("Demos")
+        else:
+            print("Default case")
+            print(newValue)
+
+    # End of graphSelectionHandler
 
     def comboSelectUser(self, event):
         user = self.user_cache[self.search.get()]
@@ -187,12 +185,7 @@ class Application(tk.Frame):
         self.progressBar.configure(maximum=len(result['list']))
 
         # Stats to be updated for the current search list
-        orangeGoals = []
-        blueGoals = []
-        gameTimes = []
-        gameLengths = []
-        results = []
-        resultsCols = []
+        localSearchedGames = []
 
         seenGUIDs = {}
 
@@ -226,20 +219,10 @@ class Application(tk.Frame):
 
             # print("reached past the continue")
             # Data processing on the replay
-            orangeGoals.append(
-                replayResult['orange']['stats']['core']['goals'])
-            blueGoals.append(replayResult['blue']['stats']['core']['goals'])
-            gameTimes.append(
-                parse(replayResult['date']).astimezone(timezone.utc))
-            # print(gameTimes[len(gameTimes)-1])
-            gameLengths.append(replayResult['duration'])
-            if('Win' in replay['replay_title']):
-                results.append(1)
-                resultsCols.append('g')
-            else:
-                results.append(-1)
-                resultsCols.append('r')
-            # print(gameTimes)
+            localGame = GameStat()
+            localGame.populateFromGame(replay, replayResult)
+            localSearchedGames.append(localGame.__dict__)
+            # print(localGame)
 
             # Wait 500 ms before looking at the next (rate limiter on api calls)
             if fetched:
@@ -249,11 +232,8 @@ class Application(tk.Frame):
 
         # Save the updated games list to file
         gamesFile = open('games.json', 'w+')
-        json.dump(games, gamesFile)
+        json.dump(games, gamesFile, indent=4, default=str)
         gamesFile.close()
-        barLengths = []
-        for gameLength in gameLengths:
-            barLengths.append(0.00001*gameLength)
 
         # UI plotting of data for the search period and removing loading bar
         self.progressBar.pack_forget()
@@ -265,11 +245,11 @@ class Application(tk.Frame):
         self.goalsAx = self.goalsFigure.add_subplot(111)
 
         # Plot the data
-        '''self.goalsAx.bar(gameTimes, orangeGoals,
-                         color='r', width=barLengths, alpha=0.5, align='edge')
-        self.goalsAx.bar(gameTimes, blueGoals, color='b',
-                         width=barLengths, alpha=0.5, align='edge')'''
-        self.goalsAx.bar(gameTimes, results, color=resultsCols, width=barLengths,
+        print(json.dumps(result['list'][0], indent=4, default=str))
+        print(json.dumps(
+            games.get(result['list'][0]['id']), indent=4, default=str))
+        print(json.dumps(localSearchedGames[0], indent=4, default=str))
+        self.goalsAx.bar([d['Date'] for d in localSearchedGames], [d['Win'] for d in localSearchedGames], color=[d['WinLossColor'] for d in localSearchedGames], width=[d['BarWidth'] for d in localSearchedGames],
                          align='edge', alpha=0.5)
 
         # Format the axis and add a title
