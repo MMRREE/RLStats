@@ -60,7 +60,7 @@ class Application(tk.Frame):
 
         # Get a list of available stats from
         exampleGame = next(iter(games.values()))
-        #print(json.dumps(exampleGame, indent=4, sort_keys=True))
+        # print(json.dumps(exampleGame, indent=4, sort_keys=True))
 
         self.graphSelectionVar = tk.StringVar(name="GraphSelection")
         self.graphMenu = tk.Menubutton(
@@ -82,6 +82,7 @@ class Application(tk.Frame):
         self.search.pack(side="left", padx=10, pady=10)
         self.search.bind('<<ComboboxSelected>>', self.comboSelectUser)
 
+        # Create a absolute values checkbox
         self.absoluteValues = tk.BooleanVar(self, False)
         self.absoluteValuesCheckbox = tk.Checkbutton(
             self.topFrame, text="Absolute Values", variable=self.absoluteValues)
@@ -154,7 +155,7 @@ class Application(tk.Frame):
     # End of exploreDict
 
     def graphSelectionHandler(self, name, index, mode):
-        #print(name, index, mode)
+        # print(name, index, mode)
         newValue = self.graphSelectionVar.get()
         if("Wins/Losses" in newValue):
             print("win/loss")
@@ -223,7 +224,7 @@ class Application(tk.Frame):
         headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
         searchGames = req.get(url, headers=headers)
         result = searchGames.json()
-        #print(json.dumps(result['list'], indent=4, sort_keys=True))
+        # print(json.dumps(result['list'], indent=4, sort_keys=True))
 
         # Configuring UI with the relelvant progress
         self.progressBar.configure(maximum=len(result['list']))
@@ -298,6 +299,10 @@ class Application(tk.Frame):
 
         # Format the axis and add a title
         self.goalsAx.set_xticklabels(self.goalsAx.get_xticks(), rotation=30)
+        print(self.goalsAx.xaxis)
+        self.goalsAx.yaxis.set_major_formatter(plt.FuncFormatter(
+            lambda value, ticknumber: "Win" if value == 1 else "Loss" if value == -1 else ""))
+        # self.goalsAx.set_yticks()
         self.goalsAx.set_ylabel("Wins/Loss")
         self.goalsAx.set_xlabel("Time")
         self.goalsAx.set_title("Wins Vs Losses")
