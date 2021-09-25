@@ -1,5 +1,4 @@
 # As imports
-from PIL.Image import new
 from tkImageURL import tkLabelImageURL, tkRawImageURL
 import matplotlib.pyplot as plt
 import GraphFormat as gf
@@ -9,13 +8,12 @@ import tkinter as tk
 # From imports
 from matplotlib.backends.backend_tkagg import *
 from tkinter import ttk
-from io import BytesIO
 
 # Direct imports
 import time
 import json
 
-from data import statMenuChoices, GameStat
+from data import GameStat
 
 # Initialise data from stored files
 gamesFile = open('games.json', 'r+')
@@ -69,7 +67,10 @@ class Application(tk.Frame):
             self.topFrame, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
 
-        self.populateMenuFromDict(statMenuChoices, menu=self.gM)
+        statMenuChoices = GameStat().__dict__
+
+        self.exploreDict(statMenuChoices, menu=self.gM,
+                         variable=self.graphSelectionVar)
         self.graphSelectionVar.trace('w', self.graphSelectionHandler)
 
         self.graphMenu.configure(menu=self.gM)
@@ -81,11 +82,16 @@ class Application(tk.Frame):
         self.search.pack(side="left", padx=10, pady=10)
         self.search.bind('<<ComboboxSelected>>', self.comboSelectUser)
 
+        self.absoluteValues = tk.BooleanVar(self, False)
+        self.absoluteValuesCheckbox = tk.Checkbutton(
+            self.topFrame, text="Absolute Values", variable=self.absoluteValues)
+        self.absoluteValuesCheckbox.pack(side="left", padx=10, pady=10)
+
         # Automatically run search
         self.search_replays('76561198072178785')
     # End of create_widgets(self)
 
-    def populateMenuFromDict(self, dictionary, menu=None):
+    def populateMenuFromDict(self, dictionary, menu=None, variable=None):
         if(menu == None):
             menu = tk.Menu(self.graphMenu)
         if(type(dictionary) is dict):
@@ -93,21 +99,59 @@ class Application(tk.Frame):
                 if(type(val) is dict or type(val) is list):
                     newMenu = tk.Menu(self.graphMenu, tearoff=False)
                     menu.add_cascade(label=tag, menu=newMenu)
-                    self.populateMenuFromDict(dictionary=val, menu=newMenu)
+                    self.populateMenuFromDict(
+                        dictionary=val, variable=variable, menu=newMenu)
                 else:
                     menu.add_radiobutton(
-                        value=val, label=tag, indicatoron=True, variable=self.graphSelectionVar)
-                    if(self.graphSelectionVar.get() is None):
-                        self.graphSelectionVar.set(tag)
+                        value=val, label=tag, indicatoron=True, variable=variable)
+                    if(variable.get() is None):
+                        variable.set(val)
         elif(type(dictionary) is list):
             for obj in dictionary:
-                self.populateMenuFromDict(obj, menu=menu)
+                self.populateMenuFromDict(obj, variable=variable, menu=menu)
         else:
             menu.add_radiobutton(
-                value=dictionary, label=dictionary, indicatoron=True, variable=self.graphSelectionVar)
-            if(self.graphSelectionVar.get() == ""):
-                self.graphSelectionVar.set(dictionary)
+                value=dictionary, label=dictionary, indicatoron=True, variable=variable)
+            if(variable.get() == ""):
+                variable.set(dictionary)
     # End of populateMenuFromDict
+
+    def exploreDict(self, dictionary, parentTags="", menu=None, variable=None):
+        if(menu == None):
+            menu = tk.Menu(self.graphMenu)
+        if(type(dictionary) is dict):
+            for tag, val in dictionary.items():
+                if(parentTags != ""):
+                    currentTags = parentTags + "." + tag
+                else:
+                    currentTags = tag
+
+                if(type(val) is dict or type(val) is list):
+                    newMenu = tk.Menu(self.graphMenu, tearoff=False)
+                    menu.add_cascade(label=tag, menu=newMenu)
+                    self.exploreDict(val, currentTags, newMenu, variable)
+                else:
+                    # Add to list
+                    menu.add_radiobutton(
+                        value=currentTags, label=tag, indicatoron=True, variable=variable)
+                    if(variable.get() == ""):
+                        variable.set(tag)
+        elif(type(dictionary) is list):
+            for obj in dictionary:
+                if(parentTags != ""):
+                    currentTags = parentTags + \
+                        "[" + str(dictionary.index(obj)) + "]"
+                else:
+                    currentTags = "[" + str(dictionary.index(obj)) + "]"
+                self.exploreDict(obj, parentTags=currentTags,
+                                 variable=variable, menu=menu)
+        else:
+            menu.add_radiobutton(
+                value=dictionary, label=dictionary, indicatoron=True, variable=variable)
+            if(variable.get() == ""):
+                print(dictionary)
+                variable.set(dictionary)
+    # End of exploreDict
 
     def graphSelectionHandler(self, name, index, mode):
         #print(name, index, mode)
@@ -220,7 +264,7 @@ class Application(tk.Frame):
             # print("reached past the continue")
             # Data processing on the replay
             localGame = GameStat()
-            localGame.populateFromGame(replay, replayResult)
+            localGame.populateFromGame(replay, replayResult, steamId)
             localSearchedGames.append(localGame.__dict__)
             # print(localGame)
 
