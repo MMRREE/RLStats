@@ -1,19 +1,20 @@
 # As imports
-from tkImageURL import tkLabelImageURL, tkRawImageURL
 import matplotlib.pyplot as plt
 import GraphFormat as gf
 import requests as req
 import tkinter as tk
 
 # From imports
+from tkImageURL import tkLabelImageURL, tkRawImageURL
 from matplotlib.backends.backend_tkagg import *
+from matplotlib.ticker import MaxNLocator
+from data import graphChoices, GameStat
 from tkinter import ttk
 
 # Direct imports
 import time
 import json
 
-from data import graphChoices, GameStat
 
 # Initialise data from stored files
 gamesFile = open('games.json', 'r+')
@@ -29,6 +30,7 @@ class Application(tk.Frame):
         self.master = master
         self._after_id = None
         self.user_cache = {}
+        self.graph_init = True
 
         self.pack()
 
@@ -168,33 +170,19 @@ class Application(tk.Frame):
         return returnData
     # End of graphDataArrayFromKeyString
 
-    def graphSelectionHandler(self, name, index, mode):
-        # print(name, index, mode)
-        newValue = self.graphSelectionVar.get()
-        print(newValue)
+    def refreshGraph(self):
+        dataChoiceValue = self.graphSelectionVar.get()
 
         currentLow, currentHigh = self.goalsAx.get_xlim()
-        # Clear Graph
-        self.goalsAx.clear()
-        self.goalsAx.remove()
-        self.goalsFigure.clear()
-        self.goalsAx = self.goalsFigure.add_subplot(111)
 
-        if("/" in newValue):
-            choiceA, choiceB = newValue.split("/")
-            if(" " in choiceA):
-                tag, choiceA = choiceA.split(" ")
-                choiceA = tag + " " + choiceA
-                choiceB = tag + " " + choiceB
+        self.clearGraph()
 
-            graphDataA = self.graphDataArrayFromKeyString(
-                choiceA, self.searchCache)
-            graphDataB = self.graphDataArrayFromKeyString(
-                choiceB, self.searchCache)
+        self.goalsAx.get_yaxis().set_major_locator(
+            MaxNLocator(integer=True))
 
-            graphDataB = [-1*x for x in graphDataB]
-
-            if(newValue == "Win/Losses"):
+        if("/" in dataChoiceValue):
+            if(dataChoiceValue == "Win/Losses"):
+                print([d['Win'] for d in self.searchCache])
                 self.goalsAx.bar(
                     [d['Date'] for d in self.searchCache],
                     [d['Win'] for d in self.searchCache],
@@ -209,10 +197,27 @@ class Application(tk.Frame):
                 self.goalsAx.set_ylabel("Wins/Loss")
                 self.goalsAx.set_title("Wins Vs Losses")
             else:
+                choiceA, choiceB = dataChoiceValue.split("/")
+                if(" " in choiceA):
+                    tag, choiceA = choiceA.split(" ")
+                    choiceA = tag + " " + choiceA
+                    choiceB = tag + " " + choiceB
+
+                graphDataA = self.graphDataArrayFromKeyString(
+                    choiceA, self.searchCache)
+                graphDataB = self.graphDataArrayFromKeyString(
+                    choiceB, self.searchCache)
+
+                graphDataB = [-1*x for x in graphDataB]
+
+                print(graphDataA)
+                print(graphDataB)
+
                 self.goalsAx.bar(
                     [d['Date'] for d in self.searchCache],
                     graphDataA,
-                    color='g',
+                    color=[d['Win_Loss_Color']
+                           for d in self.searchCache],
                     width=[d['Bar_Width'] for d in self.searchCache],
                     align='edge',
                     alpha=0.5)
@@ -220,19 +225,20 @@ class Application(tk.Frame):
                 self.goalsAx.bar(
                     [d['Date'] for d in self.searchCache],
                     graphDataB,
-                    color='r',
+                    color=[d['Win_Loss_Color']
+                           for d in self.searchCache],
                     width=[d['Bar_Width'] for d in self.searchCache],
                     align='edge',
                     alpha=0.5)
 
                 # Format the axis and add a title
-                self.goalsAx.set_ylabel(newValue)
-                self.goalsAx.set_title(newValue)
+                self.goalsAx.set_ylabel(dataChoiceValue)
+                self.goalsAx.set_title(dataChoiceValue)
         else:
-            if(newValue == "Time Played"):
-                newValue = "Time_Played"
+            if(dataChoiceValue == "Time Played"):
+                dataChoiceValue = "Time_Played"
             graphData = self.graphDataArrayFromKeyString(
-                newValue, self.searchCache)
+                dataChoiceValue, self.searchCache)
 
             # If a dict then can either be absolute or percent (this graph updating also needs to be checked when updating absolute value)
             if(type(graphData[0]) is dict):
@@ -244,6 +250,8 @@ class Application(tk.Frame):
                               "percent"][0]
                 graphData = [x[choice] for x in graphData]
 
+            print(graphData)
+
             self.goalsAx.bar(
                 [d['Date'] for d in self.searchCache],
                 graphData,
@@ -251,25 +259,41 @@ class Application(tk.Frame):
                        for d in self.searchCache],
                 width=[d['Bar_Width'] for d in self.searchCache],
                 align='edge',
-                alpha=1)
+                alpha=0.5)
             # Format the axis and add a title
             self.goalsAx.set_xticklabels(
                 self.goalsAx.get_xticks(), rotation=30)
-            self.goalsAx.set_ylabel(newValue.replace("_", " "))
-            self.goalsAx.set_title(newValue.replace("_", " "))
+            self.goalsAx.set_ylabel(dataChoiceValue.replace("_", " "))
+            self.goalsAx.set_title(dataChoiceValue.replace("_", " "))
 
         # Calculate major ticks
         self.goalsAx.set_xticklabels(
             self.goalsAx.get_xticks(), rotation=30)
         self.goalsAx.set_xlabel("Date")
 
-        self.goalsAx.set_xlim(currentLow, currentHigh)
+        if(self.graph_init is not True):
+            self.goalsAx.set_xlim(currentLow, currentHigh)
+        else:
+            self.graph_init = False
 
         gf.dateGraphMajorTicksCalculation(self.goalsAx)
+        self.goalsAx.axhline(y=0, ls="--", color="black", lw=0.25)
         gf.repaintMajorTicks(self.goalsAx)
         self.goalsFigure.tight_layout()
 
         self.goalsCanvas.draw()
+    # End of refreshGraph
+
+    def clearGraph(self):
+        self.goalsAx.clear()
+        self.goalsAx.remove()
+        self.goalsFigure.clear()
+        self.goalsAx = self.goalsFigure.add_subplot(111)
+    # End of clearGraphy
+
+    def graphSelectionHandler(self, name, index, mode):
+        # Clear Graph
+        self.refreshGraph()
     # End of graphSelectionHandler
 
     def comboSelectUser(self, event):
@@ -394,30 +418,11 @@ class Application(tk.Frame):
             self.goalsCanvas.get_tk_widget().pack_forget()
         self.goalsAx = self.goalsFigure.add_subplot(111)
 
-        # Plot the data
-        #print(json.dumps(result['list'][0], indent=4, default=str))
-        # print(json.dumps(
-        #    games.get(result['list'][0]['id']), indent=4, default=str))
-        #print(json.dumps(self.searchCache[0], indent=4, default=str))
-        self.goalsAx.bar([d['Date'] for d in self.searchCache], [d['Win'] for d in self.searchCache], color=[d['Win_Loss_Color'] for d in self.searchCache], width=[d['Bar_Width'] for d in self.searchCache],
-                         align='edge', alpha=0.5)
+        # Add the grpah to the window
+        self.goalsCanvas = FigureCanvasTkAgg(self.goalsFigure, self.master)
+        self.goalsCanvas.get_tk_widget().pack()
 
-        # Format the axis and add a title
-        self.goalsAx.set_xticklabels(self.goalsAx.get_xticks(), rotation=30)
-        # print(self.goalsAx.xaxis)
-        self.goalsAx.yaxis.set_major_formatter(plt.FuncFormatter(
-            lambda value, ticknumber: "Win" if value == 1 else "Loss" if value == -1 else ""))
-        # self.goalsAx.set_yticks()
-        self.goalsAx.set_ylabel("Wins/Loss")
-        self.goalsAx.set_xlabel("Date")
-        self.goalsAx.set_title("Wins Vs Losses")
-
-        # Calculate major ticks
-        self.goalsAx.set_xlim(
-            self.goalsAx.get_xlim()[1]-1, self.goalsAx.get_xlim()[1])
-        gf.dateGraphMajorTicksCalculation(self.goalsAx)
-        gf.repaintMajorTicks(self.goalsAx)
-        self.goalsFigure.tight_layout()
+        self.refreshGraph()
 
         # Mouse handle event variable initialisaiton
         self.mouse_down = False
@@ -431,13 +436,6 @@ class Application(tk.Frame):
             'motion_notify_event', self.onmousemove)
         sid = self.goalsFigure.canvas.mpl_connect(
             'scroll_event', self.onscroll)
-
-        # Add the grpah to the window
-        self.goalsCanvas = FigureCanvasTkAgg(self.goalsFigure, self.master)
-        self.goalsCanvas.get_tk_widget().pack()
-        # self.goalsFigure.tight_layout()
-
-        # print(results)
     # End search_replays
 
     def onclick(self, event):

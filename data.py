@@ -313,7 +313,7 @@ class GameStat():
             self.Individual['Movement']['Average speed']['absolute'] = targetUser['stats']['movement']['avg_speed']
             self.Individual['Movement']['Average speed']['percent'] = targetUser['stats']['movement']['avg_speed_percentage']
             self.Individual['Movement']['Average powerslide duration'] = targetUser['stats']['movement']['avg_powerslide_duration']
-            self.Individual['Movement']['Total distance travelled'] = targetUser['stats']['movement']['total_distance']
+            self.Individual['Movement']['Total distance travelled'] = targetUser['stats']['movement']['total_distance']*3.653/1000
             self.Individual['Movement']['Powerslide total duration'] = targetUser['stats']['movement']['time_powerslide']
             self.Individual['Movement']['Number of powerslides'] = targetUser['stats']['movement']['count_powerslide']
 

@@ -43,7 +43,7 @@ def dateGraphMajorTicksCalculation(axes):
             axes, "%d/%m, %H:%M", "Hour", [0, 6, 12, 18])
     else:
         reformatMajorTicks(
-            axes, "%d/%m", "Day", range(31))
+            axes, "%d/%m/%Y", "Day", range(32))
 # End of dateGraphMajorTicksCalculation
 
 
@@ -53,12 +53,5 @@ def repaintMajorTicks(axes, ls='--', color='black', lw=0.25):
     for xmaj in axes.xaxis.get_majorticklocs():
         axes.axvline(
             x=xmaj, ls=ls, color=color, lw=lw)
+    axes.axhline(y=0, ls=ls, color=color, lw=lw)
 # End of repaintMajorTicks
-
-
-def clearAndResetGraph(axes, figure):
-    axes.clear()
-    axes.remove()
-    figure.clear()
-    axes = figure.add_subplot(111)
-# End of clearAndResetGraph
