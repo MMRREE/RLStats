@@ -54,3 +54,11 @@ def repaintMajorTicks(axes, ls='--', color='black', lw=0.25):
         axes.axvline(
             x=xmaj, ls=ls, color=color, lw=lw)
 # End of repaintMajorTicks
+
+
+def clearAndResetGraph(axes, figure):
+    axes.clear()
+    axes.remove()
+    figure.clear()
+    axes = figure.add_subplot(111)
+# End of clearAndResetGraph

@@ -13,7 +13,7 @@ from tkinter import ttk
 import time
 import json
 
-from data import GameStat
+from data import graphChoices, GameStat
 
 # Initialise data from stored files
 gamesFile = open('games.json', 'r+')
@@ -67,7 +67,8 @@ class Application(tk.Frame):
             self.topFrame, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
 
-        statMenuChoices = GameStat().__dict__
+        #statMenuChoices = GameStat().__dict__
+        statMenuChoices = graphChoices
 
         self.exploreDict(statMenuChoices, menu=self.gM,
                          variable=self.graphSelectionVar)
@@ -133,38 +134,142 @@ class Application(tk.Frame):
                     self.exploreDict(val, currentTags, newMenu, variable)
                 else:
                     # Add to list
+                    label = tag
                     menu.add_radiobutton(
                         value=currentTags, label=tag, indicatoron=True, variable=variable)
                     if(variable.get() == ""):
                         variable.set(tag)
         elif(type(dictionary) is list):
             for obj in dictionary:
-                if(parentTags != ""):
-                    currentTags = parentTags + \
-                        "[" + str(dictionary.index(obj)) + "]"
-                else:
-                    currentTags = "[" + str(dictionary.index(obj)) + "]"
-                self.exploreDict(obj, parentTags=currentTags,
+                self.exploreDict(obj, parentTags=parentTags,
                                  variable=variable, menu=menu)
         else:
+            if(parentTags == ""):
+                currentTags = dictionary
+            else:
+                currentTags = parentTags + "." + dictionary
             menu.add_radiobutton(
-                value=dictionary, label=dictionary, indicatoron=True, variable=variable)
+                value=currentTags, label=dictionary, indicatoron=True, variable=variable)
             if(variable.get() == ""):
-                print(dictionary)
+                # print(dictionary)
                 variable.set(dictionary)
     # End of exploreDict
+
+    def graphDataArrayFromKeyString(self, keyString, originalDictionary):
+        keys = keyString.split(".")
+        returnData = originalDictionary
+        for key in keys:
+            if("[" in key):
+                tempLabel = key.split("]")[0]
+                newKey, ind = tempLabel.split("[")
+                returnData = [d.get(newKey) for d in returnData]
+            else:
+                returnData = [d.get(key) for d in returnData]
+        return returnData
+    # End of graphDataArrayFromKeyString
 
     def graphSelectionHandler(self, name, index, mode):
         # print(name, index, mode)
         newValue = self.graphSelectionVar.get()
-        if("Wins/Losses" in newValue):
-            print("win/loss")
-        elif("Demos Inflicted/Received" in newValue):
-            print("Demos")
-        else:
-            print("Default case")
-            print(newValue)
+        print(newValue)
 
+        currentLow, currentHigh = self.goalsAx.get_xlim()
+        # Clear Graph
+        self.goalsAx.clear()
+        self.goalsAx.remove()
+        self.goalsFigure.clear()
+        self.goalsAx = self.goalsFigure.add_subplot(111)
+
+        if("/" in newValue):
+            choiceA, choiceB = newValue.split("/")
+            if(" " in choiceA):
+                tag, choiceA = choiceA.split(" ")
+                choiceA = tag + " " + choiceA
+                choiceB = tag + " " + choiceB
+
+            graphDataA = self.graphDataArrayFromKeyString(
+                choiceA, self.searchCache)
+            graphDataB = self.graphDataArrayFromKeyString(
+                choiceB, self.searchCache)
+
+            graphDataB = [-1*x for x in graphDataB]
+
+            if(newValue == "Win/Losses"):
+                self.goalsAx.bar(
+                    [d['Date'] for d in self.searchCache],
+                    [d['Win'] for d in self.searchCache],
+                    color=[d['Win_Loss_Color'] for d in self.searchCache],
+                    width=[d['Bar_Width'] for d in self.searchCache],
+                    align='edge',
+                    alpha=0.5)
+
+                # Format the axis and add a title
+                self.goalsAx.yaxis.set_major_formatter(plt.FuncFormatter(
+                    lambda value, ticknumber: "Win" if value == 1 else "Loss" if value == -1 else ""))
+                self.goalsAx.set_ylabel("Wins/Loss")
+                self.goalsAx.set_title("Wins Vs Losses")
+            else:
+                self.goalsAx.bar(
+                    [d['Date'] for d in self.searchCache],
+                    graphDataA,
+                    color='g',
+                    width=[d['Bar_Width'] for d in self.searchCache],
+                    align='edge',
+                    alpha=0.5)
+
+                self.goalsAx.bar(
+                    [d['Date'] for d in self.searchCache],
+                    graphDataB,
+                    color='r',
+                    width=[d['Bar_Width'] for d in self.searchCache],
+                    align='edge',
+                    alpha=0.5)
+
+                # Format the axis and add a title
+                self.goalsAx.set_ylabel(newValue)
+                self.goalsAx.set_title(newValue)
+        else:
+            if(newValue == "Time Played"):
+                newValue = "Time_Played"
+            graphData = self.graphDataArrayFromKeyString(
+                newValue, self.searchCache)
+
+            # If a dict then can either be absolute or percent (this graph updating also needs to be checked when updating absolute value)
+            if(type(graphData[0]) is dict):
+                if(self.absoluteValues.get() is True):
+                    choice = [x for x in graphData[0].keys() if x !=
+                              "percent"][0]
+                else:
+                    choice = [x for x in graphData[0].keys() if x ==
+                              "percent"][0]
+                graphData = [x[choice] for x in graphData]
+
+            self.goalsAx.bar(
+                [d['Date'] for d in self.searchCache],
+                graphData,
+                color=[d['Win_Loss_Color']
+                       for d in self.searchCache],
+                width=[d['Bar_Width'] for d in self.searchCache],
+                align='edge',
+                alpha=1)
+            # Format the axis and add a title
+            self.goalsAx.set_xticklabels(
+                self.goalsAx.get_xticks(), rotation=30)
+            self.goalsAx.set_ylabel(newValue.replace("_", " "))
+            self.goalsAx.set_title(newValue.replace("_", " "))
+
+        # Calculate major ticks
+        self.goalsAx.set_xticklabels(
+            self.goalsAx.get_xticks(), rotation=30)
+        self.goalsAx.set_xlabel("Date")
+
+        self.goalsAx.set_xlim(currentLow, currentHigh)
+
+        gf.dateGraphMajorTicksCalculation(self.goalsAx)
+        gf.repaintMajorTicks(self.goalsAx)
+        self.goalsFigure.tight_layout()
+
+        self.goalsCanvas.draw()
     # End of graphSelectionHandler
 
     def comboSelectUser(self, event):
@@ -230,7 +335,7 @@ class Application(tk.Frame):
         self.progressBar.configure(maximum=len(result['list']))
 
         # Stats to be updated for the current search list
-        localSearchedGames = []
+        self.searchCache = []
 
         seenGUIDs = {}
 
@@ -266,7 +371,7 @@ class Application(tk.Frame):
             # Data processing on the replay
             localGame = GameStat()
             localGame.populateFromGame(replay, replayResult, steamId)
-            localSearchedGames.append(localGame.__dict__)
+            self.searchCache.append(localGame.__dict__)
             # print(localGame)
 
             # Wait 500 ms before looking at the next (rate limiter on api calls)
@@ -290,21 +395,21 @@ class Application(tk.Frame):
         self.goalsAx = self.goalsFigure.add_subplot(111)
 
         # Plot the data
-        print(json.dumps(result['list'][0], indent=4, default=str))
-        print(json.dumps(
-            games.get(result['list'][0]['id']), indent=4, default=str))
-        print(json.dumps(localSearchedGames[0], indent=4, default=str))
-        self.goalsAx.bar([d['Date'] for d in localSearchedGames], [d['Win'] for d in localSearchedGames], color=[d['WinLossColor'] for d in localSearchedGames], width=[d['BarWidth'] for d in localSearchedGames],
+        #print(json.dumps(result['list'][0], indent=4, default=str))
+        # print(json.dumps(
+        #    games.get(result['list'][0]['id']), indent=4, default=str))
+        #print(json.dumps(self.searchCache[0], indent=4, default=str))
+        self.goalsAx.bar([d['Date'] for d in self.searchCache], [d['Win'] for d in self.searchCache], color=[d['Win_Loss_Color'] for d in self.searchCache], width=[d['Bar_Width'] for d in self.searchCache],
                          align='edge', alpha=0.5)
 
         # Format the axis and add a title
         self.goalsAx.set_xticklabels(self.goalsAx.get_xticks(), rotation=30)
-        print(self.goalsAx.xaxis)
+        # print(self.goalsAx.xaxis)
         self.goalsAx.yaxis.set_major_formatter(plt.FuncFormatter(
             lambda value, ticknumber: "Win" if value == 1 else "Loss" if value == -1 else ""))
         # self.goalsAx.set_yticks()
         self.goalsAx.set_ylabel("Wins/Loss")
-        self.goalsAx.set_xlabel("Time")
+        self.goalsAx.set_xlabel("Date")
         self.goalsAx.set_title("Wins Vs Losses")
 
         # Calculate major ticks

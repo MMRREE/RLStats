@@ -14,12 +14,12 @@ class GameStat():
 
         # MetaData stats (to do with graphing)
         self.Date = 0
-        self.BarWidth = 0
-        self.WinLossColor = 'g'
-        self.TargetPlayerTeam = 'Orange'
-        self.OppositionTeam = 'Blue'
-        self.PlayerTeamSize = 0
-        self.OppositionTeamSize = 0
+        self.Bar_Width = 0
+        self.Win_Loss_Color = 'g'
+        self.Target_Player_Team = 'Orange'
+        self.Opposition_Team = 'Blue'
+        self.Player_Team_Size = 0
+        self.Opposition_Team_Size = 0
 
         # Team stats
         self.Team = {
@@ -120,14 +120,15 @@ class GameStat():
         # Clarify if it was win or loss and assigning the teams
         if('Win' in replay['replay_title']):
             self.Win = 1
-            self.WinLossColor = 'g'
-            self.TargetPlayerTeam = "Orange" if self.Orange[
+            self.Win_Loss_Color = 'g'
+            self.Target_Player_Team = "Orange" if self.Orange[
                 'Goals For'] > self.Blue['Goals For'] else "Blue"
         else:
             self.Win = -1
-            self.WinLossColor = 'r'
-            self.TargetPlayerTeam = "Blue" if self.Orange['Goals For'] > self.Blue['Goals For'] else "Orange"
-        self.OppositionTeam = "Orange" if not "Orange" in self.TargetPlayerTeam else "Blue"
+            self.Win_Loss_Color = 'r'
+            self.Target_Player_Team = "Blue" if self.Orange[
+                'Goals For'] > self.Blue['Goals For'] else "Orange"
+        self.Opposition_Team = "Orange" if not "Orange" in self.Target_Player_Team else "Blue"
 
         # General game stats (and meta data for graphing)
         self.Orange['Goals For'] = replayResult['orange']['stats']['core']['goals']
@@ -136,90 +137,90 @@ class GameStat():
         self.Date = parse(replayResult['date']).astimezone(timezone.utc)
         self.Time_Played = replayResult['duration']
 
-        self.BarWidth = self.Time_Played*0.00001
+        self.Bar_Width = self.Time_Played*0.00001
 
         # Team sizes
-        self.PlayerTeamSize = len(
-            replayResult[self.TargetPlayerTeam.lower()]['players'])
-        self.OppositionTeamSize = len(
-            replayResult[self.OppositionTeam.lower()]['players'])
+        self.Player_Team_Size = len(
+            replayResult[self.Target_Player_Team.lower()]['players'])
+        self.Opposition_Team_Size = len(
+            replayResult[self.Opposition_Team.lower()]['players'])
 
         # Team stats
-        self.Team['Goals For'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Goals For'] = replayResult[self.Target_Player_Team.lower()
                                               ]['stats']['core']['goals']
 
-        self.Team['Goals Against'] = replayResult[self.TargetPlayerTeam.lower()
-                                                  ]['stats']['core']['goals_against']*-1
+        self.Team['Goals Against'] = replayResult[self.Target_Player_Team.lower()
+                                                  ]['stats']['core']['goals_against']
 
-        self.Team['Assists'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Assists'] = replayResult[self.Target_Player_Team.lower()
                                             ]['stats']['core']['assists']
 
-        self.Team['Shots'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Shots'] = replayResult[self.Target_Player_Team.lower()
                                           ]['stats']['core']['shots']
 
-        self.Team['Demos Inflicted'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Demos Inflicted'] = replayResult[self.Target_Player_Team.lower()
                                                     ]['stats']['demo']['inflicted']
 
-        self.Team['Demos Received'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Demos Received'] = replayResult[self.Target_Player_Team.lower()
                                                    ]['stats']['demo']['taken']
 
-        self.Team['Total Score'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Total Score'] = replayResult[self.Target_Player_Team.lower()
                                                 ]['stats']['core']['score']
 
         self.Team['Average Score'] = self.Team['Total Score'] / \
-            self.PlayerTeamSize
+            self.Player_Team_Size
 
-        self.Team['Average Shooting Percent'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Average Shooting Percent'] = replayResult[self.Target_Player_Team.lower()
                                                              ]['stats']['core']['shooting_percentage']
 
-        self.Team['Time in possesion'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Time in possesion'] = replayResult[self.Target_Player_Team.lower()
                                                       ]['stats']['ball']['possession_time']
 
-        self.Team['Time ball in defensive half'] = replayResult[self.TargetPlayerTeam.lower()
+        self.Team['Time ball in defensive half'] = replayResult[self.Target_Player_Team.lower()
                                                                 ]['stats']['ball']['time_in_side']
 
         # Opposition stats
-        self.Opposition['Goals For'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Goals For'] = replayResult[self.Opposition_Team.lower()
                                                     ]['stats']['core']['goals']
-        self.Opposition['Goals Against'] = replayResult[self.OppositionTeam.lower()
-                                                        ]['stats']['core']['goals_against']*-1
+        self.Opposition['Goals Against'] = replayResult[self.Opposition_Team.lower()
+                                                        ]['stats']['core']['goals_against']
 
-        self.Opposition['Assists'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Assists'] = replayResult[self.Opposition_Team.lower()
                                                   ]['stats']['core']['assists']
 
-        self.Opposition['Shots'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Shots'] = replayResult[self.Opposition_Team.lower()
                                                 ]['stats']['core']['shots']
 
-        self.Opposition['Demos Inflicted'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Demos Inflicted'] = replayResult[self.Opposition_Team.lower()
                                                           ]['stats']['demo']['inflicted']
 
-        self.Opposition['Demos Received'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Demos Received'] = replayResult[self.Opposition_Team.lower()
                                                          ]['stats']['demo']['taken']
 
-        self.Opposition['Total Score'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Total Score'] = replayResult[self.Opposition_Team.lower()
                                                       ]['stats']['core']['score']
 
         self.Opposition['Average Score'] = self.Opposition['Total Score'] / \
-            self.OppositionTeamSize
+            self.Opposition_Team_Size
 
-        self.Opposition['Average Shooting Percent'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Average Shooting Percent'] = replayResult[self.Opposition_Team.lower()
                                                                    ]['stats']['core']['shooting_percentage']
 
-        self.Opposition['Time in possesion'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Time in possesion'] = replayResult[self.Opposition_Team.lower()
                                                             ]['stats']['ball']['possession_time']
 
-        self.Opposition['Time ball in defensive half'] = replayResult[self.OppositionTeam.lower()
+        self.Opposition['Time ball in defensive half'] = replayResult[self.Opposition_Team.lower()
                                                                       ]['stats']['ball']['time_in_side']
 
         # Individual stats
         targetUser = None
-        for player in replayResult[self.TargetPlayerTeam.lower()]['players']:
+        for player in replayResult[self.Target_Player_Team.lower()]['players']:
             if(player['id']['id'] == steamId):
                 targetUser = player
 
         # Individual stats
         if(targetUser is not None):
-            print(json.dumps(targetUser, indent=4))
+            #print(json.dumps(targetUser, indent=4))
 
             # General stats
             self.Individual['General']['Goals'] = targetUser['stats']['core']['goals']
@@ -299,7 +300,7 @@ class GameStat():
             self.Individual['Positioning']['In front of the ball']['time'] = targetUser['stats']['positioning']['time_infront_ball']
 
             # Averages
-            if(self.PlayerTeamSize > 1):
+            if(self.Player_Team_Size > 1):
                 self.Individual['Positioning']['Average distance to teammates'] = targetUser['stats']['positioning']['avg_distance_to_mates']
             self.Individual['Positioning']['Average distance to the ball'] = targetUser['stats']['positioning']['avg_distance_to_ball']
             self.Individual['Positioning']['Average distance to the ball in possesion'] = targetUser[
@@ -330,7 +331,106 @@ class GameStat():
             self.Individual['Movement']['In low air']['time'] = targetUser['stats']['movement']['time_low_air']
             self.Individual['Movement']['In high air']['time'] = targetUser['stats']['movement']['time_high_air']
 
-        print(json.dumps(self.__dict__, indent=4, default=str))
+        #print(json.dumps(self.__dict__, indent=4, default=str))
 
     # End of populateFromGame
 # End of GameStat
+
+
+graphChoices = [
+    "Win/Losses",
+    "Time Played",
+    "Overtime",
+    {
+        "Team": [
+            "Goals For/Against",
+            "Assists",
+            "Shots",
+            "Demos Inflicted/Received",
+            "Total Score",
+            "Average Score",
+            "Average Shooting Percent",
+            "Time in possesion",
+            "Time ball in defensive half"
+        ],
+        "Opposition": [
+            "Goals For/Against",
+            "Assists",
+            "Shots",
+            "Demos Inflicted/Received",
+            "Total Score",
+            "Average Score",
+            "Average Shooting Percent",
+            "Time in possesion",
+            "Time ball in defensive half"
+        ],
+        "Individual": [
+            {
+                "General": [
+                    "Goals",
+                    "Saves",
+                    "Assists",
+                    "Shots",
+                    "Demos Inflicted/Received",
+                    "Score",
+                    "Shooting Percent",
+                    "Goals Against Whilst Last Defender",
+                ],
+            },
+            {
+                "Boost": [
+                    "Average boost used/collected per minute",
+                    "Average boost amount",
+                    "Amount of boost used at supersonic",
+                    "Amount of boost collected",
+                    "Big pads taken",
+                    "Big pads stolen",
+                    "Small pads taken",
+                    "Small pads stolen",
+                    "Boost overfill",
+                    "Stolen overfill",
+                    "0 boost",
+                    "100 boost",
+                    "0-25% boost",
+                    "25-50% boost",
+                    "50-75% boost",
+                    "75-100% boost"
+                ],
+            },
+            {
+                "Positioning": [
+                    "Average distance to teammates",
+                    "Average distance to the ball",
+                    "Average distance to the ball in possesion",
+                    "Average distance to the ball out of possesion",
+                    "Most back",
+                    "Most forward",
+                    "Defensive third",
+                    "Neutral third",
+                    "Offensive third",
+                    "Defensive half",
+                    "Offensive half",
+                    "Closest to ball",
+                    "Farthest from ball",
+                    "Behind the ball",
+                    "In front of the ball"
+                ],
+            },
+            {
+                "Movement": [
+                    "Average speed",
+                    "Average powerslide duration",
+                    "Powerslide total duration",
+                    "Total distance travelled",
+                    "Number of powerslides",
+                    "Supersonic",
+                    "Boost speed",
+                    "Slow speed",
+                    "On the ground",
+                    "In low air",
+                    "In high air"
+                ]
+            }
+        ]
+    },
+]
