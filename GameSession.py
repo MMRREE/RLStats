@@ -126,7 +126,7 @@ class GameSession():
         self.Overtime += game.Overtime if game.Overtime != -2 else 0
         self.EndDate = game.Date + \
             datetime.timedelta(
-                0, game.Time_Played) if self.EndDate == 0 else self.EndDate
+                seconds=game.Time_Played) if self.EndDate == 0 else self.EndDate
         self.Time_Played += game.Time_Played
         self.StartDate = game.Date
 
@@ -303,6 +303,19 @@ class GameSession():
         self.Individual['Movement']['On the ground']['time'] += game.Individual['Movement']['On the ground']['time']
         self.Individual['Movement']['In low air']['time'] += game.Individual['Movement']['In low air']['time']
         self.Individual['Movement']['In high air']['time'] += game.Individual['Movement']['In high air']['time']
-
     # End of addGame
+
+    def checkGameInSession(self, game):
+        if(len(self.Games) < 1):
+            endSearchDate = game.Date
+            startSearchDate = game.Date
+        else:
+            endSearchDate = self.Games[len(self.Games)-1].Date
+            startSearchDate = self.Games[len(
+                self.Games)-1].Date + datetime.timedelta(minutes=-20)
+
+        if(startSearchDate <= game.Date <= endSearchDate):
+            return True
+        return False
+    # End of checkGameInSession
 # End of GameSession

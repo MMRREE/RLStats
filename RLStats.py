@@ -13,6 +13,7 @@ from GameSession import GameSession
 from tkinter import ttk
 
 # Direct imports
+import datetime
 import time
 import json
 
@@ -93,10 +94,30 @@ class Application(tk.Frame):
             self.topFrame, text="Absolute Values", variable=self.absoluteValues)
         self.absoluteValuesCheckbox.pack(side="left", padx=10, pady=10)
 
+        # Create a listbox to show all the sessions
+        self.sessionListBox = tk.Listbox(self.topFrame)
+        self.sessionListBox.bind('<<ListboxSelect>>', self.sessionSelect)
+        self.sessionListBox.pack(side="left", padx=10, pady=10)
+
         # Automatically run search
-        self.search_replays(
-            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785'})
+        # self.search_replays(
+        #    {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785'})
     # End of create_widgets(self)
+
+    def sessionSelect(self, event):
+        widget = event.widget
+        index = int(widget.curselection()[0])
+        value = widget.get(index)
+        for session in self.GameSessions:
+            if(str(session.StartDate) == value):
+                lowerDate = session.StartDate + datetime.timedelta(minutes=-3)
+                higherDate = session.EndDate + datetime.timedelta(minutes=3)
+                self.goalsAx.set_xlim(lowerDate, higherDate)
+                gf.repaintMajorTicks(self.goalsAx)
+                self.goalsFigure.tight_layout()
+
+                self.goalsCanvas.draw()
+    # End of sessionSelect
 
     def populateMenuFromDict(self, dictionary, parentTags="", menu=None, variable=None):
         if(menu == None):
@@ -333,6 +354,8 @@ class Application(tk.Frame):
             self.master, orient="horizontal", length=200)
         self.progressBar.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+        self.sessionListBox.delete(0, tk.END)
+
         # Search elements
         url = 'https://ballchasing.com/api/replays?player-id=' + playerId
         headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
@@ -385,7 +408,9 @@ class Application(tk.Frame):
             localGame = GameStat()
             localGame.populateFromGame(
                 replay, replayResult, user['platformUserIdentifier'])
-            self.GameSessions[0].addGame(localGame)
+            if(not self.GameSessions[len(self.GameSessions)-1].checkGameInSession(localGame)):
+                self.GameSessions.append(GameSession())
+            self.GameSessions[len(self.GameSessions)-1].addGame(localGame)
             self.searchCache.append(localGame.__dict__)
             # print(localGame)
 
@@ -400,7 +425,10 @@ class Application(tk.Frame):
         json.dump(games, gamesFile, indent=4, default=str)
         gamesFile.close()
 
-        print(json.dumps(self.GameSessions[0].__dict__, indent=4, default=str))
+        for session in self.GameSessions:
+            sessionDict = session.__dict__
+            print(str(sessionDict['StartDate']))
+            self.sessionListBox.insert(0, str(sessionDict['StartDate']))
 
         # UI plotting of data for the search period and removing loading bar
         self.progressBar.pack_forget()
