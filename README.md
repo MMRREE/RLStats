@@ -12,7 +12,7 @@ This is a repo to track the development of RLStats, a python program interfacing
   - [x] Create an object as a schema
   - [ ] Capture listed stats (initial query)
   - [x] Capture listed stats (independent query)
-- [ ] Graphing:
-  - [ ] Parse the schema so that choice of drop down options matches
-  - [ ] Group together categories that make sense (goals for/against) and graph in positive and negative direction
-  - [ ] Selection of data based on absoulte or percentage statistics (where applicable)
+- [x] Graphing:
+  - [x] Parse the schema so that choice of drop down options matches
+  - [x] Group together categories that make sense (goals for/against) and graph in positive and negative direction
+  - [x] Selection of data based on absoulte or percentage statistics (where applicable)

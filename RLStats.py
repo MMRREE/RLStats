@@ -8,7 +8,8 @@ import tkinter as tk
 from tkImageURL import tkLabelImageURL, tkRawImageURL
 from matplotlib.backends.backend_tkagg import *
 from matplotlib.ticker import MaxNLocator
-from data import graphChoices, GameStat
+from GameStats import graphChoices, GameStat
+from GameSession import GameSession
 from tkinter import ttk
 
 # Direct imports
@@ -64,7 +65,7 @@ class Application(tk.Frame):
         exampleGame = next(iter(games.values()))
         # print(json.dumps(exampleGame, indent=4, sort_keys=True))
 
-        self.graphSelectionVar = tk.StringVar(name="GraphSelection")
+        self.graphSelectionVar = tk.StringVar(self, "", name="GraphSelection")
         self.graphMenu = tk.Menubutton(
             self.topFrame, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
@@ -72,8 +73,8 @@ class Application(tk.Frame):
         #statMenuChoices = GameStat().__dict__
         statMenuChoices = graphChoices
 
-        self.exploreDict(statMenuChoices, menu=self.gM,
-                         variable=self.graphSelectionVar)
+        self.populateMenuFromDict(statMenuChoices, menu=self.gM,
+                                  variable=self.graphSelectionVar)
         self.graphSelectionVar.trace('w', self.graphSelectionHandler)
 
         self.graphMenu.configure(menu=self.gM)
@@ -86,41 +87,18 @@ class Application(tk.Frame):
         self.search.bind('<<ComboboxSelected>>', self.comboSelectUser)
 
         # Create a absolute values checkbox
-        self.absoluteValues = tk.BooleanVar(self, False)
+        self.absoluteValues = tk.BooleanVar(self, False, "absoluteValues")
+        self.absoluteValues.trace('w', self.graphAbsoluteValueHandler)
         self.absoluteValuesCheckbox = tk.Checkbutton(
             self.topFrame, text="Absolute Values", variable=self.absoluteValues)
         self.absoluteValuesCheckbox.pack(side="left", padx=10, pady=10)
 
         # Automatically run search
-        self.search_replays('76561198072178785')
+        self.search_replays(
+            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785'})
     # End of create_widgets(self)
 
-    def populateMenuFromDict(self, dictionary, menu=None, variable=None):
-        if(menu == None):
-            menu = tk.Menu(self.graphMenu)
-        if(type(dictionary) is dict):
-            for tag, val in dictionary.items():
-                if(type(val) is dict or type(val) is list):
-                    newMenu = tk.Menu(self.graphMenu, tearoff=False)
-                    menu.add_cascade(label=tag, menu=newMenu)
-                    self.populateMenuFromDict(
-                        dictionary=val, variable=variable, menu=newMenu)
-                else:
-                    menu.add_radiobutton(
-                        value=val, label=tag, indicatoron=True, variable=variable)
-                    if(variable.get() is None):
-                        variable.set(val)
-        elif(type(dictionary) is list):
-            for obj in dictionary:
-                self.populateMenuFromDict(obj, variable=variable, menu=menu)
-        else:
-            menu.add_radiobutton(
-                value=dictionary, label=dictionary, indicatoron=True, variable=variable)
-            if(variable.get() == ""):
-                variable.set(dictionary)
-    # End of populateMenuFromDict
-
-    def exploreDict(self, dictionary, parentTags="", menu=None, variable=None):
+    def populateMenuFromDict(self, dictionary, parentTags="", menu=None, variable=None):
         if(menu == None):
             menu = tk.Menu(self.graphMenu)
         if(type(dictionary) is dict):
@@ -133,7 +111,8 @@ class Application(tk.Frame):
                 if(type(val) is dict or type(val) is list):
                     newMenu = tk.Menu(self.graphMenu, tearoff=False)
                     menu.add_cascade(label=tag, menu=newMenu)
-                    self.exploreDict(val, currentTags, newMenu, variable)
+                    self.populateMenuFromDict(
+                        val, currentTags, newMenu, variable)
                 else:
                     # Add to list
                     label = tag
@@ -143,8 +122,8 @@ class Application(tk.Frame):
                         variable.set(tag)
         elif(type(dictionary) is list):
             for obj in dictionary:
-                self.exploreDict(obj, parentTags=parentTags,
-                                 variable=variable, menu=menu)
+                self.populateMenuFromDict(obj, parentTags=parentTags,
+                                          variable=variable, menu=menu)
         else:
             if(parentTags == ""):
                 currentTags = dictionary
@@ -155,7 +134,7 @@ class Application(tk.Frame):
             if(variable.get() == ""):
                 # print(dictionary)
                 variable.set(dictionary)
-    # End of exploreDict
+    # End of populateMenuFromDict
 
     def graphDataArrayFromKeyString(self, keyString, originalDictionary):
         keys = keyString.split(".")
@@ -291,6 +270,10 @@ class Application(tk.Frame):
         self.goalsAx = self.goalsFigure.add_subplot(111)
     # End of clearGraphy
 
+    def graphAbsoluteValueHandler(self, name, index, mode):
+        self.refreshGraph()
+    # End of graphAbsoluteValueHandler
+
     def graphSelectionHandler(self, name, index, mode):
         # Clear Graph
         self.refreshGraph()
@@ -304,7 +287,7 @@ class Application(tk.Frame):
         self.userImage.image = newImage
         self.master.update()
         # 76561198072178785
-        self.search_replays(user['platformUserIdentifier'])
+        self.search_replays(user)
     # End of comboSelectUser
 
     def check_input(self, event):
@@ -342,14 +325,16 @@ class Application(tk.Frame):
             self.search['values'] = []
     # End of autocompleteSearch
 
-    def search_replays(self, steamId):
+    def search_replays(self, user):
         # UI Element to update user of progress
+        playerId = user['platformSlug'] + \
+            "%3A" + user['platformUserIdentifier']
         self.progressBar = ttk.Progressbar(
             self.master, orient="horizontal", length=200)
         self.progressBar.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Search elements
-        url = 'https://ballchasing.com/api/replays?player-id=Steam%3A' + steamId
+        url = 'https://ballchasing.com/api/replays?player-id=' + playerId
         headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
         searchGames = req.get(url, headers=headers)
         result = searchGames.json()
@@ -361,7 +346,11 @@ class Application(tk.Frame):
         # Stats to be updated for the current search list
         self.searchCache = []
 
+        self.GameSessions = []
+
         seenGUIDs = {}
+
+        self.GameSessions.append(GameSession())
 
         for replay in result['list']:
             # Update loading bar
@@ -394,7 +383,9 @@ class Application(tk.Frame):
             # print("reached past the continue")
             # Data processing on the replay
             localGame = GameStat()
-            localGame.populateFromGame(replay, replayResult, steamId)
+            localGame.populateFromGame(
+                replay, replayResult, user['platformUserIdentifier'])
+            self.GameSessions[0].addGame(localGame)
             self.searchCache.append(localGame.__dict__)
             # print(localGame)
 
@@ -408,6 +399,8 @@ class Application(tk.Frame):
         gamesFile = open('games.json', 'w+')
         json.dump(games, gamesFile, indent=4, default=str)
         gamesFile.close()
+
+        print(json.dumps(self.GameSessions[0].__dict__, indent=4, default=str))
 
         # UI plotting of data for the search period and removing loading bar
         self.progressBar.pack_forget()

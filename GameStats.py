@@ -58,11 +58,13 @@ class GameStat():
                 "Saves": 0,
                 "Assists": 0,
                 "Shots": 0,
+                "Shots Against": 0,
                 "Demos Inflicted": 0,
                 "Demos Received": 0,
                 "Score": 0,
                 "Shooting Percent": 0,
-                "Goals Against Whilst Last Defender": 0
+                "Goals Against Whilst Last Defender": 0,
+                "MVP": False
             },
             "Boost": {
                 "Average boost used per minute": 0,
@@ -116,7 +118,12 @@ class GameStat():
         }
     # End of __init__
 
-    def populateFromGame(self, replay, replayResult, steamId):
+    def populateFromGame(self, replay, replayResult, userId):
+
+        # General game stats (and meta data for graphing)
+        self.Orange['Goals For'] = replayResult['orange']['stats']['core']['goals']
+        self.Blue['Goals For'] = replayResult['blue']['stats']['core']['goals']
+
         # Clarify if it was win or loss and assigning the teams
         if('Win' in replay['replay_title']):
             self.Win = 1
@@ -130,14 +137,15 @@ class GameStat():
                 'Goals For'] > self.Blue['Goals For'] else "Orange"
         self.Opposition_Team = "Orange" if not "Orange" in self.Target_Player_Team else "Blue"
 
-        # General game stats (and meta data for graphing)
-        self.Orange['Goals For'] = replayResult['orange']['stats']['core']['goals']
-        self.Blue['Goals For'] = replayResult['blue']['stats']['core']['goals']
+        if(replayResult['overtime']):
+            self.Overtime = replayResult['overtime_seconds']
+        else:
+            self.Overtime = -2
 
         self.Date = parse(replayResult['date']).astimezone(timezone.utc)
         self.Time_Played = replayResult['duration']
 
-        self.Bar_Width = self.Time_Played*0.00001
+        self.Bar_Width = self.Time_Played*0.00001157407
 
         # Team sizes
         self.Player_Team_Size = len(
@@ -215,7 +223,11 @@ class GameStat():
         # Individual stats
         targetUser = None
         for player in replayResult[self.Target_Player_Team.lower()]['players']:
-            if(player['id']['id'] == steamId):
+            if(player['id']['id'] == userId):
+                targetUser = player
+
+        for player in replayResult[self.Opposition_Team.lower()]['players']:
+            if(player['id']['id'] == userId):
                 targetUser = player
 
         # Individual stats
@@ -224,6 +236,9 @@ class GameStat():
 
             # General stats
             self.Individual['General']['Goals'] = targetUser['stats']['core']['goals']
+            if(self.Individual['General']['Goals'] == 0):
+                self.Individual['General']['Goals'] = 0.1
+
             self.Individual['General']['Saves'] = targetUser['stats']['core']['saves']
             self.Individual['General']['Assists'] = targetUser['stats']['core']['assists']
             self.Individual['General']['Shots'] = targetUser['stats']['core']['shots']
