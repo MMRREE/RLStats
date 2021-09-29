@@ -236,9 +236,6 @@ class GameStat():
 
             # General stats
             self.Individual['General']['Goals'] = targetUser['stats']['core']['goals']
-            if(self.Individual['General']['Goals'] == 0):
-                self.Individual['General']['Goals'] = 0.1
-
             self.Individual['General']['Saves'] = targetUser['stats']['core']['saves']
             self.Individual['General']['Assists'] = targetUser['stats']['core']['assists']
             self.Individual['General']['Shots'] = targetUser['stats']['core']['shots']

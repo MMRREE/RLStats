@@ -318,4 +318,61 @@ class GameSession():
             return True
         return False
     # End of checkGameInSession
+
+    def updateSessionStats(self, Frame):
+        Frame.SessionWinsLabel.configure(text="Wins: " + str(self.Wins))
+
+        Frame.SessionLossLabel.configure(text="Losses: " + str(self.Losses))
+
+        Frame.SessionWinPercentLabel.configure(
+            text="Win Rate: " + str(self.Wins/(self.Wins+self.Losses)*100) + "%")
+
+        # Time stats
+
+        Frame.SessionTimePlayedLabel.configure(
+            text="Total Time: " + str(self.Time_Played))
+
+        Frame.SessionOvertimePlayedLabel.configure(
+            text="Overtime: " + str(self.Overtime))
+
+        # Date Stats
+        Frame.SessionStartLabel.configure(
+            text="Started: " + str(self.StartDate))
+
+        Frame.SessionEndLabel.configure(text="Ended: " + str(self.EndDate))
+
+        # Individual General Stats
+        Frame.SessionIndividualGoalsLabel.configure(
+            text="Goals: " + str(self.Individual['General']['Goals']))
+
+        Frame.SessionIndividualSavesLabel.configure(
+            text="Saves: " + str(self.Individual['General']['Saves']))
+
+        Frame.SessionIndividualAssistsLabel.configure(
+            text="Assists: " + str(self.Individual['General']['Assists']))
+
+        Frame.SessionIndividualShotsLabel.configure(
+            text="Shots: " + str(self.Individual['General']['Shots']))
+
+        Frame.SessionIndividualDemosReceivedLabel.configure(
+            text="Demos Received: " + str(self.Individual['General']['Demos Received']))
+
+        Frame.SessionIndividualDemosInflictedLabel.configure(
+            text="Demos Inflicted: " + str(self.Individual['General']['Demos Inflicted']))
+
+        Frame.SessionIndividualShotsAgainstLabel.configure(
+            text="Shots Against: " + str(self.Individual['General']['Shots Against']))
+
+        Frame.SessionIndividualGoalsConcededLabel.configure(
+            text="Goals Conceded: " + str(self.Individual['General']['Goals Against Whilst Last Defender']))
+
+        Frame.SessionIndividualShootingAccuracyLabel.configure(
+            text="Shooting Accuracy: " + str(self.Individual['General']['Shooting Percent']))
+
+        Frame.SessionIndividualMVPSLabel.configure(
+            text="MVPS: " + str(self.Individual['General']['MVP']))
+
+        Frame.SessionIndividualScoreLabel.configure(
+            text="Score: " + str(self.Individual['General']['Score']))
+    # End of updateSessionStats
 # End of GameSession
