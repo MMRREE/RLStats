@@ -1,0 +1,89 @@
+"Team": {
+    "Goals For": 52,
+    "Goals Against": 61,
+    "Assists": 0,
+    "Shots": 91,
+    "Demos Inflicted": 9,
+    "Demos Received": 14,
+    "Total Score": 11381,
+    "Average Score": 879.2857666015625,
+    "Average Shooting Percent": 68.87239961785889,
+    "Time in possesion": 1433.58,
+    "Time ball in defensive half": 1922.53
+},
+"Opposition": {
+    "Goals For": 61,
+    "Goals Against": 52,
+    "Assists": 0,
+    "Shots": 106,
+    "Demos Inflicted": 14,
+    "Demos Received": 9,
+    "Total Score": 12312,
+    "Average Score": 1356.755126953125,
+    "Average Shooting Percent": 66.92831378009033,
+    "Time in possesion": 1465.88,
+    "Time ball in defensive half": 2151.9
+}, {
+    'ball': {
+        'possession_time': 127.29,
+        'time_in_side': 205.61
+    },
+    'core': {
+        'shots': 7,
+        'shots_against': 12,
+        'goals': 3,
+        'goals_against': 4,
+        'saves': 8,
+        'assists': 3,
+        'score': 1349,
+        'shooting_percentage': 42.857143
+    },
+    'boost': {
+        'bpm': 810,
+        'bcpm': 831.3831,
+        'avg_amount': 91.21001,
+        'amount_collected': 4938,
+        'amount_stolen': 720,
+        'amount_collected_big': 3759,
+        'amount_stolen_big': 466,
+        'amount_collected_small': 1179,
+        'amount_stolen_small': 254,
+        'count_collected_big': 43,
+        'count_stolen_big': 5,
+        'count_collected_small': 104,
+        'count_stolen_small': 23,
+        'amount_overfill': 565,
+        'amount_overfill_stolen': 35,
+        'amount_used_while_supersonic': 741,
+        'time_zero_boost': 84.92,
+        'time_full_boost': 80.270004,
+        'time_boost_0_25': 279.92,
+        'time_boost_25_50': 171.69,
+        'time_boost_50_75': 120.22,
+        'time_boost_75_100': 158.56
+    },
+    'movement': {
+        'total_distance': 1040032,
+        'time_supersonic_speed': 89.44,
+        'time_boost_speed': 299.51,
+        'time_slow_speed': 362.31,
+        'time_ground': 442.88,
+        'time_low_air': 277.61,
+        'time_high_air': 30.779999,
+        'time_powerslide': 15.11,
+        'count_powerslide': 120
+    },
+    'positioning': {
+        'time_defensive_third': 384.05,
+        'time_neutral_third': 241.79999,
+        'time_offensive_third': 125.42,
+        'time_defensive_half': 514.07,
+        'time_offensive_half': 237.2,
+        'time_behind_ball': 567.35,
+        'time_infront_ball': 183.92
+    },
+    'demo': {
+        'inflicted': 0,
+        'taken': 2
+    }
+},

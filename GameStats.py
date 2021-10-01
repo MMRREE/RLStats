@@ -21,12 +21,12 @@ class GameStat():
         self.Player_Team_Size = 0
         self.Opposition_Team_Size = 0
 
-        # Team stats
-        self.Team = {
+        teamStructure = {
             "Goals For": 0,
-            "Goals Against": 0,
+            "Saves": 0,
             "Assists": 0,
             "Shots": 0,
+            "Goals Against": 0,
             "Demos Inflicted": 0,
             "Demos Received": 0,
             "Total Score": 0,
@@ -36,20 +36,11 @@ class GameStat():
             "Time ball in defensive half": 0
         }
 
+        # Team stats
+        self.Team = teamStructure
+
         # Opposition stats
-        self.Opposition = {
-            "Goals For": 0,
-            "Goals Against": 0,
-            "Assists": 0,
-            "Shots": 0,
-            "Demos Inflicted": 0,
-            "Demos Received": 0,
-            "Total Score": 0,
-            "Average Score": 0,
-            "Average Shooting Percent": 0,
-            "Time in possesion": 0,
-            "Time ball in defensive half": 0
-        }
+        self.Opposition = teamStructure
 
         # Individual Player stats
         self.Individual = {
@@ -154,6 +145,7 @@ class GameStat():
             replayResult[self.Opposition_Team.lower()]['players'])
 
         # Team stats
+        print(replayResult['orange']['stats'])
         self.Team['Goals For'] = replayResult[self.Target_Player_Team.lower()
                                               ]['stats']['core']['goals']
 
@@ -165,6 +157,9 @@ class GameStat():
 
         self.Team['Shots'] = replayResult[self.Target_Player_Team.lower()
                                           ]['stats']['core']['shots']
+
+        self.Team['Saves'] = replayResult[self.Target_Player_Team.lower()
+                                          ]['stats']['core']['saves']
 
         self.Team['Demos Inflicted'] = replayResult[self.Target_Player_Team.lower()
                                                     ]['stats']['demo']['inflicted']

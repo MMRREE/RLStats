@@ -11,6 +11,9 @@ from matplotlib.ticker import MaxNLocator
 from GameStats import graphChoices, GameStat
 from GameSession import GameSession
 from tkinter import ttk
+from CollapsiblePane import CollapsiblePane
+from GUISchema import SessionSidebar
+from Scrollable import ScrollableFrame
 
 # Direct imports
 import datetime
@@ -31,18 +34,24 @@ class Application(tk.Frame):
 
         self.master = master
 
-        self.master.resizable(False, False)
-
         self._after_id = None
         self.user_cache = {}
         self.graph_init = True
 
-        self.pack()
+        self.pack(fill="both", expand=True)
 
         self.create_widgets()
 
         self.master.protocol("WM_DELETE_WINDOW", self.onExit)
+        #self.master.bind("<Configure>", self.resize)
+        self.SessionStatsScrollBox.recalculateScrollBox()
     # End of __init__
+
+    def resize(self, event):
+        # print(event.widget)
+        if(self.SessionStatsScrollBox.contentFrame is event.widget):
+            self.SessionStatsScrollBox.recalculateScrollBox()
+    # End of resize
 
     def create_widgets(self):
         # Setting up window name and icon
@@ -58,49 +67,46 @@ class Application(tk.Frame):
 
         # Create the scaffold for the application
         self.SearchBox = tk.Frame(self, relief="groove", borderwidth=1)
-        self.SearchBox.pack(side="top", anchor="w", fill="both", expand=True)
+        self.SearchBox.grid(row=0, column=0, columnspan=5, sticky="nsew")
 
         self.createSearchBox(self.SearchBox)
 
         # Second Row
-        self.SecondRow = tk.Frame(self, relief="groove", borderwidth=1)
-        self.SecondRow.pack(side="top", anchor="w", fill="both", expand=True)
-
-        self.UserBox = tk.Frame(self.SecondRow, relief="groove", borderwidth=1)
-        self.UserBox.pack(side="left", anchor="w", fill="both", expand=True)
+        self.UserBox = tk.Frame(self, relief="groove", borderwidth=1)
+        self.UserBox.grid(row=1, column=0, columnspan=3, sticky="nsew")
 
         self.createUserBox(self.UserBox)
 
         self.GraphOptionsBox = tk.Frame(
-            self.SecondRow, relief="groove", borderwidth=1)
-        self.GraphOptionsBox.pack(
-            side="left", anchor="w", fill="both", expand=True)
+            self, relief="groove", borderwidth=1)
+        self.GraphOptionsBox.grid(row=1, column=3, columnspan=1, sticky="nsew")
 
         self.createGraphOptionsBox(self.GraphOptionsBox)
 
         self.SessionBox = tk.Frame(
-            self.SecondRow, relief="groove", borderwidth=1)
-        self.SessionBox.pack(side="right", anchor="e",
-                             fill="both", expand=True)
+            self, relief="groove", borderwidth=1)
+        self.SessionBox.grid(row=1, column=4, columnspan=1, sticky="nsew")
 
         self.createSessionBox(self.SessionBox)
 
         # Bottom Frame
-        self.GraphAndSessionStatsBox = tk.Frame(
-            self, relief="groove", borderwidth=1)
-        self.GraphAndSessionStatsBox.pack(
-            side="bottom", anchor="w", fill="both", expand=True)
-
         self.GraphBox = tk.Frame(
-            self.GraphAndSessionStatsBox, relief="groove", borderwidth=1)
-        self.GraphBox.pack(side="left", anchor="w")
+            self, relief="groove", borderwidth=1)
+        self.GraphBox.grid(row=2, column=0, columnspan=3, sticky="nsew")
 
         self.SessionStatsBox = tk.Frame(
-            self.GraphAndSessionStatsBox, relief="groove", borderwidth=1)
-        self.SessionStatsBox.pack(
-            side="right", anchor="e", fill="both", expand=True, padx=5, pady=5)
+            self, relief="groove", borderwidth=1)
+        self.SessionStatsBox.grid(row=2, column=3, columnspan=2, sticky="nsew")
 
         self.createSessionStatsBox(self.SessionStatsBox)
+
+        # Configure the columns to expand properly when window is resized
+        self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=2, weight=1)
+
+        self.master.update()
+        self.master.minsize(self.master.winfo_width(),
+                            self.master.winfo_height())
 
         # Automatically run search
         self.searchReplays(
@@ -108,165 +114,155 @@ class Application(tk.Frame):
     # End of create_widgets(self)
 
     def createSearchBox(self, master):
-
-        self.UserSearchBox = tk.Frame(master)
-        self.UserSearchBox.pack(side="left", padx=5, pady=5, anchor="n")
-
         self.UserSearchLabel = tk.Label(
-            self.UserSearchBox, text="User to Search For:")
-        self.UserSearchLabel.pack(side="top", anchor="w")
+            master, text="User to Search For:")
+        self.UserSearchLabel.grid(
+            row=0, column=0, sticky="nw", padx=2, pady=2)
 
-        self.UserSearch = ttk.Combobox(self.UserSearchBox)
+        self.UserSearch = ttk.Combobox(master)
         self.UserSearch.bind('<KeyRelease>', self.checkInput)
-        self.UserSearch.pack(side="top")
         self.UserSearch.bind('<<ComboboxSelected>>', self.comboSelectUser)
+        self.UserSearch.grid(row=1, column=0, sticky="nw", padx=2, pady=2)
 
-        self.GameSizeBox = tk.Frame(master)
-        self.GameSizeBox.pack(side="left", anchor="n", padx=5, pady=5)
+        self.OneVOneCheckbox = tk.Checkbutton(master, text="1v1")
+        self.OneVOneCheckbox.grid(
+            row=0, column=1, sticky="nw", padx=2, pady=2)
 
-        self.OneVOneCheckbox = tk.Checkbutton(self.GameSizeBox, text="1v1")
-        self.OneVOneCheckbox.pack(side="top", anchor="w")
+        self.TwoVTwoCheckbox = tk.Checkbutton(master, text="2v2")
+        self.TwoVTwoCheckbox.grid(
+            row=1, column=1, sticky="nw", padx=2, pady=2)
 
-        self.TwoVTwoCheckbox = tk.Checkbutton(self.GameSizeBox, text="2v2")
-        self.TwoVTwoCheckbox.pack(side="top", anchor="w")
-
-        self.ThreeVThreeCheckbox = tk.Checkbutton(self.GameSizeBox, text="3v3")
-        self.ThreeVThreeCheckbox.pack(side="top", anchor="w")
+        self.ThreeVThreeCheckbox = tk.Checkbutton(master, text="3v3")
+        self.ThreeVThreeCheckbox.grid(
+            row=2, column=1, sticky="nw", padx=2, pady=2)
 
         self.RankedCheckbox = tk.Checkbutton(master, text="Ranked")
-        self.RankedCheckbox.pack(side="left", anchor="n", padx=5, pady=5)
-
-        self.ExtraGameModesBox = tk.Frame(master)
-        self.ExtraGameModesBox.pack(side="left", anchor="n", padx=5, pady=5)
+        self.RankedCheckbox.grid(
+            row=3, column=1, sticky="nw", padx=2, pady=2)
 
         self.HoopsCheckbox = tk.Checkbutton(
-            self.ExtraGameModesBox, text="Hoops")
-        self.HoopsCheckbox.pack(side="top", anchor="w")
+            master, text="Hoops")
+        self.HoopsCheckbox.grid(row=0, column=2, sticky="nw", padx=2, pady=2)
 
         self.RumbleCheckbox = tk.Checkbutton(
-            self.ExtraGameModesBox, text="Rumble")
-        self.RumbleCheckbox.pack(side="top", anchor="w")
+            master, text="Rumble")
+        self.RumbleCheckbox.grid(
+            row=1, column=2, sticky="nw", padx=2, pady=2)
 
         self.DropshotCheckbox = tk.Checkbutton(
-            self.ExtraGameModesBox, text="Dropshot")
-        self.DropshotCheckbox.pack(side="top", anchor="w")
+            master, text="Dropshot")
+        self.DropshotCheckbox.grid(
+            row=2, column=2, sticky="nw", padx=2, pady=2)
 
         self.SnowdayCheckbox = tk.Checkbutton(
-            self.ExtraGameModesBox, text="Snowday")
-        self.SnowdayCheckbox.pack(side="top", anchor="w")
-
-        self.GameFiltersBox = tk.Frame(master)
-        self.GameFiltersBox.pack(side="left", anchor="n", padx=5, pady=5)
+            master, text="Snowday")
+        self.SnowdayCheckbox.grid(
+            row=3, column=2, sticky="nw", padx=2, pady=2)
 
         self.SeasonSelectionLabel = tk.Label(
-            self.GameFiltersBox, text="Season:")
-        self.SeasonSelectionLabel.pack(side="top", anchor="w")
+            master, text="Season:")
+        self.SeasonSelectionLabel.grid(
+            row=0, column=3, sticky="nw", padx=2, pady=2)
 
-        self.SeasonSelection = ttk.Combobox(self.GameFiltersBox)
-        self.SeasonSelection.pack(side="top")
+        self.SeasonSelection = ttk.Combobox(master)
+        self.SeasonSelection.grid(
+            row=1, column=3, sticky="nw", padx=2, pady=2)
 
-        self.MapSelectionLabel = tk.Label(self.GameFiltersBox, text="Map:")
-        self.MapSelectionLabel.pack(side="top", anchor="w")
+        self.MapSelectionLabel = tk.Label(master, text="Map:")
+        self.MapSelectionLabel.grid(
+            row=2, column=3, sticky="nw", padx=2, pady=2)
 
-        self.MapSelection = ttk.Combobox(self.GameFiltersBox)
-        self.MapSelection.pack(side="top")
-
-        self.DateFiltersBox = tk.Frame(master)
-        self.DateFiltersBox.pack(side="left", anchor="n", padx=5, pady=5)
+        self.MapSelection = ttk.Combobox(master)
+        self.MapSelection.grid(row=3, column=3, sticky="nw", padx=2, pady=2)
 
         self.DateBeforeLabel = tk.Label(
-            self.DateFiltersBox, text="Replay Before:")
-        self.DateBeforeLabel.pack(side="top", anchor="w")
+            master, text="Replay Before:")
+        self.DateBeforeLabel.grid(
+            row=0, column=4, sticky="nw", padx=2, pady=2)
 
-        self.ReplayBeforeFilter = ttk.Combobox(self.DateFiltersBox)
-        self.ReplayBeforeFilter.pack(side="top")
+        self.ReplayBeforeFilter = ttk.Combobox(master)
+        self.ReplayBeforeFilter.grid(
+            row=1, column=4, sticky="nw", padx=2, pady=2)
 
         self.DateAfterLabel = tk.Label(
-            self.DateFiltersBox, text="Replay After:")
-        self.DateAfterLabel.pack(side="top", anchor="w")
+            master, text="Replay After:")
+        self.DateAfterLabel.grid(
+            row=2, column=4, sticky="nw", padx=2, pady=2)
 
-        self.ReplayAfterFilter = ttk.Combobox(self.DateFiltersBox)
-        self.ReplayAfterFilter.pack(side="top")
+        self.ReplayAfterFilter = ttk.Combobox(master)
+        self.ReplayAfterFilter.grid(
+            row=3, column=4, sticky="nw", padx=2, pady=2)
     # End of createSearchBox
 
     def createUserBox(self, master):
         self.userImage = tkLabelImageURL(
             'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png', master)
-        self.userImage.pack(side="left", anchor="n", padx=5, pady=5)
-
-        self.CurrentStatsBox = tk.Frame(master)
-        self.CurrentStatsBox.pack(side="left", anchor="n", padx=5, pady=5)
+        self.userImage.grid(row=0, column=0, rowspan=5,
+                            sticky="nw", padx=2, pady=2)
 
         self.UsernameLabel = tk.Label(
-            self.CurrentStatsBox, text="Username")
-        self.UsernameLabel.pack(side="top", anchor="w")
-
-        self.OneAndTwoMMRBox = tk.Frame(self.CurrentStatsBox)
-        self.OneAndTwoMMRBox.pack(side="left", anchor="n", padx=5, pady=5)
+            master, text="Username")
+        self.UsernameLabel.grid(
+            row=0, column=1, columnspan=2, sticky="nw", padx=2)
 
         self.OneVOneMMRLabel = tk.Label(
-            self.OneAndTwoMMRBox, text="1v1: N/A")
-        self.OneVOneMMRLabel.pack(side="top", anchor="w")
+            master, text="1v1: N/A")
+        self.OneVOneMMRLabel.grid(row=1, column=1, sticky="nw", padx=2)
 
         self.TwoVTwoMMRLabel = tk.Label(
-            self.OneAndTwoMMRBox, text="2v2: N/a")
-        self.TwoVTwoMMRLabel.pack(side="top", anchor="w")
-
-        self.ThreeAndSeasonMMRBox = tk.Frame(self.CurrentStatsBox)
-        self.ThreeAndSeasonMMRBox.pack(side="left", anchor="n", padx=5, pady=5)
+            master, text="2v2: N/A")
+        self.TwoVTwoMMRLabel.grid(row=2, column=1, sticky="nw", padx=2)
 
         self.ThreeVThreeMMRLabel = tk.Label(
-            self.ThreeAndSeasonMMRBox, text="3v3: N/A")
-        self.ThreeVThreeMMRLabel.pack(side="top", anchor="w")
+            master, text="3v3: N/A")
+        self.ThreeVThreeMMRLabel.grid(
+            row=1, column=2, sticky="nw", padx=2)
 
         self.SeasonRewradLabel = tk.Label(
-            self.ThreeAndSeasonMMRBox, text="Season Rewards: N/A")
-        self.SeasonRewradLabel.pack(side="top", anchor="w")
+            master, text="Season Rewards: N/A")
+        self.SeasonRewradLabel.grid(
+            row=2, column=2, sticky="nw", padx=2)
 
-        self.CareerStatsBox = tk.Frame(master)
-        self.CareerStatsBox.pack(side="left", anchor="n", padx=5, pady=5)
-
-        self.FirstStatsColumnBox = tk.Frame(self.CareerStatsBox)
-        self.FirstStatsColumnBox.pack(side="left", anchor="n", padx=5, pady=5)
-
-        self.WinsLabel = tk.Label(self.FirstStatsColumnBox, text="Wins: N/A")
-        self.WinsLabel.pack(side="top", anchor="w")
+        self.WinsLabel = tk.Label(master, text="Wins: N/A")
+        self.WinsLabel.grid(row=0, column=3, sticky="nw", padx=2)
 
         self.GoalsLabel = tk.Label(
-            self.FirstStatsColumnBox, text="Goals: N/A")
-        self.GoalsLabel.pack(side="top", anchor="w")
+            master, text="Goals: N/A")
+        self.GoalsLabel.grid(row=1, column=3, sticky="nw", padx=2)
 
         self.SavesLabel = tk.Label(
-            self.FirstStatsColumnBox, text="Saves: N/A")
-        self.SavesLabel.pack(side="top", anchor="w")
+            master, text="Saves: N/A")
+        self.SavesLabel.grid(row=2, column=3, sticky="nw", padx=2)
 
-        self.MVPSLabel = tk.Label(self.FirstStatsColumnBox, text="MVPS: N/A")
-        self.MVPSLabel.pack(side="top", anchor="w")
-
-        self.SecondStatsColumnBox = tk.Frame(self.CareerStatsBox)
-        self.SecondStatsColumnBox.pack(side="left", anchor="n", padx=5, pady=5)
+        self.MVPSLabel = tk.Label(master, text="MVPS: N/A")
+        self.MVPSLabel.grid(row=3, column=3, sticky="nw", padx=2)
 
         self.AssistsLabel = tk.Label(
-            self.SecondStatsColumnBox, text="Assists: N/A")
-        self.AssistsLabel.pack(side="top", anchor="w")
+            master, text="Assists: N/A")
+        self.AssistsLabel.grid(row=0, column=4, sticky="nw", padx=2)
 
         self.ShotsLabel = tk.Label(
-            self.SecondStatsColumnBox, text="Shots: N/A")
-        self.ShotsLabel.pack(side="top", anchor="w")
+            master, text="Shots: N/A")
+        self.ShotsLabel.grid(row=1, column=4, sticky="nw", padx=2)
 
         self.ShootingPercentLabel = tk.Label(
-            self.SecondStatsColumnBox, text="Shooting Accuracy: N/A")
-        self.ShootingPercentLabel.pack(side="top", anchor="w")
+            master, text="Shooting Accuracy: N/A")
+        self.ShootingPercentLabel.grid(
+            row=2, column=4, sticky="nw", padx=2)
 
         self.TotalScoreLabel = tk.Label(
-            self.SecondStatsColumnBox, text="Total Points: N/A")
-        self.TotalScoreLabel.pack(side="top", anchor="w")
+            master, text="Total Points: N/A")
+        self.TotalScoreLabel.grid(row=3, column=4, sticky="nw", padx=2)
     # End of createUserBox
 
     def createGraphOptionsBox(self, master):
         # Get a list of available stats from
         exampleGame = next(iter(games.values()))
         # print(json.dumps(exampleGame, indent=4, sort_keys=True))
+
+        self.graphOptionsBoxLabel = tk.Label(master, text="Graph Options")
+        self.graphOptionsBoxLabel.grid(
+            row=0, column=0, sticky="nw", padx=2, pady=2)
 
         self.graphSelectionVar = tk.StringVar(self, "", name="GraphSelection")
         self.graphMenu = tk.Menubutton(
@@ -281,127 +277,89 @@ class Application(tk.Frame):
         self.graphSelectionVar.trace('w', self.graphSelectionHandler)
 
         self.graphMenu.configure(menu=self.gM)
-        self.graphMenu.pack(side='top', padx=10, pady=10)
+        self.graphMenu.grid(row=1, column=0, sticky="n", padx=2, pady=2)
 
         # Create a absolute values checkbox
         self.absoluteValues = tk.BooleanVar(self, False, "absoluteValues")
         self.absoluteValues.trace('w', self.graphAbsoluteValueHandler)
         self.absoluteValuesCheckbox = tk.Checkbutton(
             master, text="Absolute Values", variable=self.absoluteValues)
-        self.absoluteValuesCheckbox.pack(side="top", padx=10, pady=10)
+        self.absoluteValuesCheckbox.grid(
+            row=2, column=0, sticky="s", padx=2, pady=2)
     # End of createGraphOptionsBox
 
     def createSessionBox(self, master):
         # Create a listbox to show all the sessions
-        self.SessionBoxLabel = tk.Label(master, text="Sessions")
-        self.SessionBoxLabel.pack(side="top", anchor="w")
+        self.SessionBoxLabel = tk.Label(
+            master, text="Sessions")
+        self.SessionBoxLabel.grid(row=0, column=0, sticky="nw", padx=2, pady=2)
 
         self.sessionListBox = tk.Listbox(master, height=6)
         self.sessionListBox.bind('<<ListboxSelect>>', self.sessionSelect)
-        self.sessionListBox.pack(side="left")
+        self.sessionListBox.grid(row=1, column=0, sticky="sw", padx=2, pady=2)
     # End of createSessionBox
 
+    def createCollapsible(self, collapsibleInfo, master):
+        self.__setattr__(collapsibleInfo['name'], CollapsiblePane(
+            master, collapsibleInfo['title'] + " <<", collapsibleInfo['title'] + " >>"))
+        self.__getattribute__(collapsibleInfo['name']).grid(
+            row=collapsibleInfo['gridpos'][0], column=collapsibleInfo['gridpos'][1],
+            rowspan=collapsibleInfo['gridspan'][0], columnspan=collapsibleInfo['gridspan'][1],
+            sticky="nsew", padx=2, pady=2)
+
+        for widget in collapsibleInfo['widgets']:
+            if(widget['type'] == "collapsible"):
+                self.createCollapsible(widget, self.__getattribute__(
+                    collapsibleInfo['name']).content)
+            else:
+                self.createWidgetFromSchema(
+                    widget, self.__getattribute__(collapsibleInfo['name']).content)
+    # End of createCollapsible
+
+    def createWidgetFromSchema(self, widgetInfo, master):
+        if(widgetInfo['type'] == "widget"):
+            self.__setattr__(widgetInfo['name'], tk.Label(
+                master, text=widgetInfo['title'] + " N/A"))
+        else:
+            self.__setattr__(widgetInfo['name'],
+                             ttk.__getattribute__(widgetInfo['type'])(master))
+
+            for arg in widgetInfo['args']:
+                self.__getattribute__(widgetInfo['name']).configure(arg)
+        if('sticky' in widgetInfo.keys()):
+            sticky = widgetInfo['sticky']
+        else:
+            sticky = "nw"
+        self.__getattribute__(widgetInfo['name']).grid(
+            row=widgetInfo['gridpos'][0], column=widgetInfo['gridpos'][1],
+            rowspan=widgetInfo['gridspan'][0], columnspan=widgetInfo['gridspan'][1],
+            sticky=sticky, padx=2, pady=2)
+    # End of createWidgetFromSchema
+
+    def updateWidgetFromSchema(self, widgetInfo, value):
+        self.__getattribute__(widgetInfo['name']).configure(
+            text=widgetInfo['title'] + value)
+    # End of updateWidgetFromSchema
+
     def createSessionStatsBox(self, master):
-        self.SessionStatsBoxLabel = tk.Label(master, text="Session Stats")
-        self.SessionStatsBoxLabel.pack(side="top", anchor="nw")
+        self.SessionStatsBoxLabel = tk.Label(
+            self.SessionStatsBox, text="Session Stats")
+        self.SessionStatsBoxLabel.grid(
+            row=0, column=0, sticky="nw", padx=2, pady=2)
 
-        # Win Loss Stats
-        self.WinLossBox = tk.Frame(master)
-        self.WinLossBox.pack(side="top", anchor="nw")
+        self.SessionStatsScrollBox = ScrollableFrame(master)
+        self.SessionStatsScrollBox.grid(row=1, column=0, sticky="nsew")
 
-        self.SessionWinsLabel = tk.Label(self.WinLossBox, text="Wins: N/A")
-        self.SessionWinsLabel.pack(side="left", anchor="nw")
+        # Generate the sidebar from the schema
+        for collapsible in SessionSidebar:
+            if(collapsible['type'] == "collapsible"):
+                self.createCollapsible(
+                    collapsible, self.SessionStatsScrollBox.contentFrame)
+            elif(collapsible['type'] == "widget"):
+                self.createWidgetFromSchema(
+                    collapsible, self.SessionStatsScrollBox.contentFrame)
 
-        self.SessionLossLabel = tk.Label(self.WinLossBox, text="Losses: N/A")
-        self.SessionLossLabel.pack(side="left", anchor="nw")
-
-        self.SessionWinPercentLabel = tk.Label(
-            self.WinLossBox, text="Win Rate: N/A%")
-        self.SessionWinPercentLabel.pack(side="left", anchor="nw")
-
-        # Time stats
-        self.SessionTimeStatsBox = tk.Frame(master)
-        self.SessionTimeStatsBox.pack(side="top", anchor="nw")
-
-        self.SessionTimePlayedLabel = tk.Label(
-            self.SessionTimeStatsBox, text="Total Time: N/A")
-        self.SessionTimePlayedLabel.pack(side="left", anchor="nw")
-
-        self.SessionOvertimePlayedLabel = tk.Label(
-            self.SessionTimeStatsBox, text="Overtime: N/A")
-        self.SessionOvertimePlayedLabel.pack(side="left", anchor="nw")
-
-        # Date Stats
-        self.SessionStartAndEndBox = tk.Frame(master)
-        self.SessionStartAndEndBox.pack(side="top", anchor="nw")
-
-        self.SessionStartLabel = tk.Label(
-            self.SessionStartAndEndBox, text="Started: N/A")
-        self.SessionStartLabel.pack(side="left", anchor="nw")
-
-        self.SessionEndLabel = tk.Label(
-            self.SessionStartAndEndBox, text="Ended: N/A")
-        self.SessionEndLabel.pack(side="left", anchor="nw")
-
-        # Individual General Stats
-        self.SessionGeneralIndividualStatsBox = tk.Frame(master)
-        self.SessionGeneralIndividualStatsBox.pack(side="top", anchor="nw")
-
-        self.SessionIndividualGoalsLabel = tk.Label(
-            self.SessionGeneralIndividualStatsBox, text="Goals: N/A")
-        self.SessionIndividualGoalsLabel.pack(side="left", anchor="nw")
-
-        self.SessionIndividualSavesLabel = tk.Label(
-            self.SessionGeneralIndividualStatsBox, text="Saves: N/A")
-        self.SessionIndividualSavesLabel.pack(side="left", anchor="nw")
-
-        self.SessionIndividualAssistsLabel = tk.Label(
-            self.SessionGeneralIndividualStatsBox, text="Assists: N/A")
-        self.SessionIndividualAssistsLabel.pack(side="left", anchor="nw")
-
-        self.SessionIndividualShotsLabel = tk.Label(
-            self.SessionGeneralIndividualStatsBox, text="Shots: N/A")
-        self.SessionIndividualShotsLabel.pack(side="left", anchor="nw")
-
-        self.SessionDemosIndividualStatsBox = tk.Frame(master)
-        self.SessionDemosIndividualStatsBox.pack(side="top", anchor="nw")
-
-        self.SessionIndividualDemosReceivedLabel = tk.Label(
-            self.SessionDemosIndividualStatsBox, text="Demos Received: N/A")
-        self.SessionIndividualDemosReceivedLabel.pack(side="left", anchor="nw")
-
-        self.SessionIndividualDemosInflictedLabel = tk.Label(
-            self.SessionDemosIndividualStatsBox, text="Demos Inflicted: N/A")
-        self.SessionIndividualDemosInflictedLabel.pack(
-            side="left", anchor="nw")
-
-        self.SessionDefendingIndividualStatsBox = tk.Frame(master)
-        self.SessionDefendingIndividualStatsBox.pack(side="top", anchor="nw")
-
-        self.SessionIndividualShotsAgainstLabel = tk.Label(
-            self.SessionDefendingIndividualStatsBox, text="Shots Against: N/A")
-        self.SessionIndividualShotsAgainstLabel.pack(
-            side="left", anchor="nw")
-
-        self.SessionIndividualGoalsConcededLabel = tk.Label(
-            self.SessionDefendingIndividualStatsBox, text="Goals Conceded: N/A")
-        self.SessionIndividualGoalsConcededLabel.pack(side="left", anchor="nw")
-
-        self.SessionAttackingIndividualStatsBox = tk.Frame(master)
-        self.SessionAttackingIndividualStatsBox.pack(side="top", anchor="nw")
-
-        self.SessionIndividualShootingAccuracyLabel = tk.Label(
-            self.SessionAttackingIndividualStatsBox, text="Shooting Accuracy: N/A")
-        self.SessionIndividualShootingAccuracyLabel.pack(
-            side="left", anchor="nw")
-
-        self.SessionIndividualMVPSLabel = tk.Label(
-            self.SessionAttackingIndividualStatsBox, text="MVPS: N/A")
-        self.SessionIndividualMVPSLabel.pack(side="left", anchor="nw")
-
-        self.SessionIndividualScoreLabel = tk.Label(
-            self.SessionAttackingIndividualStatsBox, text="Score: N/A")
-        self.SessionIndividualScoreLabel.pack(side="left", anchor="nw")
+        self.SessionStatsScrollBox.recalculateScrollBox()
     # End of createSessionsStatsBox
 
     def sessionSelect(self, event):
@@ -410,7 +368,7 @@ class Application(tk.Frame):
         value = widget.get(index)
         for session in self.GameSessions:
             if(str(session.StartDate) == value):
-                session.updateSessionStats(self)
+                session.updateSessionStats(self, SessionSidebar)
 
                 lowerDate = session.StartDate + datetime.timedelta(minutes=-3)
                 higherDate = session.EndDate + datetime.timedelta(minutes=3)
@@ -483,7 +441,7 @@ class Application(tk.Frame):
 
         if("/" in dataChoiceValue):
             if(dataChoiceValue == "Win/Losses"):
-                #print([d['Win'] for d in self.searchCache])
+                # print([d['Win'] for d in self.searchCache])
                 self.goalsAx.bar(
                     [d['Date'] for d in self.searchCache],
                     [d['Win'] for d in self.searchCache],
@@ -619,6 +577,8 @@ class Application(tk.Frame):
 
     def autocompleteSearch(self):
         if(self.UserSearch.get() != ""):
+            if(self.user_cache is not None):
+                self.user_cache.clear()
             # Steam Search
             userSearchSteamResp = req.get('https://api.tracker.gg/api/v2/rocket-league/standard/search?platform=steam&autocomplete=true&query=' +
                                           self.UserSearch.get(),
@@ -665,6 +625,8 @@ class Application(tk.Frame):
                 user)['platformUserHandle'] for user in self.user_cache]
             self.UserSearch.event_generate('<Down>')
         else:
+            if(self.user_cache is not None):
+                self.user_cache.clear()
             self.UserSearch['values'] = []
     # End of autocompleteSearch
 
@@ -713,11 +675,11 @@ class Application(tk.Frame):
         self.UsernameLabel.configure(
             text=userStats['platformInfo']['platformUserHandle'])
 
-        #print(json.dumps(userStats, indent=4, default=str))
+        # print(json.dumps(userStats, indent=4, default=str))
 
         userOverallStats = None
         for segment in userStats['segments']:
-            #print(json.dumps(segment, indent=4, default=str))
+            # print(json.dumps(segment, indent=4, default=str))
             if(segment['type'] == "overview"):
                 userOverallStats = segment['stats']
             elif(segment['type'] == "playlist" and segment['metadata']['name'] == "Ranked Duel 1v1"):
@@ -765,7 +727,7 @@ class Application(tk.Frame):
         headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
         searchGames = req.get(url, headers=headers)
         result = searchGames.json()
-        #print(json.dumps(result['list'], indent=4, sort_keys=True))
+        # print(json.dumps(result['list'], indent=4, sort_keys=True))
 
         # Configuring UI with the relelvant progress
         self.progressBar.configure(maximum=len(result['list']))
@@ -870,6 +832,10 @@ class Application(tk.Frame):
             'motion_notify_event', self.onMouseMove)
         sid = self.goalsFigure.canvas.mpl_connect(
             'scroll_event', self.onScroll)
+
+        self.master.update()
+        self.master.minsize(self.master.winfo_width(),
+                            self.master.winfo_height())
     # End searchReplays
 
     def onClick(self, event):

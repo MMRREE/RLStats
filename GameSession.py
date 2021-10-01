@@ -14,28 +14,14 @@ class GameSession():
         self.Overtime = 0
         self.StartDate = 0
         self.EndDate = 0
+        self.WinRate = 0
 
-        # Team Stats
-        self.Team = {
+        teamStructure = {
             "Goals For": 0,
-            "Goals Against": 0,
+            "Saves": 0,
             "Assists": 0,
             "Shots": 0,
-            "Demos Inflicted": 0,
-            "Demos Received": 0,
-            "Total Score": 0,
-            "Average Score": 0,
-            "Average Shooting Percent": 0,
-            "Time in possesion": 0,
-            "Time ball in defensive half": 0,
-        }
-
-        # Opposition Stats
-        self.Opposition = {
-            "Goals For": 0,
             "Goals Against": 0,
-            "Assists": 0,
-            "Shots": 0,
             "Demos Inflicted": 0,
             "Demos Received": 0,
             "Total Score": 0,
@@ -44,6 +30,12 @@ class GameSession():
             "Time in possesion": 0,
             "Time ball in defensive half": 0
         }
+
+        # Team Stats
+        self.Team = teamStructure
+
+        # Opposition Stats
+        self.Opposition = teamStructure
 
         # Individual Stats
         self.Individual = {
@@ -135,6 +127,7 @@ class GameSession():
         self.Team['Goals Against'] += game.Team['Goals Against']
         self.Team['Assists'] += game.Team['Assists']
         self.Team['Shots'] += game.Team['Shots']
+        self.Team['Saves'] += game.Team['Saves']
         self.Team['Demos Inflicted'] += game.Team['Demos Inflicted']
         self.Team['Demos Received'] += game.Team['Demos Received']
         self.Team['Total Score'] += game.Team['Total Score']
@@ -150,6 +143,7 @@ class GameSession():
         self.Opposition['Goals Against'] += game.Opposition['Goals Against']
         self.Opposition['Assists'] += game.Opposition['Assists']
         self.Opposition['Shots'] += game.Opposition['Shots']
+        self.Opposition['Saves'] += game.Opposition['Saves']
         self.Opposition['Demos Inflicted'] += game.Opposition['Demos Inflicted']
         self.Opposition['Demos Received'] += game.Opposition['Demos Received']
         self.Opposition['Total Score'] += game.Opposition['Total Score']
@@ -319,60 +313,52 @@ class GameSession():
         return False
     # End of checkGameInSession
 
-    def updateSessionStats(self, Frame):
-        Frame.SessionWinsLabel.configure(text="Wins: " + str(self.Wins))
+    def updateStat(self, widget, Frame):
+        if("tags" in widget.keys()):
+            if("." not in widget['tags']):
+                rawValue = self.__getattribute__(widget['tags'])
+                if(type(rawValue) is int or type(rawValue) is float):
+                    value = f"{rawValue:{widget['precision']}}"
+                else:
+                    value = str(rawValue)
+            else:
+                print(widget)
+                rawValue = self.returnValueFromKeyString(widget['tags'])
+                print(rawValue)
+                value = f"{rawValue:{widget['precision']}}"
+        else:
+            value = ""
+        Frame.updateWidgetFromSchema(widget, f"{value}")
 
-        Frame.SessionLossLabel.configure(text="Losses: " + str(self.Losses))
+    # End of updateStat
 
-        Frame.SessionWinPercentLabel.configure(
-            text="Win Rate: " + str(self.Wins/(self.Wins+self.Losses)*100) + "%")
+    def returnValueFromKeyString(self, keyString):
+        keys = keyString.split(".")
+        returnData = self.__dict__
+        for key in keys:
+            if("[" in key):
+                tempLabel = key.split("]")[0]
+                newKey, ind = tempLabel.split("[")
+                returnData = returnData.get(newKey)
+            else:
+                returnData = returnData.get(key)
+        return returnData
+    # End of returnValueFromKeyString
 
-        # Time stats
+    def exploreSchemaAndUpdate(self, schema, Frame):
+        if(type(schema) is dict):
+            if(schema['type'] == "widget"):
+                self.updateStat(schema, Frame)
+            elif(schema['type'] == "collapsible"):
+                self.exploreSchemaAndUpdate(schema['widgets'], Frame)
+        elif(type(schema) is list):
+            for widget in schema:
+                self.exploreSchemaAndUpdate(widget, Frame)
+    # End of exploreSchemaAndUpdate
 
-        Frame.SessionTimePlayedLabel.configure(
-            text="Total Time: " + str(self.Time_Played))
+    def updateSessionStats(self, Frame, schema):
+        self.WinRate = self.Wins/(self.Wins+self.Losses)*100
 
-        Frame.SessionOvertimePlayedLabel.configure(
-            text="Overtime: " + str(self.Overtime))
-
-        # Date Stats
-        Frame.SessionStartLabel.configure(
-            text="Started: " + str(self.StartDate))
-
-        Frame.SessionEndLabel.configure(text="Ended: " + str(self.EndDate))
-
-        # Individual General Stats
-        Frame.SessionIndividualGoalsLabel.configure(
-            text="Goals: " + str(self.Individual['General']['Goals']))
-
-        Frame.SessionIndividualSavesLabel.configure(
-            text="Saves: " + str(self.Individual['General']['Saves']))
-
-        Frame.SessionIndividualAssistsLabel.configure(
-            text="Assists: " + str(self.Individual['General']['Assists']))
-
-        Frame.SessionIndividualShotsLabel.configure(
-            text="Shots: " + str(self.Individual['General']['Shots']))
-
-        Frame.SessionIndividualDemosReceivedLabel.configure(
-            text="Demos Received: " + str(self.Individual['General']['Demos Received']))
-
-        Frame.SessionIndividualDemosInflictedLabel.configure(
-            text="Demos Inflicted: " + str(self.Individual['General']['Demos Inflicted']))
-
-        Frame.SessionIndividualShotsAgainstLabel.configure(
-            text="Shots Against: " + str(self.Individual['General']['Shots Against']))
-
-        Frame.SessionIndividualGoalsConcededLabel.configure(
-            text="Goals Conceded: " + str(self.Individual['General']['Goals Against Whilst Last Defender']))
-
-        Frame.SessionIndividualShootingAccuracyLabel.configure(
-            text="Shooting Accuracy: " + str(self.Individual['General']['Shooting Percent']))
-
-        Frame.SessionIndividualMVPSLabel.configure(
-            text="MVPS: " + str(self.Individual['General']['MVP']))
-
-        Frame.SessionIndividualScoreLabel.configure(
-            text="Score: " + str(self.Individual['General']['Score']))
+        self.exploreSchemaAndUpdate(schema, Frame)
     # End of updateSessionStats
 # End of GameSession
