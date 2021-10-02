@@ -28,22 +28,27 @@ def dateGraphMajorTicksCalculation(axes):
     # Calculate the major ticks requirement
     if(width < 0.000694*2):
         reformatMajorTicks(
-            axes, "%M:%S", "Second", [0, 15, 30, 45])
+            axes, "%H:%M:%S", "Second", range(0, 60, 15))
+    elif(width < 0.000694*15):
+        reformatMajorTicks(axes, "%H:%M:%S", "Minute", range(0, 60, 1))
+    elif(width < 0.000694*60):
+        reformatMajorTicks(axes, "%H:%M:%S", "Minute", range(0, 60, 5))
     elif(width < 0.041*2):
         reformatMajorTicks(
-            axes, "%H:%M", "Minute", [0, 15, 30, 45])
+            axes, "%H:%M", "Minute", range(0, 60, 15))
     elif(width < 0.041*6):
         reformatMajorTicks(
-            axes, "%H:%M", "Hour", range(24))
+            axes, "%H:%M", "Hour", range(0, 24, 1))
     elif(width < 0.041*12):
         reformatMajorTicks(
-            axes, "%H:%M", "Hour", [0, 3, 6, 9, 12, 15, 18, 21])
+            axes, "%H:%M", "Hour", range(0, 24, 3))
     elif(width < 1.5):
         reformatMajorTicks(
-            axes, "%d/%m, %H:%M", "Hour", [0, 6, 12, 18])
+            axes, "%d/%m, %H:%M", "Hour", range(0, 24, 6))
     else:
         reformatMajorTicks(
-            axes, "%d/%m/%Y", "Day", range(32))
+            axes, "%d/%m/%Y", "Day", range(0, 31, 1))
+    repaintMajorTicks(axes)
 # End of dateGraphMajorTicksCalculation
 
 

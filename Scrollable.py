@@ -8,6 +8,8 @@ class ScrollableFrame(tk.Frame):
 
         self.master = container
 
+        self.mouseWithin = False
+
         self.originalMasterWidth = self.master.winfo_width()
 
         self.canvas = tk.Canvas(self)
@@ -19,6 +21,9 @@ class ScrollableFrame(tk.Frame):
         self.canvas.configure(yscrollcommand=self.verticalScrollbar.set)
 
         self.contentFrame = tk.Frame(self.canvas)
+        self.configure(highlightthickness=0)
+        self.contentFrame.configure(highlightthickness=0)
+        self.canvas.configure(highlightthickness=0)
 
         self.canvas.create_window(
             (0, 0), window=self.contentFrame, anchor="nw")
@@ -32,10 +37,22 @@ class ScrollableFrame(tk.Frame):
 
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
         self.contentFrame.bind("<Configure>", self.configureHandler)
+        self.bind('<Enter>', self.mouseEntered)
+        self.bind('<Leave>', self.mouseExit)
     # End of __init__
 
+    def mouseEntered(self, event):
+        self.mouseWithin = True
+    # End of mouseEntered
+
+    def mouseExit(self, event):
+        self.mouseWithin = False
+    # End of mouseExit
+
     def _on_mousewheel(self, event):
-        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        if(not (self.verticalScrollbar.get()[0] == 0 and self.verticalScrollbar.get()[1] == 1) and self.mouseWithin):
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        # TODO: Figure out bug where canvas is over the graph, so scrolling the graph also scrolls this box
     # End of _on_mousewheel
 
     def addWidget(self, uniqueName, widgetType, args, row=0, column=0, sticky="", columnspan=1, rowspan=1):

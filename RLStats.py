@@ -14,6 +14,7 @@ from tkinter import ttk
 from CollapsiblePane import CollapsiblePane
 from GUISchema import SessionSidebar
 from Scrollable import ScrollableFrame
+from tkcalendar import Calendar, DateEntry
 
 # Direct imports
 import datetime
@@ -34,23 +35,30 @@ class Application(tk.Frame):
 
         self.master = master
 
-        self._after_id = None
+        self._typing_after_id = None
+        self._resizing_after_id = None
         self.user_cache = {}
         self.graph_init = True
+
+        self.ballchasingHeaders = {
+            'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
 
         self.pack(fill="both", expand=True)
 
         self.create_widgets()
 
         self.master.protocol("WM_DELETE_WINDOW", self.onExit)
-        #self.master.bind("<Configure>", self.resize)
-        self.SessionStatsScrollBox.recalculateScrollBox()
+        self.master.bind("<Configure>", self.resize)
     # End of __init__
 
     def resize(self, event):
         # print(event.widget)
-        if(self.SessionStatsScrollBox.contentFrame is event.widget):
-            self.SessionStatsScrollBox.recalculateScrollBox()
+        if(event.widget == self.GraphBox):
+            if(self._resizing_after_id is not None):
+                self.after_cancel(self._resizing_after_id)
+
+            self._resizing_after_id = self.after(150, self.refreshGraph)
+
     # End of resize
 
     def create_widgets(self):
@@ -104,14 +112,43 @@ class Application(tk.Frame):
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=2, weight=1)
 
+        self.createGraph()
+
         self.master.update()
+        self.master.update_idletasks()
         self.master.minsize(self.master.winfo_width(),
                             self.master.winfo_height())
 
         # Automatically run search
-        self.searchReplays(
-            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785'})
+        '''self.searchReplays(
+            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785'})'''
+        '''self.searchReplays({
+            'platformSlug': "epic", "platformUserHandle": "MMRREE", "platformUserIdentifier": "MMRREE"
+        })'''
     # End of create_widgets(self)
+
+    def getMaps(self):
+        url = 'https://ballchasing.com/api/maps'
+        searchGames = req.get(url, headers=self.ballchasingHeaders)
+        result = searchGames.json()
+        self.mapsTranslation = result
+        maps = list(result.values())
+        return maps
+    # End of getMaps
+
+    def comboSelectUser(self, event):
+        user = list(self.user_cache.values())[self.UserSearch.current()]
+        print(user)
+        if("avatarUrl" in user.keys() and user['avatarUrl'] is not None):
+            imageURL = user['avatarUrl']
+        else:
+            imageURL = 'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png'
+
+        rawImage = tkRawImageURL(imageURL, (50, 50))
+        self.UserSearchImage.image = rawImage
+        self.UserSearchImage.configure(image=rawImage)
+
+    # End of comboSelectUser
 
     def createSearchBox(self, master):
         self.UserSearchLabel = tk.Label(
@@ -122,40 +159,57 @@ class Application(tk.Frame):
         self.UserSearch = ttk.Combobox(master)
         self.UserSearch.bind('<KeyRelease>', self.checkInput)
         self.UserSearch.bind('<<ComboboxSelected>>', self.comboSelectUser)
-        self.UserSearch.grid(row=1, column=0, sticky="nw", padx=2, pady=2)
+        self.UserSearch.grid(row=1, column=0, sticky="new", padx=2, pady=2)
 
-        self.OneVOneCheckbox = tk.Checkbutton(master, text="1v1")
+        self.UserSearchImage = tkLabelImageURL(
+            'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png', master, (50, 50))
+        self.UserSearchImage.grid(
+            row=2, column=0, rowspan=2, sticky="new", padx=2, pady=2)
+
+        self.OneVOneFilter = tk.BooleanVar(master, False, "1v1")
+        self.OneVOneCheckbox = tk.Checkbutton(
+            master, text="1v1", variable=self.OneVOneFilter)
         self.OneVOneCheckbox.grid(
             row=0, column=1, sticky="nw", padx=2, pady=2)
 
-        self.TwoVTwoCheckbox = tk.Checkbutton(master, text="2v2")
+        self.TwoVTwoFilter = tk.BooleanVar(master, True, "2v2")
+        self.TwoVTwoCheckbox = tk.Checkbutton(
+            master, text="2v2", variable=self.TwoVTwoFilter)
         self.TwoVTwoCheckbox.grid(
             row=1, column=1, sticky="nw", padx=2, pady=2)
 
-        self.ThreeVThreeCheckbox = tk.Checkbutton(master, text="3v3")
+        self.ThreeVThreeFilter = tk.BooleanVar(master, False, "3v3")
+        self.ThreeVThreeCheckbox = tk.Checkbutton(
+            master, text="3v3", variable=self.ThreeVThreeFilter)
         self.ThreeVThreeCheckbox.grid(
             row=2, column=1, sticky="nw", padx=2, pady=2)
 
-        self.RankedCheckbox = tk.Checkbutton(master, text="Ranked")
+        self.RankedFilter = tk.BooleanVar(master, True, "Ranked")
+        self.RankedCheckbox = tk.Checkbutton(
+            master, text="Ranked", variable=self.RankedFilter)
         self.RankedCheckbox.grid(
             row=3, column=1, sticky="nw", padx=2, pady=2)
 
+        self.HoopsFilter = tk.BooleanVar(master, False, "Hoops")
         self.HoopsCheckbox = tk.Checkbutton(
-            master, text="Hoops")
+            master, text="Hoops", variable=self.HoopsFilter)
         self.HoopsCheckbox.grid(row=0, column=2, sticky="nw", padx=2, pady=2)
 
+        self.RumbleFilter = tk.BooleanVar(master, False, "Rumble")
         self.RumbleCheckbox = tk.Checkbutton(
-            master, text="Rumble")
+            master, text="Rumble", variable=self.RumbleFilter)
         self.RumbleCheckbox.grid(
             row=1, column=2, sticky="nw", padx=2, pady=2)
 
+        self.DropshotFilter = tk.BooleanVar(master, False, "Dropshot")
         self.DropshotCheckbox = tk.Checkbutton(
-            master, text="Dropshot")
+            master, text="Dropshot", variable=self.DropshotFilter)
         self.DropshotCheckbox.grid(
             row=2, column=2, sticky="nw", padx=2, pady=2)
 
+        self.SnowdayFilter = tk.BooleanVar(master, False, "Snowday")
         self.SnowdayCheckbox = tk.Checkbutton(
-            master, text="Snowday")
+            master, text="Snowday", variable=self.SnowdayFilter)
         self.SnowdayCheckbox.grid(
             row=3, column=2, sticky="nw", padx=2, pady=2)
 
@@ -164,41 +218,77 @@ class Application(tk.Frame):
         self.SeasonSelectionLabel.grid(
             row=0, column=3, sticky="nw", padx=2, pady=2)
 
-        self.SeasonSelection = ttk.Combobox(master)
+        self.SeasonFilter = tk.StringVar(
+            master, name="Season")
+        self.SeasonSelection = ttk.Combobox(
+            master, textvariable=self.SeasonFilter)
+        self.SeasonSelection['values'] = ("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9",
+                                          "S10", "S11", "S12", "S13", "S14", "Season 1", "Season 2", "Season 3", "Season 4",)
+        self.SeasonSelection['values'] = self.SeasonSelection['values'][::-1]
+        self.SeasonFilter.set(self.SeasonSelection['values'][0])
         self.SeasonSelection.grid(
-            row=1, column=3, sticky="nw", padx=2, pady=2)
+            row=1, column=3, sticky="nsew", padx=2, pady=2)
 
         self.MapSelectionLabel = tk.Label(master, text="Map:")
         self.MapSelectionLabel.grid(
             row=2, column=3, sticky="nw", padx=2, pady=2)
 
-        self.MapSelection = ttk.Combobox(master)
-        self.MapSelection.grid(row=3, column=3, sticky="nw", padx=2, pady=2)
+        self.MapFilter = tk.StringVar(master, name="Map")
+        self.MapSelection = ttk.Combobox(master, textvariable=self.MapFilter)
+        maps = self.getMaps()
+        maps = ["Any"] + maps
+        self.MapSelection['values'] = maps
+        self.MapFilter.set(self.MapSelection['values'][0])
+        self.MapSelection.grid(row=3, column=3, sticky="nsew", padx=2, pady=2)
 
         self.DateBeforeLabel = tk.Label(
             master, text="Replay Before:")
         self.DateBeforeLabel.grid(
             row=0, column=4, sticky="nw", padx=2, pady=2)
 
-        self.ReplayBeforeFilter = ttk.Combobox(master)
+        self.ReplayBeforeFilter = DateEntry(master)
         self.ReplayBeforeFilter.grid(
-            row=1, column=4, sticky="nw", padx=2, pady=2)
+            row=1, column=4, sticky="nsew", padx=2, pady=2)
 
         self.DateAfterLabel = tk.Label(
             master, text="Replay After:")
         self.DateAfterLabel.grid(
             row=2, column=4, sticky="nw", padx=2, pady=2)
 
-        self.ReplayAfterFilter = ttk.Combobox(master)
+        self.ReplayAfterFilter = DateEntry(master)
+        beginingOfTime = datetime.date.today() - datetime.timedelta(days=31)
+        self.ReplayAfterFilter.set_date(beginingOfTime)
         self.ReplayAfterFilter.grid(
-            row=3, column=4, sticky="nw", padx=2, pady=2)
+            row=3, column=4, sticky="nsew", padx=2, pady=2)
+
+        self.SearchImage = tkRawImageURL(
+            'https://icons-for-free.com/iconfiles/png/512/search+icon-1320183705543171170.png', (25, 25))
+        self.SearchButton = tk.Button(
+            master, image=self.SearchImage, text=" Search", compound="left", command=self.searchClicked)
+        self.SearchButton.grid(row=1, column=5, rowspan=2,
+                               sticky="nsew", padx=2, pady=2)
+
+        self.equalWeightsGrid(master)
     # End of createSearchBox
+
+    def equalWeightsGrid(self, master):
+        columns, rows = master.grid_size()
+        for row in range(rows):
+            master.grid_rowconfigure(row, weight=1)
+        for column in range(columns):
+            master.grid_columnconfigure(column, weight=1)
+    # End of equalWeightsGrid
+
+    def searchClicked(self):
+        user = list(self.user_cache.values())[self.UserSearch.current()]
+        self.searchReplays(user)
+    # End of searchClicked
 
     def createUserBox(self, master):
         self.userImage = tkLabelImageURL(
             'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png', master)
         self.userImage.grid(row=0, column=0, rowspan=5,
-                            sticky="nw", padx=2, pady=2)
+                            sticky="nsew", padx=2, pady=2)
 
         self.UsernameLabel = tk.Label(
             master, text="Username")
@@ -253,11 +343,13 @@ class Application(tk.Frame):
         self.TotalScoreLabel = tk.Label(
             master, text="Total Points: N/A")
         self.TotalScoreLabel.grid(row=3, column=4, sticky="nw", padx=2)
+
+        self.equalWeightsGrid(master)
     # End of createUserBox
 
     def createGraphOptionsBox(self, master):
         # Get a list of available stats from
-        exampleGame = next(iter(games.values()))
+        #exampleGame = next(iter(games.values()))
         # print(json.dumps(exampleGame, indent=4, sort_keys=True))
 
         self.graphOptionsBoxLabel = tk.Label(master, text="Graph Options")
@@ -286,6 +378,8 @@ class Application(tk.Frame):
             master, text="Absolute Values", variable=self.absoluteValues)
         self.absoluteValuesCheckbox.grid(
             row=2, column=0, sticky="s", padx=2, pady=2)
+
+        self.equalWeightsGrid(master)
     # End of createGraphOptionsBox
 
     def createSessionBox(self, master):
@@ -296,7 +390,10 @@ class Application(tk.Frame):
 
         self.sessionListBox = tk.Listbox(master, height=6)
         self.sessionListBox.bind('<<ListboxSelect>>', self.sessionSelect)
-        self.sessionListBox.grid(row=1, column=0, sticky="sw", padx=2, pady=2)
+        self.sessionListBox.grid(
+            row=1, column=0, sticky="nsew", padx=2, pady=2)
+
+        self.equalWeightsGrid(master)
     # End of createSessionBox
 
     def createCollapsible(self, collapsibleInfo, master):
@@ -323,9 +420,15 @@ class Application(tk.Frame):
         else:
             self.__setattr__(widgetInfo['name'],
                              ttk.__getattribute__(widgetInfo['type'])(master))
+            if('args' in widgetInfo.keys()):
+                for arg in widgetInfo['args']:
+                    self.__getattribute__(widgetInfo['name']).configure(arg)
 
-            for arg in widgetInfo['args']:
-                self.__getattribute__(widgetInfo['name']).configure(arg)
+            if('binds' in widgetInfo.keys()):
+                for bind in widgetInfo['binds']:
+
+                    self.__getattribute__(widgetInfo['name']).bind(
+                        next(iter(bind)), next(iter(bind.items())))
         if('sticky' in widgetInfo.keys()):
             sticky = widgetInfo['sticky']
         else:
@@ -342,6 +445,7 @@ class Application(tk.Frame):
     # End of updateWidgetFromSchema
 
     def createSessionStatsBox(self, master):
+
         self.SessionStatsBoxLabel = tk.Label(
             self.SessionStatsBox, text="Session Stats")
         self.SessionStatsBoxLabel.grid(
@@ -364,9 +468,10 @@ class Application(tk.Frame):
 
     def sessionSelect(self, event):
         widget = event.widget
+        print(widget)
         index = int(widget.curselection()[0])
         value = widget.get(index)
-        for session in self.GameSessions:
+        for session in self.gameSessionsCache:
             if(str(session.StartDate) == value):
                 session.updateSessionStats(self, SessionSidebar)
 
@@ -418,6 +523,7 @@ class Application(tk.Frame):
 
     def graphDataArrayFromKeyString(self, keyString, originalDictionary):
         keys = keyString.split(".")
+        # print(originalDictionary)
         returnData = originalDictionary
         for key in keys:
             if("[" in key):
@@ -559,20 +665,15 @@ class Application(tk.Frame):
         self.refreshGraph()
     # End of graphSelectionHandler
 
-    def comboSelectUser(self, event):
-        user = list(self.user_cache.values())[event.widget.current()]
-        self.searchReplays(user)
-    # End of comboSelectUser
-
     def checkInput(self, event):
         if(event.keysym == "Escape"):
             self.UserSearch.set("")
 
-        if(self._after_id is not None):
-            self.after_cancel(self._after_id)
+        if(self._typing_after_id is not None):
+            self.after_cancel(self._typing_after_id)
 
         # Create a new job to run after the use has typed
-        self._after_id = self.after(600, self.autocompleteSearch)
+        self._typing_after_id = self.after(750, self.autocompleteSearch)
     # End of checkInput
 
     def autocompleteSearch(self):
@@ -630,21 +731,13 @@ class Application(tk.Frame):
             self.UserSearch['values'] = []
     # End of autocompleteSearch
 
-    def searchReplays(self, user):
-        # UI Element to update user of progress
-        # print(user)
-        playerId = user['platformSlug'] + \
-            ":" + user['platformUserIdentifier']
-        self.progressBar = ttk.Progressbar(
-            self.GraphBox, orient="horizontal", length=200)
-        self.progressBar.pack(side="left", fill="both", expand=True)
-
-        self.sessionListBox.delete(0, tk.END)
-
-        id = user['platformUserIdentifier'] if user['platformSlug'] == "steam" else user['platformUserHandle']
+    def updateUserBox(self, user):
+        userId = user['platformUserIdentifier'] if user['platformSlug'] == "steam" else user['platformUserHandle']
 
         searchUrl = "https://api.tracker.gg/api/v2/rocket-league/standard/profile/" + \
-            user['platformSlug']+"/"+id+"?"
+            user['platformSlug']+"/"+userId+"?"
+
+        # print(searchUrl)
 
         userStatsResp = req.get(searchUrl,
                                 headers={
@@ -720,28 +813,65 @@ class Application(tk.Frame):
             text="Total Points: " + userOverallStats['score']['displayValue'])
 
         self.master.update()
+    # End of updateUserBox
 
-        # Search elements
-        # print(playerId)
-        url = 'https://ballchasing.com/api/replays?player-id=' + playerId
-        headers = {'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
-        searchGames = req.get(url, headers=headers)
+    def getReplaysFromBallchasing(self, user):
+        userId = user['platformUserIdentifier'] if user['platformSlug'] == "steam" else user['platformUserHandle']
+
+        url = 'https://ballchasing.com/api/replays?'
+        url += ('player-id=steam:' +
+                userId) if user['platformSlug'] == "steam" else ('player-name=' + userId)
+
+        '''
+        TODO: Add the variables here that are in the search bar so that replays can be filtered
+        '''
+
+        if(self.OneVOneFilter.get()):
+            url += "&playlist=" + "ranked-duels" if self.RankedFilter.get() else "unranked-duels"
+        if(self.TwoVTwoFilter.get()):
+            url += "&playlist=" + "ranked-doubles" if self.RankedFilter.get() else "unranked-doubles"
+        if(self.ThreeVThreeFilter.get()):
+            url += "&playlist=" + "ranked-standard" if self.RankedFilter.get() else "unranked-standard"
+        if(self.HoopsFilter.get()):
+            url += "&playlist=" + "ranked-hoops" if self.RankedFilter.get() else "hoops"
+        if(self.RumbleFilter.get()):
+            url += "&playlist=" + "ranked-rumble" if self.RankedFilter.get() else "rumble"
+        if(self.DropshotFilter.get()):
+            url += "&playlist=" + "ranked-dropshot" if self.RankedFilter.get() else "dropshot"
+        if(self.SnowdayFilter.get()):
+            url += "&playlist=" + "ranked-snowday" if self.RankedFilter.get() else "snowday"
+
+        if(self.SeasonFilter.get() != "Season 4"):
+            print("Not Season 4")
+            # TODO: Do the conversion of the season to the correct tag
+
+        if(self.MapFilter.get() != "Any"):
+            mapCode = [d[0] for d in self.mapsTranslation.items()
+                       if d[1] == self.MapFilter.get()]
+            url += "&map=" + mapCode[0]
+
+        print(url)
+
+        searchGames = req.get(url, headers=self.ballchasingHeaders)
         result = searchGames.json()
-        # print(json.dumps(result['list'], indent=4, sort_keys=True))
+        print(result)
+        return result
+    # End of getReplaysFromBallchasing
+
+    def processReplays(self, replays, user):
+        self.progressBar = ttk.Progressbar(
+            self.GraphBox, orient="horizontal", length=200)
+        self.progressBar.pack(side="left", fill="both", expand=True)
 
         # Configuring UI with the relelvant progress
-        self.progressBar.configure(maximum=len(result['list']))
+        self.progressBar.configure(maximum=len(replays))
 
         # Stats to be updated for the current search list
         self.searchCache = []
-
-        self.GameSessions = []
-
+        self.gameSessionsCache = []
         seenGUIDs = {}
 
-        self.GameSessions.append(GameSession())
-
-        for replay in result['list']:
+        for replay in replays:
             # Update loading bar
             self.progressBar.step()
             self.master.update()
@@ -749,15 +879,14 @@ class Application(tk.Frame):
 
             # Check if the replay needs to be fetched (or if it is duplicate)
             # If these are the same, then assume it is the same game
-            if games.get(replay['id']) is not None:
+            if (games.get(replay['id']) is not None):
                 # Get the replay from the hash list
                 # print("Retrieving game from hash " + replay['id'])
                 replayResult = games.get(replay['id'])
                 fetched = False
             else:
-                # Fetch replay
-                # print("Fetching..." + replay['link'])
-                gameReplay = req.get(replay['link'], headers=headers)
+                gameReplay = req.get(
+                    replay['link'], headers=self.ballchasingHeaders)
                 replayResult = gameReplay.json()
                 games[replay['id']] = replayResult
 
@@ -772,13 +901,16 @@ class Application(tk.Frame):
             # print("reached past the continue")
             # Data processing on the replay
             localGame = GameStat()
+            print(json.dumps(replayResult, indent=4, default=str))
             localGame.populateFromGame(
-                replay, replayResult, user['platformUserIdentifier'])
-            if(not self.GameSessions[len(self.GameSessions)-1].checkGameInSession(localGame)):
-                self.GameSessions.append(GameSession())
-            self.GameSessions[len(self.GameSessions)-1].addGame(localGame)
+                replay, replayResult, user['platformUserHandle'])
+            if(len(self.gameSessionsCache) == 0 or
+               not self.gameSessionsCache[len(self.gameSessionsCache)-1].checkGameInSession(localGame)):
+                self.gameSessionsCache.append(GameSession())
+            self.gameSessionsCache[len(
+                self.gameSessionsCache)-1].addGame(localGame)
             self.searchCache.append(localGame.__dict__)
-            # print(localGame)
+            print(localGame.__dict__)
 
             # Wait 500 ms before looking at the next (rate limiter on api calls)
             if fetched:
@@ -791,25 +923,25 @@ class Application(tk.Frame):
         json.dump(games, gamesFile, indent=4, default=str)
         gamesFile.close()
 
-        for session in self.GameSessions:
+        for session in self.gameSessionsCache:
             sessionDict = session.__dict__
             print(json.dumps(sessionDict, indent=4, default=str))
             self.sessionListBox.insert(0, str(sessionDict['StartDate']))
 
         # UI plotting of data for the search period and removing loading bar
         self.progressBar.pack_forget()
+        # End of processReplays
 
+    def createGraph(self):
         # Creating the graph object
-        # Set to 1 dpi so that you can set the pixels size
-        graphWidth = self.UserBox.winfo_width()  # + self.GraphOptionsBox.winfo_width()
-        # Scale factor for both is 10
-        # Scale factor for just UserBox is 7.5
-        scaleFactor = 7.5
+        graphWidth = self.UserBox.winfo_width()
+        # Default dpi is 100, so 100 = width/scalefactor, or width/100 = scalefactor
+        scaleFactor = graphWidth/100
         # 4:3 = 0.75
         # 16:9 = 0.5625
         self.goalsFigure = plt.Figure(
             figsize=(scaleFactor, scaleFactor*0.75), dpi=graphWidth/scaleFactor)
-        if hasattr(self, 'goalsCanvas'):
+        if (hasattr(self, 'goalsCanvas')):
             self.goalsCanvas.get_tk_widget().pack_forget()
         self.goalsAx = self.goalsFigure.add_subplot(111)
 
@@ -817,8 +949,6 @@ class Application(tk.Frame):
         self.goalsCanvas = FigureCanvasTkAgg(self.goalsFigure, self.GraphBox)
         self.goalsCanvas.get_tk_widget().pack(
             side="bottom", anchor="w", fill="both", expand=True)
-
-        self.refreshGraph()
 
         # Mouse handle event variable initialisaiton
         self.mouse_down = False
@@ -832,8 +962,19 @@ class Application(tk.Frame):
             'motion_notify_event', self.onMouseMove)
         sid = self.goalsFigure.canvas.mpl_connect(
             'scroll_event', self.onScroll)
+    # End of createGraph
 
-        self.master.update()
+    def searchReplays(self, user):
+        self.sessionListBox.delete(0, tk.END)
+
+        self.updateUserBox(user)
+
+        ballchasingResult = self.getReplaysFromBallchasing(user)
+
+        self.processReplays(ballchasingResult['list'], user)
+
+        self.refreshGraph()
+
         self.master.minsize(self.master.winfo_width(),
                             self.master.winfo_height())
     # End searchReplays

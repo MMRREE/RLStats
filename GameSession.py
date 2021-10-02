@@ -181,14 +181,20 @@ class GameSession():
         # Absolutes
         self.Individual['Boost']['Amount of boost collected'] += game.Individual['Boost']['Amount of boost collected']
         self.Individual['Boost']['Amount of boost used at supersonic'] += game.Individual['Boost']['Amount of boost used at supersonic']
-        self.Individual['Boost']['Total stolen'] +=\
-            game.Individual['Boost']['Total stolen']
-        self.Individual['Boost']['Total collected from big pads'] += game.Individual['Boost']['Total collected from big pads']
-        self.Individual['Boost']['Total stolen from big pads'] += game.Individual['Boost']['Total stolen from big pads']
-        self.Individual['Boost']['Total collected from small pads'] += game.Individual['Boost']['Total collected from small pads']
-        self.Individual['Boost']['Total stolen from small pads'] += game.Individual['Boost']['Total stolen from small pads']
-        self.Individual['Boost']['Boost overfill'] += game.Individual['Boost']['Boost overfill']
-        self.Individual['Boost']['Stolen overfill'] += game.Individual['Boost']['Stolen overfill']
+        self.Individual['Boost']['Total stolen'] += getattr(
+            game.Individual['Boost'], 'Total stolen', 0)
+        self.Individual['Boost']['Total collected from big pads'] += getattr(
+            game.Individual['Boost'], 'Total collected from big pads', 0)
+        self.Individual['Boost']['Total stolen from big pads'] += getattr(
+            game.Individual['Boost'], 'Total stolen from big pads', 0)
+        self.Individual['Boost']['Total collected from small pads'] += getattr(
+            game.Individual['Boost'], 'Total collected from small pads', 0)
+        self.Individual['Boost']['Total stolen from small pads'] += getattr(
+            game.Individual['Boost'], 'Total stolen from small pads', 0)
+        self.Individual['Boost']['Boost overfill'] += getattr(
+            game.Individual['Boost'], 'Boost overfill', 0)
+        self.Individual['Boost']['Stolen overfill'] += getattr(
+            game.Individual['Boost'], 'Stolen overfill', 0)
 
         # Count
         self.Individual['Boost']['Big pads taken'] += game.Individual['Boost']['Big pads taken']
@@ -322,9 +328,9 @@ class GameSession():
                 else:
                     value = str(rawValue)
             else:
-                print(widget)
+                # print(widget)
                 rawValue = self.returnValueFromKeyString(widget['tags'])
-                print(rawValue)
+                # print(rawValue)
                 value = f"{rawValue:{widget['precision']}}"
         else:
             value = ""

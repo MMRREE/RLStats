@@ -109,7 +109,7 @@ class GameStat():
         }
     # End of __init__
 
-    def populateFromGame(self, replay, replayResult, userId):
+    def populateFromGame(self, replay, replayResult, userName):
 
         # General game stats (and meta data for graphing)
         self.Orange['Goals For'] = replayResult['orange']['stats']['core']['goals']
@@ -145,7 +145,7 @@ class GameStat():
             replayResult[self.Opposition_Team.lower()]['players'])
 
         # Team stats
-        print(replayResult['orange']['stats'])
+        # print(replayResult['orange']['stats'])
         self.Team['Goals For'] = replayResult[self.Target_Player_Team.lower()
                                               ]['stats']['core']['goals']
 
@@ -176,8 +176,8 @@ class GameStat():
         self.Team['Average Shooting Percent'] = replayResult[self.Target_Player_Team.lower()
                                                              ]['stats']['core']['shooting_percentage']
 
-        self.Team['Time in possesion'] = replayResult[self.Target_Player_Team.lower()
-                                                      ]['stats']['ball']['possession_time']
+        self.Team['Time in possesion'] = getattr(replayResult[self.Target_Player_Team.lower()
+                                                              ]['stats']['ball'], 'possession_time', 0)
 
         self.Team['Time ball in defensive half'] = replayResult[self.Target_Player_Team.lower()
                                                                 ]['stats']['ball']['time_in_side']
@@ -218,11 +218,11 @@ class GameStat():
         # Individual stats
         targetUser = None
         for player in replayResult[self.Target_Player_Team.lower()]['players']:
-            if(player['id']['id'] == userId):
+            if(player['name'] == userName):
                 targetUser = player
 
         for player in replayResult[self.Opposition_Team.lower()]['players']:
-            if(player['id']['id'] == userId):
+            if(player['name'] == userName):
                 targetUser = player
 
         # Individual stats
