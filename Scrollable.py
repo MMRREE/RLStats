@@ -52,7 +52,6 @@ class ScrollableFrame(tk.Frame):
     def _on_mousewheel(self, event):
         if(not (self.verticalScrollbar.get()[0] == 0 and self.verticalScrollbar.get()[1] == 1) and self.mouseWithin):
             self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        # TODO: Figure out bug where canvas is over the graph, so scrolling the graph also scrolls this box
     # End of _on_mousewheel
 
     def addWidget(self, uniqueName, widgetType, args, row=0, column=0, sticky="", columnspan=1, rowspan=1):

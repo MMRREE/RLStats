@@ -1,4 +1,3 @@
-# Graph formatting for repeated tasks
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -25,7 +24,6 @@ def dateGraphMajorTicksCalculation(axes):
     lowXlim, highXlim = axes.get_xlim()
     width = highXlim - lowXlim
 
-    # Calculate the major ticks requirement
     if(width < 0.000694*2):
         reformatMajorTicks(
             axes, "%H:%M:%S", "Second", range(0, 60, 15))

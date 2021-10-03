@@ -47,7 +47,7 @@ SessionSidebar = [
                 'name': 'SessionOvertimePlayed',
                 'title': 'Overtime: ',
                 'gridpos': (1, 2),
-                'gridspan': (1, 2),
+                'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Overtime",
                 "precision": "g"
@@ -65,7 +65,7 @@ SessionSidebar = [
                 'name': 'SessionEnd',
                 'title': 'Ended: ',
                 'gridpos': (2, 2),
-                'gridspan': (1, 2),
+                'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "EndDate",
                 "precision": "g"
@@ -109,34 +109,16 @@ SessionSidebar = [
             {
                 'name': 'SessionIndividualShots',
                 'title': 'Shots: ',
-                'gridpos': (0, 3),
+                'gridpos': (1, 0),
                 'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Individual.General.Shots",
                 "precision": "g"
             },
             {
-                'name': 'SessionIndividualShotsAgainst',
-                'title': 'Shots Against: ',
-                'gridpos': (1, 0),
-                'gridspan': (1, 1),
-                "type": "widget",
-                'tags': "Individual.General.Shots Against",
-                "precision": "g"
-            },
-            {
-                'name': 'SessionIndividualGoalsConceded',
-                'title': 'Goals Conceded: ',
-                'gridpos': (1, 1),
-                'gridspan': (1, 1),
-                "type": "widget",
-                'tags': "Individual.General.Goals Against Whilst Last Defender",
-                "precision": "g"
-            },
-            {
                 'name': 'SessionIndividualShootingAccuracy',
                 'title': 'Shooting Accuracy: ',
-                'gridpos': (1, 2),
+                'gridpos': (1, 1),
                 'gridspan': (1, 2),
                 "type": "widget",
                 'tags': "Individual.General.Shooting Percent",
@@ -146,7 +128,7 @@ SessionSidebar = [
                 'name': 'SessionIndividualMVPs',
                 'title': 'MVPs: ',
                 'gridpos': (2, 0),
-                'gridspan': (1, 2),
+                'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Individual.General.MVP",
                 "precision": ".2f"
@@ -155,7 +137,7 @@ SessionSidebar = [
                 'name': 'SessionIndividualSore',
                 'title': 'Score: ',
                 'gridpos': (2, 2),
-                'gridspan': (1, 2),
+                'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Individual.General.Score",
                 "precision": ".2f"
@@ -173,7 +155,7 @@ SessionSidebar = [
                 'name': 'SessionIndividualDemosInflicted',
                 'title': 'Demos Inflicted: ',
                 'gridpos': (3, 2),
-                'gridspan': (1, 2),
+                'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Individual.General.Demos Inflicted",
                 "precision": "g"

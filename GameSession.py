@@ -4,10 +4,8 @@ import datetime
 
 class GameSession():
     def __init__(self):
-        # Games Array (for reference)
         self.Games = []
 
-        # General Aggregated Stats
         self.Wins = int(0)
         self.Losses = int(0)
         self.Time_Played = int(0)
@@ -31,25 +29,20 @@ class GameSession():
             "Time ball in defensive half": int(0)
         }
 
-        # Team Stats
         self.Team = teamStructure
 
-        # Opposition Stats
         self.Opposition = teamStructure
 
-        # Individual Stats
         self.Individual = {
             "General": {
                 "Goals": int(0),
                 "Saves": int(0),
                 "Assists": int(0),
                 "Shots": int(0),
-                "Shots Against": int(0),
                 "Demos Inflicted": int(0),
                 "Demos Received": int(0),
                 "Score": int(0),
                 "Shooting Percent": int(0),
-                "Goals Against Whilst Last Defender": int(0),
                 "MVP": int(0)
             },
             "Boost": {
@@ -121,8 +114,6 @@ class GameSession():
 
         gameTeams = [getattr(d, 'Team') for d in self.Games]
 
-        # Team
-
         self.Team['Goals For'] = sum(
             [d.get('Goals For', int(0)) for d in gameTeams])
         self.Team['Goals Against'] = sum([d.get('Goals Against', 0)
@@ -145,7 +136,6 @@ class GameSession():
         self.Team['Time ball in defensive half'] = sum(
             [d.get('Time ball in defensive half', 0) for d in gameTeams])
 
-        # Opposition
         gameOppositionTeams = [getattr(d, 'Opposition') for d in self.Games]
 
         self.Opposition['Goals For'] = sum([d.get('Goals For', 0)
@@ -173,8 +163,6 @@ class GameSession():
         self.Opposition['Time ball in defensive half'] = sum(
             [d.get('Time ball in defensive half', 0) for d in gameOppositionTeams])
 
-        # Individual Stats
-        # General Stats
         gameIndividuals = [getattr(d, 'Individual') for d in self.Games]
         gameIndividualGenerals = [d.get('General', None)
                                   for d in gameIndividuals]
@@ -186,8 +174,6 @@ class GameSession():
             [d.get('Assists', 0) for d in gameIndividualGenerals])
         self.Individual['General']['Shots'] = sum(
             [d.get('Shots', 0) for d in gameIndividualGenerals])
-        self.Individual['General']['Shots Against'] = sum(
-            [d.get('Shots Against', 0) for d in gameIndividualGenerals])
         self.Individual['General']['Demos Inflicted'] = sum(
             [d.get('Demos Inflicted', 0) for d in gameIndividualGenerals])
         self.Individual['General']['Demos Received'] = sum(
@@ -196,13 +182,9 @@ class GameSession():
             [d.get('Score', 0) for d in gameIndividualGenerals])
         self.Individual['General']['Shooting Percent'] = self.average(
             [d.get('Shooting Percent', 0) for d in gameIndividualGenerals])
-        self.Individual['General']['Goals Against Whilst Last Defender'] = sum(
-            [d.get('Goals Against Whilst Last Defender', 0) for d in gameIndividualGenerals])
         self.Individual['General']['MVP'] = sum(
             [d.get('MVP', 0) for d in gameIndividualGenerals])
 
-        # Boost Stats
-        # Averages
         gameIndividualBoosts = [d.get('Boost', None) for d in gameIndividuals]
         self.Individual['Boost']['Average boost used per minute'] = self.average(
             [d.get('Average boost used per minute', 0) for d in gameIndividualBoosts])
@@ -211,7 +193,6 @@ class GameSession():
         self.Individual['Boost']['Average boost amount'] = self.average(
             [d.get('Average boost amount', 0) for d in gameIndividualBoosts])
 
-        # Absolutes
         self.Individual['Boost']['Amount of boost collected'] = sum(
             [d.get('Amount of boost collected', 0) for d in gameIndividualBoosts])
         self.Individual['Boost']['Amount of boost used at supersonic'] = sum(
@@ -231,7 +212,6 @@ class GameSession():
         self.Individual['Boost']['Stolen overfill'] = sum(
             [d.get('Stolen overfill', 0) for d in gameIndividualBoosts])
 
-        # Count
         self.Individual['Boost']['Big pads taken'] = sum(
             [d.get('Big pads taken', 0) for d in gameIndividualBoosts])
         self.Individual['Boost']['Big pads stolen'] = sum(
@@ -241,7 +221,6 @@ class GameSession():
         self.Individual['Boost']['Small pads stolen'] = sum(
             [d.get('Small pads stolen', 0) for d in gameIndividualBoosts])
 
-        # Time
         self.Individual['Boost']['0 boost']['time'] = sum(
             [d['0 boost']['time'] for d in gameIndividualBoosts])
         self.Individual['Boost']['100 boost']['time'] = sum(
@@ -255,7 +234,6 @@ class GameSession():
         self.Individual['Boost']['75-100% boost']['time'] = sum(
             [d['75-100% boost']['time'] for d in gameIndividualBoosts])
 
-        # Percent
         self.Individual['Boost']['0 boost']['percent'] = self.average(
             [d['0 boost']['percent'] for d in gameIndividualBoosts])
         self.Individual['Boost']['100 boost']['percent'] = self.average(
@@ -269,8 +247,6 @@ class GameSession():
         self.Individual['Boost']['75-100% boost']['percent'] = self.average(
             [d['75-100% boost']['percent'] for d in gameIndividualBoosts])
 
-        # Positioning stats
-        # Percentages
         gameIndividualPositionings = [
             d.get('Positioning', None) for d in gameIndividuals]
         self.Individual['Positioning']['Most back']['percent'] = self.average(
@@ -296,7 +272,6 @@ class GameSession():
         self.Individual['Positioning']['In front of the ball']['percent'] = self.average(
             [d['In front of the ball']['percent'] for d in gameIndividualPositionings])
 
-        # Absolutes
         self.Individual['Positioning']['Most back']['time'] = sum(
             [d['Most back']['time'] for d in gameIndividualPositionings])
         self.Individual['Positioning']['Most forward']['time'] = sum(
@@ -320,7 +295,6 @@ class GameSession():
         self.Individual['Positioning']['In front of the ball']['time'] = sum(
             [d['In front of the ball']['time'] for d in gameIndividualPositionings])
 
-        # Averages
         self.Individual['Positioning']['Average distance to teammates'] = self.average(
             [d.get('Average distance to teammates', 0) for d in gameIndividualPositionings])
         self.Individual['Positioning']['Average distance to the ball'] = self.average(
@@ -330,8 +304,6 @@ class GameSession():
         self.Individual['Positioning']['Average distance to the ball out of possesion'] = self.average(
             [d.get('Average distance to the ball out of possesion', 0) for d in gameIndividualPositionings])
 
-        # Movement stats
-        # Averages
         gameIndividualMovements = [
             d.get('Movement', None) for d in gameIndividuals]
         self.Individual['Movement']['Average speed']['absolute'] = self.average(
@@ -376,8 +348,6 @@ class GameSession():
 
     def addGame(self, game):
         self.Games.append(game)
-
-        # General Stats for session
         self.EndDate = getattr(game, 'Date', int(0)) + \
             datetime.timedelta(
                 seconds=getattr(game, 'Time_Played', int(0))) if self.EndDate == int(0) else self.EndDate
@@ -405,31 +375,30 @@ class GameSession():
 
     def updateStat(self, widget, Frame):
         if("tags" in widget.keys()):
-            if("." not in widget['tags']):
-                rawValue = self.__getattribute__(widget['tags'])
-                if(type(rawValue) is int or type(rawValue) is float):
-                    value = f"{rawValue:{widget['precision']}}"
-                else:
-                    value = str(rawValue)
-            else:
-                rawValue = self.returnValueFromKeyString(widget['tags'])
+            rawValue = self.returnValueFromKeyString(widget['tags'])
+            if(type(rawValue) is int or type(rawValue) is float):
                 value = f"{rawValue:{widget['precision']}}"
-        else:
-            value = ""
-        Frame.updateWidgetFromSchema(widget, f"{value}")
+            elif(type(rawValue) is datetime.datetime):
+                value = rawValue.strftime("%m-%d: %H:%M")
+            else:
+                value = str(rawValue)
+            Frame.updateWidgetFromSchema(widget, f"{value}")
 
     # End of updateStat
 
     def returnValueFromKeyString(self, keyString):
-        keys = keyString.split(".")
         returnData = self.__dict__
-        for key in keys:
-            if("[" in key):
-                tempLabel = key.split("]")[0]
-                newKey, ind = tempLabel.split("[")
-                returnData = returnData.get(newKey)
-            else:
-                returnData = returnData.get(key)
+        if("." in keyString):
+            keys = keyString.split(".")
+            for key in keys:
+                if("[" in key):
+                    tempLabel = key.split("]")[0]
+                    newKey, ind = tempLabel.split("[")
+                    returnData = returnData.get(newKey)
+                else:
+                    returnData = returnData.get(key)
+        else:
+            returnData = returnData.get(keyString)
         return returnData
     # End of returnValueFromKeyString
 

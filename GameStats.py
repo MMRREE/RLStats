@@ -5,14 +5,12 @@ import json
 
 class GameStat():
     def __init__(self):
-        # General stats
         self.Win = -1
         self.Time_Played = 0
         self.Overtime = 0
         self.Orange = {"Goals For": 0}
         self.Blue = {"Goals For": 0}
 
-        # MetaData stats (to do with graphing)
         self.Date = 0
         self.Bar_Width = 0
         self.Win_Loss_Color = 'g'
@@ -38,13 +36,10 @@ class GameStat():
             "Time ball in defensive half": 0
         }
 
-        # Team stats
         self.Team = teamStructure
 
-        # Opposition stats
         self.Opposition = teamStructure
 
-        # Individual Player stats
         self.Individual = {
             "General": {
                 "Goals": 0,
@@ -116,7 +111,6 @@ class GameStat():
 
         self.Match_GUID = replayResult['match_guid']
 
-        # Split into different objects, using defaults to ensure that if something is missing it all still works
         orange = replayResult.get('orange', None)
         blue = replayResult.get('blue', None)
 
@@ -159,11 +153,9 @@ class GameStat():
             self.Target_Player_Team.lower(), None)
         oppositionTeam = replayResult.get(self.Opposition_Team.lower(), None)
 
-        # Team sizes
         self.Player_Team_Size = len(targetPlayerTeam.get('players', []))
         self.Opposition_Team_Size = len(oppositionTeam.get('players', []))
 
-        # Team stats
         targetPlayerTeamStats = targetPlayerTeam.get('stats', None)
         targetPlayerTeamStatsCore = targetPlayerTeamStats.get('core', None)
         self.Team['Goals For'] = targetPlayerTeamStatsCore.get('goals', int(0))
@@ -202,7 +194,6 @@ class GameStat():
         self.Team['Time ball in defensive half'] = targetPlayerTeamStatsBall.get(
             'time_in_side', int(0))
 
-        # Opposition stats
         oppositionTeamStats = oppositionTeam.get('stats', None)
         oppositionTeamStatsCore = oppositionTeamStats.get('core', None)
 
@@ -241,13 +232,11 @@ class GameStat():
         self.Opposition['Time ball in defensive half'] = oppositionTeamStatsBall.get(
             'time_in_side', int(0))
 
-        # Individual stats
         if(targetUser is not None):
             targetUserStats = targetUser.get('stats', None)
             targetUserStatsCore = targetUserStats.get('core', None)
             targetUserStatsDemo = targetUserStats.get('demo', None)
 
-            # General stats
             self.Individual['General']['Goals'] = targetUserStatsCore.get(
                 'goals', int(0))
             self.Individual['General']['Saves'] = targetUserStatsCore.get(
@@ -256,8 +245,6 @@ class GameStat():
                 'assists', int(0))
             self.Individual['General']['Shots'] = targetUserStatsCore.get(
                 'shots', int(0))
-            self.Individual['General']['Shots Against'] = targetUserStatsCore.get(
-                'shots_against', int(0))
             self.Individual['General']['Demos Inflicted'] = targetUserStatsDemo.get(
                 'inflicted', int(0))
             self.Individual['General']['Demos Received'] = targetUserStatsDemo.get(
@@ -266,13 +253,9 @@ class GameStat():
                 'score', int(0))
             self.Individual['General']['Shooting Percent'] = targetUserStatsCore.get(
                 'shooting_percentage', int(0))
-            self.Individual['General']['Goals Against Whilst Last Defender'] = targetUserStatsCore.get(
-                'goals_against', int(0))
             self.Individual['General']['MVP'] = targetUserStatsCore.get(
                 'mvp', False)
 
-            # Boost stats
-            # Absolute
             targetUserStatsBoost = targetUserStats.get('boost', None)
             self.Individual['Boost']['Average boost used per minute'] = targetUserStatsBoost.get(
                 'bpm', int(0))
@@ -299,7 +282,6 @@ class GameStat():
             self.Individual['Boost']['Stolen overfill'] = targetUserStatsBoost.get(
                 'amount_overfill_stolen', int(0))
 
-            # Count
             self.Individual['Boost']['Big pads taken'] = targetUserStatsBoost.get(
                 'count_collected_big', int(0))
             self.Individual['Boost']['Big pads stolen'] = targetUserStatsBoost.get(
@@ -309,7 +291,6 @@ class GameStat():
             self.Individual['Boost']['Small pads stolen'] = targetUserStatsBoost.get(
                 'count_stolen_small', int(0))
 
-            # Time
             self.Individual['Boost']['0 boost']['time'] = targetUserStatsBoost.get(
                 'time_zero_boost', int(0))
             self.Individual['Boost']['100 boost']['time'] = targetUserStatsBoost.get(
@@ -323,7 +304,6 @@ class GameStat():
             self.Individual['Boost']['75-100% boost']['time'] = targetUserStatsBoost.get(
                 'time_boost_75_100', int(0))
 
-            # Percent
             self.Individual['Boost']['0 boost']['percent'] = targetUserStatsBoost.get(
                 'percent_zero_boost', int(0))
             self.Individual['Boost']['100 boost']['percent'] = targetUserStatsBoost.get(
@@ -337,8 +317,6 @@ class GameStat():
             self.Individual['Boost']['75-100% boost']['percent'] = targetUserStatsBoost.get(
                 'percent_boost_75_100', int(0))
 
-            # Positioning stats
-            # Percentages
             targetUserStatsPositioning = targetUserStats.get(
                 'positioning', None)
 
@@ -365,7 +343,6 @@ class GameStat():
             self.Individual['Positioning']['In front of the ball']['percent'] = targetUserStatsPositioning.get(
                 'percent_infront_ball', int(0))
 
-            # Absolutes
             self.Individual['Positioning']['Most back']['time'] = targetUserStatsPositioning.get(
                 'time_most_back', int(0))
             self.Individual['Positioning']['Most forward']['time'] = targetUserStatsPositioning.get(
@@ -389,7 +366,6 @@ class GameStat():
             self.Individual['Positioning']['In front of the ball']['time'] = targetUserStatsPositioning.get(
                 'time_infront_ball', int(0))
 
-            # Averages
             if(self.Player_Team_Size > 1):
                 self.Individual['Positioning']['Average distance to teammates'] = targetUserStatsPositioning.get(
                     'avg_distance_to_mates', int(0))
@@ -400,8 +376,6 @@ class GameStat():
             self.Individual['Positioning']['Average distance to the ball out of possesion'] = targetUserStatsPositioning.get(
                 'avg_distance_to_ball_no_possession', int(0))
 
-            # Movement stats
-            # Averages
             targetUserStatsMovement = targetUserStats.get('movement', None)
 
             self.Individual['Movement']['Average speed']['absolute'] = targetUserStatsMovement.get(

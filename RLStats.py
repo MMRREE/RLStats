@@ -1,10 +1,8 @@
-# As imports
 import matplotlib.pyplot as plt
 import GraphFormat as gf
 import requests as req
 import tkinter as tk
 
-# From imports
 from tkImageURL import tkLabelImageURL, tkRawImageURL
 from matplotlib.backends.backend_tkagg import *
 from matplotlib.ticker import MaxNLocator
@@ -16,13 +14,10 @@ from GUISchema import SessionSidebar
 from Scrollable import ScrollableFrame
 from tkcalendar import Calendar, DateEntry
 
-# Direct imports
 import datetime
 import time
 import json
 
-
-# Initialise data from stored files
 gamesFile = open('games.json', 'r+')
 gamesData = gamesFile.read()
 games = json.loads(gamesData)
@@ -61,24 +56,20 @@ class Application(tk.Frame):
     # End of resize
 
     def create_widgets(self):
-        # Setting up window name and icon
         self.master.title("Rocket League Stats")
         self.master.iconbitmap(default='./icon.ico')
 
-        # Create an interface menu
         self.menu = tk.Menu(self)
         self.m_file = tk.Menu(self, tearoff=0)
         self.m_file.add_command(label="Exit", command=self.onExit)
         self.menu.add_cascade(label="File", menu=self.m_file)
         self.master.config(menu=self.menu)
 
-        # Create the scaffold for the application
         self.SearchBox = tk.Frame(self, relief="groove", borderwidth=1)
         self.SearchBox.grid(row=0, column=0, columnspan=5, sticky="nsew")
 
         self.createSearchBox(self.SearchBox)
 
-        # Second Row
         self.UserBox = tk.Frame(self, relief="groove", borderwidth=1)
         self.UserBox.grid(row=1, column=0, columnspan=3, sticky="nsew")
 
@@ -96,7 +87,6 @@ class Application(tk.Frame):
 
         self.createSessionBox(self.SessionBox)
 
-        # Bottom Frame
         self.GraphBox = tk.Frame(
             self, relief="groove", borderwidth=1)
         self.GraphBox.grid(row=2, column=0, columnspan=3, sticky="nsew")
@@ -107,7 +97,6 @@ class Application(tk.Frame):
 
         self.createSessionStatsBox(self.SessionStatsBox)
 
-        # Configure the columns to expand properly when window is resized
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=2, weight=1)
 
@@ -120,7 +109,6 @@ class Application(tk.Frame):
 
         self.SessionStatsScrollBox.recalculateScrollBox()
 
-        # Automatically run search
         self.searchReplays(
             {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785', 'platformUserHandle': 'Gavin8a2can'})
         '''self.searchReplays({
@@ -367,7 +355,6 @@ class Application(tk.Frame):
         self.graphMenu.configure(menu=self.gM)
         self.graphMenu.grid(row=1, column=0, sticky="n", padx=2, pady=2)
 
-        # Create a absolute values checkbox
         self.absoluteValues = tk.BooleanVar(self, False, "absoluteValues")
         self.absoluteValues.trace('w', self.graphAbsoluteValueHandler)
         self.absoluteValuesCheckbox = tk.Checkbutton(
@@ -379,7 +366,6 @@ class Application(tk.Frame):
     # End of createGraphOptionsBox
 
     def createSessionBox(self, master):
-        # Create a listbox to show all the sessions
         self.SessionBoxLabel = tk.Label(
             master, text="Sessions")
         self.SessionBoxLabel.grid(row=0, column=0, sticky="nw", padx=2, pady=2)
@@ -450,7 +436,6 @@ class Application(tk.Frame):
         self.SessionStatsScrollBox = ScrollableFrame(master)
         self.SessionStatsScrollBox.grid(row=1, column=0, sticky="nsew")
 
-        # Generate the sidebar from the schema
         for collapsible in SessionSidebar:
             if(collapsible['type'] == "collapsible"):
                 self.createCollapsible(
@@ -494,7 +479,6 @@ class Application(tk.Frame):
                     self.populateMenuFromDict(
                         val, currentTags, newMenu, variable)
                 else:
-                    # Add to list
                     label = tag
                     menu.add_radiobutton(
                         value=currentTags, label=tag, indicatoron=True, variable=variable)
@@ -548,7 +532,6 @@ class Application(tk.Frame):
                     align='edge',
                     alpha=0.5)
 
-                # Format the axis and add a title
                 self.goalsAx.yaxis.set_major_formatter(plt.FuncFormatter(
                     lambda value, ticknumber: "Win" if value == 1 else "Loss" if value == -1 else ""))
                 self.goalsAx.set_ylabel("Wins/Loss")
@@ -585,7 +568,6 @@ class Application(tk.Frame):
                     align='edge',
                     alpha=0.5)
 
-                # Format the axis and add a title
                 self.goalsAx.set_ylabel(dataChoiceValue)
                 self.goalsAx.set_title(dataChoiceValue)
         else:
@@ -594,7 +576,6 @@ class Application(tk.Frame):
             graphData = self.graphDataArrayFromKeyString(
                 dataChoiceValue, self.searchCache)
 
-            # If a dict then can either be absolute or percent (this graph updating also needs to be checked when updating absolute value)
             if(type(graphData[0]) is dict):
                 if(self.absoluteValues.get() is True):
                     choice = [x for x in graphData[0].keys() if x !=
@@ -617,7 +598,6 @@ class Application(tk.Frame):
             self.goalsAx.set_ylabel(dataChoiceValue.replace("_", " "))
             self.goalsAx.set_title(dataChoiceValue.replace("_", " "))
 
-        # Calculate major ticks
         self.goalsAx.set_xticklabels(
             self.goalsAx.get_xticks(), rotation=30)
         self.goalsAx.set_xlabel("Date")
@@ -647,7 +627,6 @@ class Application(tk.Frame):
     # End of graphAbsoluteValueHandler
 
     def graphSelectionHandler(self, name, index, mode):
-        # Clear Graph
         self.refreshGraph()
     # End of graphSelectionHandler
 
@@ -658,7 +637,6 @@ class Application(tk.Frame):
         if(self._typing_after_id is not None):
             self.after_cancel(self._typing_after_id)
 
-        # Create a new job to run after the use has typed
         self._typing_after_id = self.after(750, self.autocompleteSearch)
     # End of checkInput
 
@@ -666,7 +644,6 @@ class Application(tk.Frame):
         if(self.UserSearch.get() != ""):
             if(self.user_cache is not None):
                 self.user_cache.clear()
-            # Steam Search
             userSearchSteamResp = req.get('https://api.tracker.gg/api/v2/rocket-league/standard/search?platform=steam&autocomplete=true&query=' +
                                           self.UserSearch.get(),
                                           headers={
@@ -685,7 +662,6 @@ class Application(tk.Frame):
                     self.user_cache[user['platformSlug'] +
                                     user['platformUserHandle'] + user['platformUserIdentifier']] = user
 
-            # Epic Search
             userSearchEpicResp = req.get('https://api.tracker.gg/api/v2/rocket-league/standard/search?platform=epic&autocomplete=true&query=' +
                                          self.UserSearch.get(),
                                          headers={
@@ -828,7 +804,6 @@ class Application(tk.Frame):
                        if d[1] == self.MapFilter.get()]
             url += "&map=" + mapCode[0]
 
-        # 2020-01-02T15:00:05+01:00
         beforeDate = self.ReplayBeforeFilter.get_date()
         midnightHour = datetime.time(
             hour=23, minute=59, second=59)
@@ -902,24 +877,18 @@ class Application(tk.Frame):
     # End of processReplays
 
     def createGraph(self):
-        # Creating the graph object
         graphWidth = self.UserBox.winfo_width()
-        # Default dpi is 100, so 100 = width/scalefactor, or width/100 = scalefactor
         scaleFactor = graphWidth/100
-        # 4:3 = 0.75
-        # 16:9 = 0.5625
         self.goalsFigure = plt.Figure(
             figsize=(scaleFactor, scaleFactor*0.75), dpi=graphWidth/scaleFactor)
         if (hasattr(self, 'goalsCanvas')):
             self.goalsCanvas.get_tk_widget().pack_forget()
         self.goalsAx = self.goalsFigure.add_subplot(111)
 
-        # Add the grpah to the window
         self.goalsCanvas = FigureCanvasTkAgg(self.goalsFigure, self.GraphBox)
         self.goalsCanvas.get_tk_widget().pack(
             side="bottom", anchor="w", fill="both", expand=True)
 
-        # Mouse handle event variable initialisaiton
         self.mouse_down = False
         self.lastevent = None
 
@@ -960,11 +929,9 @@ class Application(tk.Frame):
 
     def onScroll(self, event):
         if(event.inaxes):
-            # Find the mid point of the graph as it is
             xlimLow, xlimHigh = self.goalsAx.get_xlim()
             xlimWidth = xlimHigh - xlimLow
 
-            # Find the position of the mouse
             lowestPixelAxes = self.goalsAx.get_position(
             ).x0 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
             highestPixelAxes = self.goalsAx.get_position(
@@ -978,7 +945,6 @@ class Application(tk.Frame):
             newxlimLow = xlimLow
 
             if(event.button == "up"):
-                # Zoom in
                 if(mousePercentageAcross > 0.66):
                     newxlimLow = xlimHigh - xlimWidth * 0.9
                 elif(mousePercentageAcross < 0.33):
@@ -987,7 +953,6 @@ class Application(tk.Frame):
                     newxlimLow = xlimHigh - xlimWidth * 0.95
                     newxlimHigh = xlimLow + xlimWidth * 0.95
             elif(event.button == "down"):
-                # Zoom out
                 if(mousePercentageAcross > 0.66):
                     newxlimLow = xlimHigh - xlimWidth * 1.1
                 elif(mousePercentageAcross < 0.33):
@@ -996,13 +961,11 @@ class Application(tk.Frame):
                     newxlimLow = xlimHigh - xlimWidth * 1.05
                     newxlimHigh = xlimLow + xlimWidth * 1.05
 
-            # Reformat with new limits
             self.goalsAx.set_xlim(
                 newxlimLow, newxlimHigh)
 
             gf.dateGraphMajorTicksCalculation(self.goalsAx)
 
-            # Recalculate the major ticks
             gf.repaintMajorTicks(self.goalsAx)
             self.goalsFigure.tight_layout()
             self.goalsCanvas.draw()
@@ -1010,25 +973,21 @@ class Application(tk.Frame):
 
     def onMouseMove(self, event):
         if(self.mouse_down and event.inaxes and self.lastevent != None):
-            # Find the data points of the current limit
             xlimLow, xlimHigh = self.goalsAx.get_xlim()
             xlimWidth = xlimHigh - xlimLow
             mouseMovement = event.x - self.lastevent.x
 
-            # Find the current pixels limits of the subplot
             lowestPixelAxes = self.goalsAx.get_position(
             ).x0 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
             highestPixelAxes = self.goalsAx.get_position(
             ).x1 * self.goalsFigure.get_size_inches()[0] * self.goalsFigure.dpi
             axesWidthPixels = highestPixelAxes - lowestPixelAxes
 
-            # Calculate and update the limits
             axMovement = mouseMovement * \
                 xlimWidth / axesWidthPixels
             self.goalsAx.set_xlim(
                 xlimLow-axMovement, xlimHigh-axMovement)
 
-            # Recalculate the major ticks
             gf.repaintMajorTicks(self.goalsAx)
             self.goalsFigure.tight_layout()
             self.goalsCanvas.draw()
