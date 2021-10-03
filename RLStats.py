@@ -52,7 +52,6 @@ class Application(tk.Frame):
     # End of __init__
 
     def resize(self, event):
-        # print(event.widget)
         if(event.widget == self.GraphBox):
             if(self._resizing_after_id is not None):
                 self.after_cancel(self._resizing_after_id)
@@ -119,9 +118,11 @@ class Application(tk.Frame):
         self.master.minsize(self.master.winfo_width(),
                             self.master.winfo_height())
 
+        self.SessionStatsScrollBox.recalculateScrollBox()
+
         # Automatically run search
-        '''self.searchReplays(
-            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785'})'''
+        self.searchReplays(
+            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785', 'platformUserHandle': 'Gavin8a2can'})
         '''self.searchReplays({
             'platformSlug': "epic", "platformUserHandle": "MMRREE", "platformUserIdentifier": "MMRREE"
         })'''
@@ -138,7 +139,6 @@ class Application(tk.Frame):
 
     def comboSelectUser(self, event):
         user = list(self.user_cache.values())[self.UserSearch.current()]
-        print(user)
         if("avatarUrl" in user.keys() and user['avatarUrl'] is not None):
             imageURL = user['avatarUrl']
         else:
@@ -178,7 +178,7 @@ class Application(tk.Frame):
         self.TwoVTwoCheckbox.grid(
             row=1, column=1, sticky="nw", padx=2, pady=2)
 
-        self.ThreeVThreeFilter = tk.BooleanVar(master, False, "3v3")
+        self.ThreeVThreeFilter = tk.BooleanVar(master, True, "3v3")
         self.ThreeVThreeCheckbox = tk.Checkbutton(
             master, text="3v3", variable=self.ThreeVThreeFilter)
         self.ThreeVThreeCheckbox.grid(
@@ -223,7 +223,7 @@ class Application(tk.Frame):
         self.SeasonSelection = ttk.Combobox(
             master, textvariable=self.SeasonFilter)
         self.SeasonSelection['values'] = ("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9",
-                                          "S10", "S11", "S12", "S13", "S14", "Season 1", "Season 2", "Season 3", "Season 4",)
+                                          "S10", "S11", "S12", "S13", "S14", "Season 1", "Season 2", "Season 3", "Season 4", "Any")
         self.SeasonSelection['values'] = self.SeasonSelection['values'][::-1]
         self.SeasonFilter.set(self.SeasonSelection['values'][0])
         self.SeasonSelection.grid(
@@ -348,10 +348,6 @@ class Application(tk.Frame):
     # End of createUserBox
 
     def createGraphOptionsBox(self, master):
-        # Get a list of available stats from
-        #exampleGame = next(iter(games.values()))
-        # print(json.dumps(exampleGame, indent=4, sort_keys=True))
-
         self.graphOptionsBoxLabel = tk.Label(master, text="Graph Options")
         self.graphOptionsBoxLabel.grid(
             row=0, column=0, sticky="nw", padx=2, pady=2)
@@ -468,19 +464,18 @@ class Application(tk.Frame):
 
     def sessionSelect(self, event):
         widget = event.widget
-        print(widget)
         index = int(widget.curselection()[0])
         value = widget.get(index)
-        for session in self.gameSessionsCache:
-            if(str(session.StartDate) == value):
-                session.updateSessionStats(self, SessionSidebar)
+        index = (len(self.gameSessionsCache)-1)-index
+        session = self.gameSessionsCache[index]
+        session.updateSessionStats(self, SessionSidebar)
 
-                lowerDate = session.StartDate + datetime.timedelta(minutes=-3)
-                higherDate = session.EndDate + datetime.timedelta(minutes=3)
-                self.goalsAx.set_xlim(lowerDate, higherDate)
-                self.refreshGraph()
+        lowerDate = session.StartDate + datetime.timedelta(minutes=-3)
+        higherDate = session.EndDate + datetime.timedelta(minutes=3)
+        self.goalsAx.set_xlim(lowerDate, higherDate)
+        self.refreshGraph()
 
-                self.goalsCanvas.draw()
+        self.goalsCanvas.draw()
     # End of sessionSelect
 
     def populateMenuFromDict(self, dictionary, parentTags="", menu=None, variable=None):
@@ -517,13 +512,11 @@ class Application(tk.Frame):
             menu.add_radiobutton(
                 value=currentTags, label=dictionary, indicatoron=True, variable=variable)
             if(variable.get() == ""):
-                # print(dictionary)
                 variable.set(dictionary)
     # End of populateMenuFromDict
 
     def graphDataArrayFromKeyString(self, keyString, originalDictionary):
         keys = keyString.split(".")
-        # print(originalDictionary)
         returnData = originalDictionary
         for key in keys:
             if("[" in key):
@@ -547,7 +540,6 @@ class Application(tk.Frame):
 
         if("/" in dataChoiceValue):
             if(dataChoiceValue == "Win/Losses"):
-                # print([d['Win'] for d in self.searchCache])
                 self.goalsAx.bar(
                     [d['Date'] for d in self.searchCache],
                     [d['Win'] for d in self.searchCache],
@@ -574,9 +566,6 @@ class Application(tk.Frame):
                     choiceB, self.searchCache)
 
                 graphDataB = [-1*x for x in graphDataB]
-
-                # print(graphDataA)
-                # print(graphDataB)
 
                 self.goalsAx.bar(
                     [d['Date'] for d in self.searchCache],
@@ -614,9 +603,6 @@ class Application(tk.Frame):
                     choice = [x for x in graphData[0].keys() if x ==
                               "percent"][0]
                 graphData = [x[choice] for x in graphData]
-
-            # print(graphData)
-
             self.goalsAx.bar(
                 [d['Date'] for d in self.searchCache],
                 graphData,
@@ -717,11 +703,7 @@ class Application(tk.Frame):
                 if(user['platformUserHandle'] == self.UserSearch.get()):
                     self.user_cache[user['platformSlug'] +
                                     user['platformUserHandle'] + user['platformUserIdentifier']] = user
-            # print(self.user_cache)
 
-            # Fill in data
-            # print([self.user_cache.get(user)['platformUserHandle']
-                  # for user in self.user_cache])
             self.UserSearch['values'] = [self.user_cache.get(
                 user)['platformUserHandle'] for user in self.user_cache]
             self.UserSearch.event_generate('<Down>')
@@ -736,8 +718,6 @@ class Application(tk.Frame):
 
         searchUrl = "https://api.tracker.gg/api/v2/rocket-league/standard/profile/" + \
             user['platformSlug']+"/"+userId+"?"
-
-        # print(searchUrl)
 
         userStatsResp = req.get(searchUrl,
                                 headers={
@@ -754,8 +734,6 @@ class Application(tk.Frame):
 
         userStats = userStatsResp.json()['data']
 
-        # print(userStats)
-
         if("avatarUrl" in userStats['platformInfo'].keys() and userStats['platformInfo']['avatarUrl'] is not None):
             imageURL = userStats['platformInfo']['avatarUrl']
         else:
@@ -768,11 +746,8 @@ class Application(tk.Frame):
         self.UsernameLabel.configure(
             text=userStats['platformInfo']['platformUserHandle'])
 
-        # print(json.dumps(userStats, indent=4, default=str))
-
         userOverallStats = None
         for segment in userStats['segments']:
-            # print(json.dumps(segment, indent=4, default=str))
             if(segment['type'] == "overview"):
                 userOverallStats = segment['stats']
             elif(segment['type'] == "playlist" and segment['metadata']['name'] == "Ranked Duel 1v1"):
@@ -841,20 +816,31 @@ class Application(tk.Frame):
         if(self.SnowdayFilter.get()):
             url += "&playlist=" + "ranked-snowday" if self.RankedFilter.get() else "snowday"
 
-        if(self.SeasonFilter.get() != "Season 4"):
-            print("Not Season 4")
-            # TODO: Do the conversion of the season to the correct tag
+        if(self.SeasonFilter.get() != "Any"):
+            rawSeason = self.SeasonFilter.get()
+            if("Season" not in rawSeason):
+                url += "&season=" + rawSeason[1:]
+            else:
+                url += "&season=f" + rawSeason.split(" ")[1]
 
         if(self.MapFilter.get() != "Any"):
             mapCode = [d[0] for d in self.mapsTranslation.items()
                        if d[1] == self.MapFilter.get()]
             url += "&map=" + mapCode[0]
 
-        print(url)
+        # 2020-01-02T15:00:05+01:00
+        beforeDate = self.ReplayBeforeFilter.get_date()
+        midnightHour = datetime.time(
+            hour=23, minute=59, second=59)
+        beforeDate = datetime.datetime.combine(beforeDate, midnightHour)
+
+        url += "&replay-date-before=" + \
+            beforeDate.strftime("%Y-%m-%dT%H:%M:%S%%2B00:00")
+        url += "&replay-date-after=" + \
+            self.ReplayAfterFilter.get_date().strftime("%Y-%m-%dT%H:%M:%S%%2B00:00")
 
         searchGames = req.get(url, headers=self.ballchasingHeaders)
         result = searchGames.json()
-        print(result)
         return result
     # End of getReplaysFromBallchasing
 
@@ -863,25 +849,18 @@ class Application(tk.Frame):
             self.GraphBox, orient="horizontal", length=200)
         self.progressBar.pack(side="left", fill="both", expand=True)
 
-        # Configuring UI with the relelvant progress
         self.progressBar.configure(maximum=len(replays))
 
-        # Stats to be updated for the current search list
         self.searchCache = []
         self.gameSessionsCache = []
         seenGUIDs = {}
 
         for replay in replays:
-            # Update loading bar
             self.progressBar.step()
             self.master.update()
             fetched = True
 
-            # Check if the replay needs to be fetched (or if it is duplicate)
-            # If these are the same, then assume it is the same game
             if (games.get(replay['id']) is not None):
-                # Get the replay from the hash list
-                # print("Retrieving game from hash " + replay['id'])
                 replayResult = games.get(replay['id'])
                 fetched = False
             else:
@@ -890,47 +869,37 @@ class Application(tk.Frame):
                 replayResult = gameReplay.json()
                 games[replay['id']] = replayResult
 
-            if(not hasattr(replayResult, 'match_guid') and seenGUIDs.get(replayResult['match_guid']) is None):
-                # print("Not seen this replay before",
-                # replayResult['match_guid'])
+            if(replayResult.get('match_guid', None) is not None and seenGUIDs.get(replayResult.get('match_guid', None), None) is None):
                 seenGUIDs[replayResult['match_guid']] = True
             else:
-                # print("Seen this replay before!", replayResult['match_guid'])
                 continue
 
-            # print("reached past the continue")
-            # Data processing on the replay
             localGame = GameStat()
-            print(json.dumps(replayResult, indent=4, default=str))
             localGame.populateFromGame(
                 replay, replayResult, user['platformUserHandle'])
             if(len(self.gameSessionsCache) == 0 or
                not self.gameSessionsCache[len(self.gameSessionsCache)-1].checkGameInSession(localGame)):
                 self.gameSessionsCache.append(GameSession())
-            self.gameSessionsCache[len(
-                self.gameSessionsCache)-1].addGame(localGame)
-            self.searchCache.append(localGame.__dict__)
-            print(localGame.__dict__)
 
-            # Wait 500 ms before looking at the next (rate limiter on api calls)
+            if(self.gameSessionsCache[len(self.gameSessionsCache)-1].checkGameInSession(localGame)):
+                self.gameSessionsCache[len(
+                    self.gameSessionsCache)-1].addGame(localGame)
+                self.searchCache.append(localGame.__dict__)
+
             if fetched:
                 time.sleep(0.5)
-        # Print an example of a game json
-        # exampleGame = next(iter(games.values()))
 
-        # Save the updated games list to file
         gamesFile = open('games.json', 'w+')
         json.dump(games, gamesFile, indent=4, default=str)
         gamesFile.close()
 
         for session in self.gameSessionsCache:
             sessionDict = session.__dict__
-            print(json.dumps(sessionDict, indent=4, default=str))
-            self.sessionListBox.insert(0, str(sessionDict['StartDate']))
+            self.sessionListBox.insert(
+                0, session.StartDate.strftime("%d/%m: %H:%M: ") + sessionDict['GameMode'])
 
-        # UI plotting of data for the search period and removing loading bar
         self.progressBar.pack_forget()
-        # End of processReplays
+    # End of processReplays
 
     def createGraph(self):
         # Creating the graph object

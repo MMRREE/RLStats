@@ -1,5 +1,5 @@
 from dateutil.parser import parse
-from datetime import timezone
+from datetime import timezone, datetime, timedelta
 import json
 
 
@@ -20,6 +20,8 @@ class GameStat():
         self.Opposition_Team = 'Blue'
         self.Player_Team_Size = 0
         self.Opposition_Team_Size = 0
+        self.Match_GUID = ""
+        self.mode = "2v2"
 
         teamStructure = {
             "Goals For": 0,
@@ -110,235 +112,336 @@ class GameStat():
     # End of __init__
 
     def populateFromGame(self, replay, replayResult, userName):
+        self.mode = replayResult['playlist_id']
 
-        # General game stats (and meta data for graphing)
-        self.Orange['Goals For'] = replayResult['orange']['stats']['core']['goals']
-        self.Blue['Goals For'] = replayResult['blue']['stats']['core']['goals']
+        self.Match_GUID = replayResult['match_guid']
 
-        # Clarify if it was win or loss and assigning the teams
-        if('Win' in replay['replay_title']):
-            self.Win = 1
-            self.Win_Loss_Color = 'g'
-            self.Target_Player_Team = "Orange" if self.Orange[
-                'Goals For'] > self.Blue['Goals For'] else "Blue"
-        else:
-            self.Win = -1
-            self.Win_Loss_Color = 'r'
-            self.Target_Player_Team = "Blue" if self.Orange[
-                'Goals For'] > self.Blue['Goals For'] else "Orange"
+        # Split into different objects, using defaults to ensure that if something is missing it all still works
+        orange = replayResult.get('orange', None)
+        blue = replayResult.get('blue', None)
+
+        orangeStats = orange.get('stats', None)
+        orangeStatsCore = orangeStats.get('core', None)
+
+        blueStats = blue.get('stats', None)
+        blueStatsCore = blueStats.get('core', None)
+
+        self.Orange['Goals For'] = orangeStatsCore.get('goals', int(0))
+        self.Blue['Goals For'] = blueStatsCore.get('goals', int(0))
+
+        targetUser = None
+        for player in blue.get('players', []):
+            if(player['name'] == userName):
+                self.Win = 1 if self.Blue['Goals For'] < self.Orange['Goals For'] else -1
+                self.Win_Loss_Color = 'g' if self.Blue['Goals For'] < self.Orange['Goals For'] else 'r'
+                self.Target_Player_Team = "Blue"
+                targetUser = player
+
+        for player in orange.get('players', []):
+            if(player['name'] == userName):
+                self.Win = 1 if self.Orange['Goals For'] < self.Blue['Goals For'] else -1
+                self.Win_Loss_Color = 'g' if self.Orange['Goals For'] < self.Blue['Goals For'] else 'r'
+                self.Target_Player_Team = "Orange"
+                targetUser = player
+
         self.Opposition_Team = "Orange" if not "Orange" in self.Target_Player_Team else "Blue"
 
-        if(replayResult['overtime']):
-            self.Overtime = replayResult['overtime_seconds']
-        else:
-            self.Overtime = -2
+        self.Overtime = replayResult.get('overtime_seconds', int(0))
 
-        self.Date = parse(replayResult['date']).astimezone(timezone.utc)
-        self.Time_Played = replayResult['duration']
+        self.Date = parse(replayResult.get('date',
+                          str(datetime.now()))).astimezone(timezone.utc)
+        self.Time_Played = replayResult.get('duration', int(0))
+        self.EndDate = self.Date + timedelta(seconds=self.Time_Played)
 
         self.Bar_Width = self.Time_Played*0.00001157407
 
+        targetPlayerTeam = replayResult.get(
+            self.Target_Player_Team.lower(), None)
+        oppositionTeam = replayResult.get(self.Opposition_Team.lower(), None)
+
         # Team sizes
-        self.Player_Team_Size = len(
-            replayResult[self.Target_Player_Team.lower()]['players'])
-        self.Opposition_Team_Size = len(
-            replayResult[self.Opposition_Team.lower()]['players'])
+        self.Player_Team_Size = len(targetPlayerTeam.get('players', []))
+        self.Opposition_Team_Size = len(oppositionTeam.get('players', []))
 
         # Team stats
-        # print(replayResult['orange']['stats'])
-        self.Team['Goals For'] = replayResult[self.Target_Player_Team.lower()
-                                              ]['stats']['core']['goals']
+        targetPlayerTeamStats = targetPlayerTeam.get('stats', None)
+        targetPlayerTeamStatsCore = targetPlayerTeamStats.get('core', None)
+        self.Team['Goals For'] = targetPlayerTeamStatsCore.get('goals', int(0))
 
-        self.Team['Goals Against'] = replayResult[self.Target_Player_Team.lower()
-                                                  ]['stats']['core']['goals_against']
+        self.Team['Goals Against'] = targetPlayerTeamStatsCore.get(
+            'goals_against', int(0))
 
-        self.Team['Assists'] = replayResult[self.Target_Player_Team.lower()
-                                            ]['stats']['core']['assists']
+        self.Team['Assists'] = targetPlayerTeamStatsCore.get('assists', int(0))
 
-        self.Team['Shots'] = replayResult[self.Target_Player_Team.lower()
-                                          ]['stats']['core']['shots']
+        self.Team['Shots'] = targetPlayerTeamStatsCore.get('shots', int(0))
 
-        self.Team['Saves'] = replayResult[self.Target_Player_Team.lower()
-                                          ]['stats']['core']['saves']
+        self.Team['Saves'] = targetPlayerTeamStatsCore.get('saves', int(0))
 
-        self.Team['Demos Inflicted'] = replayResult[self.Target_Player_Team.lower()
-                                                    ]['stats']['demo']['inflicted']
+        targetPlayerTeamStatsDemo = targetPlayerTeamStats.get('demo', None)
 
-        self.Team['Demos Received'] = replayResult[self.Target_Player_Team.lower()
-                                                   ]['stats']['demo']['taken']
+        self.Team['Demos Inflicted'] = targetPlayerTeamStatsDemo.get(
+            'inflicted', int(0))
 
-        self.Team['Total Score'] = replayResult[self.Target_Player_Team.lower()
-                                                ]['stats']['core']['score']
+        self.Team['Demos Received'] = targetPlayerTeamStatsDemo.get(
+            'taken', int(0))
+
+        self.Team['Total Score'] = targetPlayerTeamStatsCore.get(
+            'score', int(0))
 
         self.Team['Average Score'] = self.Team['Total Score'] / \
-            self.Player_Team_Size
+            self.Player_Team_Size if self.Player_Team_Size > 0 else 0
 
-        self.Team['Average Shooting Percent'] = replayResult[self.Target_Player_Team.lower()
-                                                             ]['stats']['core']['shooting_percentage']
+        self.Team['Average Shooting Percent'] = targetPlayerTeamStatsCore.get(
+            'shooting_percentage', int(0))
 
-        self.Team['Time in possesion'] = getattr(replayResult[self.Target_Player_Team.lower()
-                                                              ]['stats']['ball'], 'possession_time', 0)
+        targetPlayerTeamStatsBall = targetPlayerTeamStats.get('ball', None)
 
-        self.Team['Time ball in defensive half'] = replayResult[self.Target_Player_Team.lower()
-                                                                ]['stats']['ball']['time_in_side']
+        self.Team['Time in possesion'] = targetPlayerTeamStatsBall.get(
+            'possession_time', int(0))
+
+        self.Team['Time ball in defensive half'] = targetPlayerTeamStatsBall.get(
+            'time_in_side', int(0))
 
         # Opposition stats
-        self.Opposition['Goals For'] = replayResult[self.Opposition_Team.lower()
-                                                    ]['stats']['core']['goals']
-        self.Opposition['Goals Against'] = replayResult[self.Opposition_Team.lower()
-                                                        ]['stats']['core']['goals_against']
+        oppositionTeamStats = oppositionTeam.get('stats', None)
+        oppositionTeamStatsCore = oppositionTeamStats.get('core', None)
 
-        self.Opposition['Assists'] = replayResult[self.Opposition_Team.lower()
-                                                  ]['stats']['core']['assists']
+        self.Opposition['Goals For'] = oppositionTeamStatsCore.get(
+            'goals', int(0))
+        self.Opposition['Goals Against'] = oppositionTeamStatsCore.get(
+            'goals_against', int(0))
 
-        self.Opposition['Shots'] = replayResult[self.Opposition_Team.lower()
-                                                ]['stats']['core']['shots']
+        self.Opposition['Assists'] = oppositionTeamStatsCore.get(
+            'assists', int(0))
 
-        self.Opposition['Demos Inflicted'] = replayResult[self.Opposition_Team.lower()
-                                                          ]['stats']['demo']['inflicted']
+        self.Opposition['Shots'] = oppositionTeamStatsCore.get('shots', int(0))
 
-        self.Opposition['Demos Received'] = replayResult[self.Opposition_Team.lower()
-                                                         ]['stats']['demo']['taken']
+        oppositionTeamStatsDemo = oppositionTeamStats.get('demo', None)
 
-        self.Opposition['Total Score'] = replayResult[self.Opposition_Team.lower()
-                                                      ]['stats']['core']['score']
+        self.Opposition['Demos Inflicted'] = oppositionTeamStatsDemo.get(
+            'inflicted', int(0))
+
+        self.Opposition['Demos Received'] = oppositionTeamStatsDemo.get(
+            'taken', int(0))
+
+        self.Opposition['Total Score'] = oppositionTeamStatsCore.get(
+            'score', int(0))
 
         self.Opposition['Average Score'] = self.Opposition['Total Score'] / \
-            self.Opposition_Team_Size
+            self.Opposition_Team_Size if self.Opposition_Team_Size > 0 else 0
 
-        self.Opposition['Average Shooting Percent'] = replayResult[self.Opposition_Team.lower()
-                                                                   ]['stats']['core']['shooting_percentage']
+        self.Opposition['Average Shooting Percent'] = oppositionTeamStatsCore.get(
+            'shooting_percentage', int(0))
 
-        self.Opposition['Time in possesion'] = replayResult[self.Opposition_Team.lower()
-                                                            ]['stats']['ball']['possession_time']
+        oppositionTeamStatsBall = oppositionTeamStats.get('ball', None)
 
-        self.Opposition['Time ball in defensive half'] = replayResult[self.Opposition_Team.lower()
-                                                                      ]['stats']['ball']['time_in_side']
+        self.Opposition['Time in possesion'] = oppositionTeamStatsBall.get(
+            'possession_time', int(0))
 
-        # Individual stats
-        targetUser = None
-        for player in replayResult[self.Target_Player_Team.lower()]['players']:
-            if(player['name'] == userName):
-                targetUser = player
-
-        for player in replayResult[self.Opposition_Team.lower()]['players']:
-            if(player['name'] == userName):
-                targetUser = player
+        self.Opposition['Time ball in defensive half'] = oppositionTeamStatsBall.get(
+            'time_in_side', int(0))
 
         # Individual stats
         if(targetUser is not None):
-            #print(json.dumps(targetUser, indent=4))
+            targetUserStats = targetUser.get('stats', None)
+            targetUserStatsCore = targetUserStats.get('core', None)
+            targetUserStatsDemo = targetUserStats.get('demo', None)
 
             # General stats
-            self.Individual['General']['Goals'] = targetUser['stats']['core']['goals']
-            self.Individual['General']['Saves'] = targetUser['stats']['core']['saves']
-            self.Individual['General']['Assists'] = targetUser['stats']['core']['assists']
-            self.Individual['General']['Shots'] = targetUser['stats']['core']['shots']
-            self.Individual['General']['Shots Against'] = targetUser['stats']['core']['shots_against']
-            self.Individual['General']['Demos Inflicted'] = targetUser['stats']['demo']['inflicted']
-            self.Individual['General']['Demos Received'] = targetUser['stats']['demo']['taken']
-            self.Individual['General']['Score'] = targetUser['stats']['core']['score']
-            self.Individual['General']['Shooting Percent'] = targetUser['stats']['core']['shooting_percentage']
-            self.Individual['General']['Goals Against Whilst Last Defender'] = targetUser['stats']['core']['goals_against']
-            self.Individual['General']['MVP'] = targetUser['stats']['core']['mvp']
+            self.Individual['General']['Goals'] = targetUserStatsCore.get(
+                'goals', int(0))
+            self.Individual['General']['Saves'] = targetUserStatsCore.get(
+                'saves', int(0))
+            self.Individual['General']['Assists'] = targetUserStatsCore.get(
+                'assists', int(0))
+            self.Individual['General']['Shots'] = targetUserStatsCore.get(
+                'shots', int(0))
+            self.Individual['General']['Shots Against'] = targetUserStatsCore.get(
+                'shots_against', int(0))
+            self.Individual['General']['Demos Inflicted'] = targetUserStatsDemo.get(
+                'inflicted', int(0))
+            self.Individual['General']['Demos Received'] = targetUserStatsDemo.get(
+                'taken', int(0))
+            self.Individual['General']['Score'] = targetUserStatsCore.get(
+                'score', int(0))
+            self.Individual['General']['Shooting Percent'] = targetUserStatsCore.get(
+                'shooting_percentage', int(0))
+            self.Individual['General']['Goals Against Whilst Last Defender'] = targetUserStatsCore.get(
+                'goals_against', int(0))
+            self.Individual['General']['MVP'] = targetUserStatsCore.get(
+                'mvp', False)
 
             # Boost stats
             # Absolute
-            self.Individual['Boost']['Average boost used per minute'] = targetUser['stats']['boost']['bpm']
-            self.Individual['Boost']['Average boost collected per minute'] = targetUser['stats']['boost']['bcpm']
-            self.Individual['Boost']['Average boost amount'] = targetUser['stats']['boost']['avg_amount']
-            self.Individual['Boost']['Amount of boost collected'] = targetUser['stats']['boost']['amount_collected']
-            self.Individual['Boost']['Amount of boost used at supersonic'] = targetUser['stats']['boost']['amount_used_while_supersonic']
-            self.Individual['Boost']['Total stolen'] = targetUser['stats']['boost']['amount_stolen']
-            self.Individual['Boost']['Total collected from big pads'] = targetUser['stats']['boost']['amount_collected_big']
-            self.Individual['Boost']['Total stolen from big pads'] = targetUser['stats']['boost']['amount_stolen_big']
-            self.Individual['Boost']['Total collected from small pads'] = targetUser['stats']['boost']['amount_collected_small']
-            self.Individual['Boost']['Total stolen from small pads'] = targetUser['stats']['boost']['amount_stolen_small']
-            self.Individual['Boost']['Boost overfill'] = targetUser['stats']['boost']['amount_overfill']
-            self.Individual['Boost']['Stolen overfill'] = targetUser['stats']['boost']['amount_overfill_stolen']
+            targetUserStatsBoost = targetUserStats.get('boost', None)
+            self.Individual['Boost']['Average boost used per minute'] = targetUserStatsBoost.get(
+                'bpm', int(0))
+            self.Individual['Boost']['Average boost collected per minute'] = targetUserStatsBoost.get(
+                'bcpm', int(0))
+            self.Individual['Boost']['Average boost amount'] = targetUserStatsBoost.get(
+                'avg_amount', int(0))
+            self.Individual['Boost']['Amount of boost collected'] = targetUserStatsBoost.get(
+                'amount_collected', int(0))
+            self.Individual['Boost']['Amount of boost used at supersonic'] = targetUserStatsBoost.get(
+                'amount_used_while_supersonic', int(0))
+            self.Individual['Boost']['Total stolen'] = targetUserStatsBoost.get(
+                'amount_stolen', int(0))
+            self.Individual['Boost']['Total collected from big pads'] = targetUserStatsBoost.get(
+                'amount_collected_big', int(0))
+            self.Individual['Boost']['Total stolen from big pads'] = targetUserStatsBoost.get(
+                'amount_stolen_big', int(0))
+            self.Individual['Boost']['Total collected from small pads'] = targetUserStatsBoost.get(
+                'amount_collected_small', int(0))
+            self.Individual['Boost']['Total stolen from small pads'] = targetUserStatsBoost.get(
+                'amount_stolen_small', int(0))
+            self.Individual['Boost']['Boost overfill'] = targetUserStatsBoost.get(
+                'amount_overfill', int(0))
+            self.Individual['Boost']['Stolen overfill'] = targetUserStatsBoost.get(
+                'amount_overfill_stolen', int(0))
 
             # Count
-            self.Individual['Boost']['Big pads taken'] = targetUser['stats']['boost']['count_collected_big']
-            self.Individual['Boost']['Big pads stolen'] = targetUser['stats']['boost']['count_stolen_big']
-            self.Individual['Boost']['Small pads taken'] = targetUser['stats']['boost']['count_collected_small']
-            self.Individual['Boost']['Small pads stolen'] = targetUser['stats']['boost']['count_stolen_small']
+            self.Individual['Boost']['Big pads taken'] = targetUserStatsBoost.get(
+                'count_collected_big', int(0))
+            self.Individual['Boost']['Big pads stolen'] = targetUserStatsBoost.get(
+                'count_stolen_big', int(0))
+            self.Individual['Boost']['Small pads taken'] = targetUserStatsBoost.get(
+                'count_collected_small', int(0))
+            self.Individual['Boost']['Small pads stolen'] = targetUserStatsBoost.get(
+                'count_stolen_small', int(0))
 
             # Time
-            self.Individual['Boost']['0 boost']['time'] = targetUser['stats']['boost']['time_zero_boost']
-            self.Individual['Boost']['100 boost']['time'] = targetUser['stats']['boost']['time_full_boost']
-            self.Individual['Boost']['0-25% boost']['time'] = targetUser['stats']['boost']['time_boost_0_25']
-            self.Individual['Boost']['25-50% boost']['time'] = targetUser['stats']['boost']['time_boost_25_50']
-            self.Individual['Boost']['50-75% boost']['time'] = targetUser['stats']['boost']['time_boost_50_75']
-            self.Individual['Boost']['75-100% boost']['time'] = targetUser['stats']['boost']['time_boost_75_100']
+            self.Individual['Boost']['0 boost']['time'] = targetUserStatsBoost.get(
+                'time_zero_boost', int(0))
+            self.Individual['Boost']['100 boost']['time'] = targetUserStatsBoost.get(
+                'time_full_boost', int(0))
+            self.Individual['Boost']['0-25% boost']['time'] = targetUserStatsBoost.get(
+                'time_boost_0_25', int(0))
+            self.Individual['Boost']['25-50% boost']['time'] = targetUserStatsBoost.get(
+                'time_boost_25_50', int(0))
+            self.Individual['Boost']['50-75% boost']['time'] = targetUserStatsBoost.get(
+                'time_boost_50_75', int(0))
+            self.Individual['Boost']['75-100% boost']['time'] = targetUserStatsBoost.get(
+                'time_boost_75_100', int(0))
 
             # Percent
-            self.Individual['Boost']['0 boost']['percent'] = targetUser['stats']['boost']['percent_zero_boost']
-            self.Individual['Boost']['100 boost']['percent'] = targetUser['stats']['boost']['percent_full_boost']
-            self.Individual['Boost']['0-25% boost']['percent'] = targetUser['stats']['boost']['percent_boost_0_25']
-            self.Individual['Boost']['25-50% boost']['percent'] = targetUser['stats']['boost']['percent_boost_25_50']
-            self.Individual['Boost']['50-75% boost']['percent'] = targetUser['stats']['boost']['percent_boost_50_75']
-            self.Individual['Boost']['75-100% boost']['percent'] = targetUser['stats']['boost']['percent_boost_75_100']
+            self.Individual['Boost']['0 boost']['percent'] = targetUserStatsBoost.get(
+                'percent_zero_boost', int(0))
+            self.Individual['Boost']['100 boost']['percent'] = targetUserStatsBoost.get(
+                'percent_full_boost', int(0))
+            self.Individual['Boost']['0-25% boost']['percent'] = targetUserStatsBoost.get(
+                'percent_boost_0_25', int(0))
+            self.Individual['Boost']['25-50% boost']['percent'] = targetUserStatsBoost.get(
+                'percent_boost_25_50', int(0))
+            self.Individual['Boost']['50-75% boost']['percent'] = targetUserStatsBoost.get(
+                'percent_boost_50_75', int(0))
+            self.Individual['Boost']['75-100% boost']['percent'] = targetUserStatsBoost.get(
+                'percent_boost_75_100', int(0))
 
             # Positioning stats
             # Percentages
-            self.Individual['Positioning']['Most back']['percent'] = targetUser['stats']['positioning']['percent_most_back']
-            self.Individual['Positioning']['Most forward']['percent'] = targetUser['stats']['positioning']['percent_most_forward']
-            self.Individual['Positioning']['Defensive third']['percent'] = targetUser['stats']['positioning']['percent_defensive_third']
-            self.Individual['Positioning']['Neutral third']['percent'] = targetUser['stats']['positioning']['percent_neutral_third']
-            self.Individual['Positioning']['Offensive third']['percent'] = targetUser['stats']['positioning']['percent_offensive_third']
-            self.Individual['Positioning']['Defensive half']['percent'] = targetUser['stats']['positioning']['percent_defensive_half']
-            self.Individual['Positioning']['Offensive half']['percent'] = targetUser['stats']['positioning']['percent_offensive_half']
-            self.Individual['Positioning']['Closest to ball']['percent'] = targetUser['stats']['positioning']['percent_closest_to_ball']
-            self.Individual['Positioning']['Farthest from ball']['percent'] = targetUser['stats']['positioning']['percent_farthest_from_ball']
-            self.Individual['Positioning']['Behind the ball']['percent'] = targetUser['stats']['positioning']['percent_behind_ball']
-            self.Individual['Positioning']['In front of the ball']['percent'] = targetUser['stats']['positioning']['percent_infront_ball']
+            targetUserStatsPositioning = targetUserStats.get(
+                'positioning', None)
+
+            self.Individual['Positioning']['Most back']['percent'] = targetUserStatsPositioning.get(
+                'percent_most_back', int(0))
+            self.Individual['Positioning']['Most forward']['percent'] = targetUserStatsPositioning.get(
+                'percent_most_forward', int(0))
+            self.Individual['Positioning']['Defensive third']['percent'] = targetUserStatsPositioning.get(
+                'percent_defensive_third', int(0))
+            self.Individual['Positioning']['Neutral third']['percent'] = targetUserStatsPositioning.get(
+                'percent_neutral_third', int(0))
+            self.Individual['Positioning']['Offensive third']['percent'] = targetUserStatsPositioning.get(
+                'percent_offensive_third', int(0))
+            self.Individual['Positioning']['Defensive half']['percent'] = targetUserStatsPositioning.get(
+                'percent_defensive_half', int(0))
+            self.Individual['Positioning']['Offensive half']['percent'] = targetUserStatsPositioning.get(
+                'percent_offensive_half', int(0))
+            self.Individual['Positioning']['Closest to ball']['percent'] = targetUserStatsPositioning.get(
+                'percent_closest_to_ball', int(0))
+            self.Individual['Positioning']['Farthest from ball']['percent'] = targetUserStatsPositioning.get(
+                'percent_farthest_from_ball', int(0))
+            self.Individual['Positioning']['Behind the ball']['percent'] = targetUserStatsPositioning.get(
+                'percent_behind_ball', int(0))
+            self.Individual['Positioning']['In front of the ball']['percent'] = targetUserStatsPositioning.get(
+                'percent_infront_ball', int(0))
 
             # Absolutes
-            self.Individual['Positioning']['Most back']['time'] = targetUser['stats']['positioning']['time_most_back']
-            self.Individual['Positioning']['Most forward']['time'] = targetUser['stats']['positioning']['time_most_forward']
-            self.Individual['Positioning']['Defensive third']['time'] = targetUser['stats']['positioning']['time_defensive_third']
-            self.Individual['Positioning']['Neutral third']['time'] = targetUser['stats']['positioning']['time_neutral_third']
-            self.Individual['Positioning']['Offensive third']['time'] = targetUser['stats']['positioning']['time_offensive_third']
-            self.Individual['Positioning']['Defensive half']['time'] = targetUser['stats']['positioning']['time_defensive_half']
-            self.Individual['Positioning']['Offensive half']['time'] = targetUser['stats']['positioning']['time_offensive_half']
-            self.Individual['Positioning']['Closest to ball']['time'] = targetUser['stats']['positioning']['time_closest_to_ball']
-            self.Individual['Positioning']['Farthest from ball']['time'] = targetUser['stats']['positioning']['time_farthest_from_ball']
-            self.Individual['Positioning']['Behind the ball']['time'] = targetUser['stats']['positioning']['time_behind_ball']
-            self.Individual['Positioning']['In front of the ball']['time'] = targetUser['stats']['positioning']['time_infront_ball']
+            self.Individual['Positioning']['Most back']['time'] = targetUserStatsPositioning.get(
+                'time_most_back', int(0))
+            self.Individual['Positioning']['Most forward']['time'] = targetUserStatsPositioning.get(
+                'time_most_forward', int(0))
+            self.Individual['Positioning']['Defensive third']['time'] = targetUserStatsPositioning.get(
+                'time_defensive_third', int(0))
+            self.Individual['Positioning']['Neutral third']['time'] = targetUserStatsPositioning.get(
+                'time_neutral_third', int(0))
+            self.Individual['Positioning']['Offensive third']['time'] = targetUserStatsPositioning.get(
+                'time_offensive_third', int(0))
+            self.Individual['Positioning']['Defensive half']['time'] = targetUserStatsPositioning.get(
+                'time_defensive_half', int(0))
+            self.Individual['Positioning']['Offensive half']['time'] = targetUserStatsPositioning.get(
+                'time_offensive_half', int(0))
+            self.Individual['Positioning']['Closest to ball']['time'] = targetUserStatsPositioning.get(
+                'time_closest_to_ball', int(0))
+            self.Individual['Positioning']['Farthest from ball']['time'] = targetUserStatsPositioning.get(
+                'time_farthest_from_ball', int(0))
+            self.Individual['Positioning']['Behind the ball']['time'] = targetUserStatsPositioning.get(
+                'time_behind_ball', int(0))
+            self.Individual['Positioning']['In front of the ball']['time'] = targetUserStatsPositioning.get(
+                'time_infront_ball', int(0))
 
             # Averages
             if(self.Player_Team_Size > 1):
-                self.Individual['Positioning']['Average distance to teammates'] = targetUser['stats']['positioning']['avg_distance_to_mates']
-            self.Individual['Positioning']['Average distance to the ball'] = targetUser['stats']['positioning']['avg_distance_to_ball']
-            self.Individual['Positioning']['Average distance to the ball in possesion'] = targetUser[
-                'stats']['positioning']['avg_distance_to_ball_possession']
-            self.Individual['Positioning']['Average distance to the ball out of possesion'] = targetUser[
-                'stats']['positioning']['avg_distance_to_ball_no_possession']
+                self.Individual['Positioning']['Average distance to teammates'] = targetUserStatsPositioning.get(
+                    'avg_distance_to_mates', int(0))
+            self.Individual['Positioning']['Average distance to the ball'] = targetUserStatsPositioning.get(
+                'avg_distance_to_ball', int(0))
+            self.Individual['Positioning']['Average distance to the ball in possesion'] = targetUserStatsPositioning.get(
+                'avg_distance_to_ball_possession', int(0))
+            self.Individual['Positioning']['Average distance to the ball out of possesion'] = targetUserStatsPositioning.get(
+                'avg_distance_to_ball_no_possession', int(0))
 
             # Movement stats
             # Averages
-            self.Individual['Movement']['Average speed']['absolute'] = targetUser['stats']['movement']['avg_speed']
-            self.Individual['Movement']['Average speed']['percent'] = targetUser['stats']['movement']['avg_speed_percentage']
-            self.Individual['Movement']['Average powerslide duration'] = targetUser['stats']['movement']['avg_powerslide_duration']
-            self.Individual['Movement']['Total distance travelled'] = targetUser['stats']['movement']['total_distance']*3.653/1000
-            self.Individual['Movement']['Powerslide total duration'] = targetUser['stats']['movement']['time_powerslide']
-            self.Individual['Movement']['Number of powerslides'] = targetUser['stats']['movement']['count_powerslide']
+            targetUserStatsMovement = targetUserStats.get('movement', None)
 
-            self.Individual['Movement']['Supersonic']['percent'] = targetUser['stats']['movement']['percent_supersonic_speed']
-            self.Individual['Movement']['Boost speed']['percent'] = targetUser['stats']['movement']['percent_boost_speed']
-            self.Individual['Movement']['Slow speed']['percent'] = targetUser['stats']['movement']['percent_slow_speed']
-            self.Individual['Movement']['On the ground']['percent'] = targetUser['stats']['movement']['percent_ground']
-            self.Individual['Movement']['In low air']['percent'] = targetUser['stats']['movement']['percent_low_air']
-            self.Individual['Movement']['In high air']['percent'] = targetUser['stats']['movement']['percent_high_air']
+            self.Individual['Movement']['Average speed']['absolute'] = targetUserStatsMovement.get(
+                'avg_speed', int(0))
+            self.Individual['Movement']['Average speed']['percent'] = targetUserStatsMovement.get(
+                'avg_speed_percentage', int(0))
+            self.Individual['Movement']['Average powerslide duration'] = targetUserStatsMovement.get(
+                'avg_powerslide_duration', int(0))
+            self.Individual['Movement']['Total distance travelled'] = targetUserStatsMovement.get(
+                'total_distance', int(0))*3.653/1000
+            self.Individual['Movement']['Powerslide total duration'] = targetUserStatsMovement.get(
+                'time_powerslide', int(0))
+            self.Individual['Movement']['Number of powerslides'] = targetUserStatsMovement.get(
+                'count_powerslide', int(0))
 
-            self.Individual['Movement']['Supersonic']['time'] = targetUser['stats']['movement']['time_supersonic_speed']
-            self.Individual['Movement']['Boost speed']['time'] = targetUser['stats']['movement']['time_boost_speed']
-            self.Individual['Movement']['Slow speed']['time'] = targetUser['stats']['movement']['time_slow_speed']
-            self.Individual['Movement']['On the ground']['time'] = targetUser['stats']['movement']['time_ground']
-            self.Individual['Movement']['In low air']['time'] = targetUser['stats']['movement']['time_low_air']
-            self.Individual['Movement']['In high air']['time'] = targetUser['stats']['movement']['time_high_air']
+            self.Individual['Movement']['Supersonic']['percent'] = targetUserStatsMovement.get(
+                'percent_supersonic_speed', int(0))
+            self.Individual['Movement']['Boost speed']['percent'] = targetUserStatsMovement.get(
+                'percent_boost_speed', int(0))
+            self.Individual['Movement']['Slow speed']['percent'] = targetUserStatsMovement.get(
+                'percent_slow_speed', int(0))
+            self.Individual['Movement']['On the ground']['percent'] = targetUserStatsMovement.get(
+                'percent_ground', int(0))
+            self.Individual['Movement']['In low air']['percent'] = targetUserStatsMovement.get(
+                'percent_low_air', int(0))
+            self.Individual['Movement']['In high air']['percent'] = targetUserStatsMovement.get(
+                'percent_high_air', int(0))
 
-        #print(json.dumps(self.__dict__, indent=4, default=str))
+            self.Individual['Movement']['Supersonic']['time'] = targetUserStatsMovement.get(
+                'time_supersonic_speed', int(0))
+            self.Individual['Movement']['Boost speed']['time'] = targetUserStatsMovement.get(
+                'time_boost_speed', int(0))
+            self.Individual['Movement']['Slow speed']['time'] = targetUserStatsMovement.get(
+                'time_slow_speed', int(0))
+            self.Individual['Movement']['On the ground']['time'] = targetUserStatsMovement.get(
+                'time_ground', int(0))
+            self.Individual['Movement']['In low air']['time'] = targetUserStatsMovement.get(
+                'time_low_air', int(0))
+            self.Individual['Movement']['In high air']['time'] = targetUserStatsMovement.get(
+                'time_high_air', int(0))
 
     # End of populateFromGame
 # End of GameStat

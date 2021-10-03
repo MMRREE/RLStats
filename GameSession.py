@@ -8,27 +8,27 @@ class GameSession():
         self.Games = []
 
         # General Aggregated Stats
-        self.Wins = 0
-        self.Losses = 0
-        self.Time_Played = 0
-        self.Overtime = 0
-        self.StartDate = 0
-        self.EndDate = 0
-        self.WinRate = 0
+        self.Wins = int(0)
+        self.Losses = int(0)
+        self.Time_Played = int(0)
+        self.Overtime = int(0)
+        self.StartDate = int(0)
+        self.EndDate = int(0)
+        self.WinRate = int(0)
 
         teamStructure = {
-            "Goals For": 0,
-            "Saves": 0,
-            "Assists": 0,
-            "Shots": 0,
-            "Goals Against": 0,
-            "Demos Inflicted": 0,
-            "Demos Received": 0,
-            "Total Score": 0,
-            "Average Score": 0,
-            "Average Shooting Percent": 0,
-            "Time in possesion": 0,
-            "Time ball in defensive half": 0
+            "Goals For": int(0),
+            "Saves": int(0),
+            "Assists": int(0),
+            "Shots": int(0),
+            "Goals Against": int(0),
+            "Demos Inflicted": int(0),
+            "Demos Received": int(0),
+            "Total Score": int(0),
+            "Average Score": int(0),
+            "Average Shooting Percent": int(0),
+            "Time in possesion": int(0),
+            "Time ball in defensive half": int(0)
         }
 
         # Team Stats
@@ -40,281 +40,365 @@ class GameSession():
         # Individual Stats
         self.Individual = {
             "General": {
-                "Goals": 0,
-                "Saves": 0,
-                "Assists": 0,
-                "Shots": 0,
-                "Shots Against": 0,
-                "Demos Inflicted": 0,
-                "Demos Received": 0,
-                "Score": 0,
-                "Shooting Percent": 0,
-                "Goals Against Whilst Last Defender": 0,
-                "MVP": 0
+                "Goals": int(0),
+                "Saves": int(0),
+                "Assists": int(0),
+                "Shots": int(0),
+                "Shots Against": int(0),
+                "Demos Inflicted": int(0),
+                "Demos Received": int(0),
+                "Score": int(0),
+                "Shooting Percent": int(0),
+                "Goals Against Whilst Last Defender": int(0),
+                "MVP": int(0)
             },
             "Boost": {
-                "Average boost used per minute": 0,
-                "Average boost collected per minute": 0,
-                "Average boost amount": 0,
-                "Amount of boost used at supersonic": 0,
-                "Amount of boost collected": 0,
-                "Big pads taken": 0,
-                "Big pads stolen": 0,
-                "Small pads taken": 0,
-                "Small pads stolen": 0,
-                "Boost overfill": 0,
-                "Stolen overfill": 0,
-                "0 boost": {"time": 0, "percent": 0},
-                "100 boost": {"time": 0, "percent": 0},
-                "0-25% boost": {"time": 0, "percent": 0},
-                "25-50% boost": {"time": 0, "percent": 0},
-                "50-75% boost": {"time": 0, "percent": 0},
-                "75-100% boost": {"time": 0, "percent": 0},
-                'Total stolen': 0,
-                'Total collected from big pads': 0,
-                'Total stolen from big pads': 0,
-                'Total collected from small pads': 0,
-                'Total stolen from small pads': 0,
+                "Average boost used per minute": int(0),
+                "Average boost collected per minute": int(0),
+                "Average boost amount": int(0),
+                "Amount of boost used at supersonic": int(0),
+                "Amount of boost collected": int(0),
+                "Big pads taken": int(0),
+                "Big pads stolen": int(0),
+                "Small pads taken": int(0),
+                "Small pads stolen": int(0),
+                "Boost overfill": int(0),
+                "Stolen overfill": int(0),
+                "0 boost": {"time": int(0), "percent": int(0)},
+                "100 boost": {"time": int(0), "percent": int(0)},
+                "0-25% boost": {"time": int(0), "percent": int(0)},
+                "25-50% boost": {"time": int(0), "percent": int(0)},
+                "50-75% boost": {"time": int(0), "percent": int(0)},
+                "75-100% boost": {"time": int(0), "percent": int(0)},
+                'Total stolen': int(0),
+                'Total collected from big pads': int(0),
+                'Total stolen from big pads': int(0),
+                'Total collected from small pads': int(0),
+                'Total stolen from small pads': int(0),
             },
             "Positioning": {
-                "Average distance to teammates": 0,
-                "Average distance to the ball": 0,
-                "Average distance to the ball in possesion": 0,
-                "Average distance to the ball out of possesion": 0,
-                "Most back": {"time": 0, "percent": 0},
-                "Most forward": {"time": 0, "percent": 0},
-                "Defensive third": {"time": 0, "percent": 0},
-                "Neutral third": {"time": 0, "percent": 0},
-                "Offensive third": {"time": 0, "percent": 0},
-                "Defensive half": {"time": 0, "percent": 0},
-                "Offensive half": {"time": 0, "percent": 0},
-                "Closest to ball": {"time": 0, "percent": 0},
-                "Farthest from ball": {"time": 0, "percent": 0},
-                "Behind the ball": {"time": 0, "percent": 0},
-                "In front of the ball": {"time": 0, "percent": 0},
+                "Average distance to teammates": int(0),
+                "Average distance to the ball": int(0),
+                "Average distance to the ball in possesion": int(0),
+                "Average distance to the ball out of possesion": int(0),
+                "Most back": {"time": int(0), "percent": int(0)},
+                "Most forward": {"time": int(0), "percent": int(0)},
+                "Defensive third": {"time": int(0), "percent": int(0)},
+                "Neutral third": {"time": int(0), "percent": int(0)},
+                "Offensive third": {"time": int(0), "percent": int(0)},
+                "Defensive half": {"time": int(0), "percent": int(0)},
+                "Offensive half": {"time": int(0), "percent": int(0)},
+                "Closest to ball": {"time": int(0), "percent": int(0)},
+                "Farthest from ball": {"time": int(0), "percent": int(0)},
+                "Behind the ball": {"time": int(0), "percent": int(0)},
+                "In front of the ball": {"time": int(0), "percent": int(0)},
             },
             "Movement": {
-                "Average speed": {"absolute": 0, "percent": 0},
-                "Average powerslide duration": 0,
-                "Powerslide total duration": 0,
-                "Total distance travelled": 0,
-                "Number of powerslides": 0,
-                "Supersonic": {"time": 0, "percent": 0},
-                "Boost speed": {"time": 0, "percent": 0},
-                "Slow speed": {"time": 0, "percent": 0},
-                "On the ground": {"time": 0, "percent": 0},
-                "In low air": {"time": 0, "percent": 0},
-                "In high air": {"time": 0, "percent": 0},
+                "Average speed": {"absolute": int(0), "percent": int(0)},
+                "Average powerslide duration": int(0),
+                "Powerslide total duration": int(0),
+                "Total distance travelled": int(0),
+                "Number of powerslides": int(0),
+                "Supersonic": {"time": int(0), "percent": int(0)},
+                "Boost speed": {"time": int(0), "percent": int(0)},
+                "Slow speed": {"time": int(0), "percent": int(0)},
+                "On the ground": {"time": int(0), "percent": int(0)},
+                "In low air": {"time": int(0), "percent": int(0)},
+                "In high air": {"time": int(0), "percent": int(0)},
             }
         }
     # End of __init__
+
+    def average(self, list):
+        return sum(list) / len(list)
+    # End of average
+
+    def calculateSessionStats(self):
+        self.Wins = sum([1 for d in self.Games if d.Win == 1])
+        self.Losses = sum([1 for d in self.Games if d.Win == -1])
+        self.Overtime = sum([d.Overtime for d in self.Games])
+        self.Time_Played = sum([d.Time_Played for d in self.Games])
+
+        gameTeams = [getattr(d, 'Team') for d in self.Games]
+
+        # Team
+
+        self.Team['Goals For'] = sum(
+            [d.get('Goals For', int(0)) for d in gameTeams])
+        self.Team['Goals Against'] = sum([d.get('Goals Against', 0)
+                                          for d in gameTeams])
+        self.Team['Assists'] = sum([d.get('Assists', 0) for d in gameTeams])
+        self.Team['Shots'] = sum([d.get('Shots', 0) for d in gameTeams])
+        self.Team['Saves'] = sum([d.get('Saves', 0) for d in gameTeams])
+        self.Team['Demos Inflicted'] = sum([d.get('Demos Inflicted', 0)
+                                            for d in gameTeams])
+        self.Team['Demos Received'] = sum([d.get('Demos Received', 0)
+                                           for d in gameTeams])
+        self.Team['Total Score'] = sum([d.get('Total Score', 0)
+                                        for d in gameTeams])
+        self.Team['Average Score'] = self.average(
+            [d.get('Average Score', 0) for d in gameTeams])
+        self.Team['Average Shooting Percent'] = self.average(
+            [d.get('Average Shooting Percent', 0) for d in gameTeams])
+        self.Team['Time in possesion'] = sum(
+            [d.get('Time in possesion', 0) for d in gameTeams])
+        self.Team['Time ball in defensive half'] = sum(
+            [d.get('Time ball in defensive half', 0) for d in gameTeams])
+
+        # Opposition
+        gameOppositionTeams = [getattr(d, 'Opposition') for d in self.Games]
+
+        self.Opposition['Goals For'] = sum([d.get('Goals For', 0)
+                                            for d in gameOppositionTeams])
+        self.Opposition['Goals Against'] = sum(
+            [d.get('Goals Against', 0) for d in gameOppositionTeams])
+        self.Opposition['Assists'] = sum([d.get('Assists', 0)
+                                          for d in gameOppositionTeams])
+        self.Opposition['Shots'] = sum([d.get('Shots', 0)
+                                        for d in gameOppositionTeams])
+        self.Opposition['Saves'] = sum([d.get('Saves', 0)
+                                        for d in gameOppositionTeams])
+        self.Opposition['Demos Inflicted'] = sum(
+            [d.get('Demos Inflicted', 0) for d in gameOppositionTeams])
+        self.Opposition['Demos Received'] = sum(
+            [d.get('Demos Received', 0) for d in gameOppositionTeams])
+        self.Opposition['Total Score'] = sum([d.get('Total Score', 0)
+                                              for d in gameOppositionTeams])
+        self.Opposition['Average Score'] = self.average(
+            [d.get('Average Score', 0) for d in gameOppositionTeams])
+        self.Opposition['Average Shooting Percent'] = self.average(
+            [d.get('Average Shooting Percent', 0) for d in gameOppositionTeams])
+        self.Opposition['Time in possesion'] = sum(
+            [d.get('Time in possesion', 0) for d in gameOppositionTeams])
+        self.Opposition['Time ball in defensive half'] = sum(
+            [d.get('Time ball in defensive half', 0) for d in gameOppositionTeams])
+
+        # Individual Stats
+        # General Stats
+        gameIndividuals = [getattr(d, 'Individual') for d in self.Games]
+        gameIndividualGenerals = [d.get('General', None)
+                                  for d in gameIndividuals]
+        self.Individual['General']['Goals'] = sum(
+            [d.get('Goals', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Saves'] = sum(
+            [d.get('Saves', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Assists'] = sum(
+            [d.get('Assists', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Shots'] = sum(
+            [d.get('Shots', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Shots Against'] = sum(
+            [d.get('Shots Against', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Demos Inflicted'] = sum(
+            [d.get('Demos Inflicted', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Demos Received'] = sum(
+            [d.get('Demos Received', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Score'] = sum(
+            [d.get('Score', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Shooting Percent'] = self.average(
+            [d.get('Shooting Percent', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['Goals Against Whilst Last Defender'] = sum(
+            [d.get('Goals Against Whilst Last Defender', 0) for d in gameIndividualGenerals])
+        self.Individual['General']['MVP'] = sum(
+            [d.get('MVP', 0) for d in gameIndividualGenerals])
+
+        # Boost Stats
+        # Averages
+        gameIndividualBoosts = [d.get('Boost', None) for d in gameIndividuals]
+        self.Individual['Boost']['Average boost used per minute'] = self.average(
+            [d.get('Average boost used per minute', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Average boost collected per minute'] = self.average(
+            [d.get('Average boost collected per minute', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Average boost amount'] = self.average(
+            [d.get('Average boost amount', 0) for d in gameIndividualBoosts])
+
+        # Absolutes
+        self.Individual['Boost']['Amount of boost collected'] = sum(
+            [d.get('Amount of boost collected', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Amount of boost used at supersonic'] = sum(
+            [d.get('Amount of boost used at supersonic', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Total stolen'] = sum(
+            [d.get('Total stolen', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Total collected from big pads'] = sum(
+            [d.get('Total collected from big pads', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Total stolen from big pads'] = sum(
+            [d.get('Total stolen from big pads', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Total collected from small pads'] = sum(
+            [d.get('Total collected from small pads', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Total stolen from small pads'] = sum(
+            [d.get('Total stolen from small pads', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Boost overfill'] = sum(
+            [d.get('Boost overfill', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Stolen overfill'] = sum(
+            [d.get('Stolen overfill', 0) for d in gameIndividualBoosts])
+
+        # Count
+        self.Individual['Boost']['Big pads taken'] = sum(
+            [d.get('Big pads taken', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Big pads stolen'] = sum(
+            [d.get('Big pads stolen', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Small pads taken'] = sum(
+            [d.get('Small pads taken', 0) for d in gameIndividualBoosts])
+        self.Individual['Boost']['Small pads stolen'] = sum(
+            [d.get('Small pads stolen', 0) for d in gameIndividualBoosts])
+
+        # Time
+        self.Individual['Boost']['0 boost']['time'] = sum(
+            [d['0 boost']['time'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['100 boost']['time'] = sum(
+            [d['100 boost']['time'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['0-25% boost']['time'] = sum(
+            [d['0-25% boost']['time'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['25-50% boost']['time'] = sum(
+            [d['25-50% boost']['time'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['50-75% boost']['time'] = sum(
+            [d['50-75% boost']['time'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['75-100% boost']['time'] = sum(
+            [d['75-100% boost']['time'] for d in gameIndividualBoosts])
+
+        # Percent
+        self.Individual['Boost']['0 boost']['percent'] = self.average(
+            [d['0 boost']['percent'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['100 boost']['percent'] = self.average(
+            [d['100 boost']['percent'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['0-25% boost']['percent'] = self.average(
+            [d['0-25% boost']['percent'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['25-50% boost']['percent'] = self.average(
+            [d['25-50% boost']['percent'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['50-75% boost']['percent'] = self.average(
+            [d['50-75% boost']['percent'] for d in gameIndividualBoosts])
+        self.Individual['Boost']['75-100% boost']['percent'] = self.average(
+            [d['75-100% boost']['percent'] for d in gameIndividualBoosts])
+
+        # Positioning stats
+        # Percentages
+        gameIndividualPositionings = [
+            d.get('Positioning', None) for d in gameIndividuals]
+        self.Individual['Positioning']['Most back']['percent'] = self.average(
+            [d['Most back']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Most forward']['percent'] = self.average(
+            [d['Most forward']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Defensive third']['percent'] = self.average(
+            [d['Defensive third']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Neutral third']['percent'] = self.average(
+            [d['Neutral third']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Offensive third']['percent'] = self.average(
+            [d['Offensive third']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Defensive half']['percent'] = self.average(
+            [d['Defensive half']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Offensive half']['percent'] = self.average(
+            [d['Offensive half']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Closest to ball']['percent'] = self.average(
+            [d['Closest to ball']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Farthest from ball']['percent'] = self.average(
+            [d['Farthest from ball']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Behind the ball']['percent'] = self.average(
+            [d['Behind the ball']['percent'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['In front of the ball']['percent'] = self.average(
+            [d['In front of the ball']['percent'] for d in gameIndividualPositionings])
+
+        # Absolutes
+        self.Individual['Positioning']['Most back']['time'] = sum(
+            [d['Most back']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Most forward']['time'] = sum(
+            [d['Most forward']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Defensive third']['time'] = sum(
+            [d['Defensive third']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Neutral third']['time'] = sum(
+            [d['Neutral third']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Offensive third']['time'] = sum(
+            [d['Offensive third']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Defensive half']['time'] = sum(
+            [d['Defensive half']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Offensive half']['time'] = sum(
+            [d['Offensive half']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Closest to ball']['time'] = sum(
+            [d['Closest to ball']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Farthest from ball']['time'] = sum(
+            [d['Farthest from ball']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Behind the ball']['time'] = sum(
+            [d['Behind the ball']['time'] for d in gameIndividualPositionings])
+        self.Individual['Positioning']['In front of the ball']['time'] = sum(
+            [d['In front of the ball']['time'] for d in gameIndividualPositionings])
+
+        # Averages
+        self.Individual['Positioning']['Average distance to teammates'] = self.average(
+            [d.get('Average distance to teammates', 0) for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Average distance to the ball'] = self.average(
+            [d.get('Average distance to the ball', 0) for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Average distance to the ball in possesion'] = self.average(
+            [d.get('Average distance to the ball in possesion', 0) for d in gameIndividualPositionings])
+        self.Individual['Positioning']['Average distance to the ball out of possesion'] = self.average(
+            [d.get('Average distance to the ball out of possesion', 0) for d in gameIndividualPositionings])
+
+        # Movement stats
+        # Averages
+        gameIndividualMovements = [
+            d.get('Movement', None) for d in gameIndividuals]
+        self.Individual['Movement']['Average speed']['absolute'] = self.average(
+            [d['Average speed']['absolute'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Average speed']['percent'] = self.average(
+            [d['Average speed']['percent'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Average powerslide duration'] = self.average(
+            [d['Average powerslide duration'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Total distance travelled'] = sum(
+            [d.get('Total distance travelled', 0) for d in gameIndividualMovements])
+        self.Individual['Movement']['Powerslide total duration'] = sum(
+            [d.get('Powerslide total duration', 0) for d in gameIndividualMovements])
+        self.Individual['Movement']['Number of powerslides'] = sum(
+            [d.get('Number of powerslides', 0) for d in gameIndividualMovements])
+
+        self.Individual['Movement']['Supersonic']['percent'] = self.average(
+            [d['Supersonic']['percent'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Boost speed']['percent'] = self.average(
+            [d['Boost speed']['percent'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Slow speed']['percent'] = self.average(
+            [d['Slow speed']['percent'] for d in gameIndividualMovements])
+        self.Individual['Movement']['On the ground']['percent'] = self.average(
+            [d['On the ground']['percent'] for d in gameIndividualMovements])
+        self.Individual['Movement']['In low air']['percent'] = self.average(
+            [d['In low air']['percent'] for d in gameIndividualMovements])
+        self.Individual['Movement']['In high air']['percent'] = self.average(
+            [d['In high air']['percent'] for d in gameIndividualMovements])
+
+        self.Individual['Movement']['Supersonic']['time'] = self.average(
+            [d['Supersonic']['time'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Boost speed']['time'] = self.average(
+            [d['Boost speed']['time'] for d in gameIndividualMovements])
+        self.Individual['Movement']['Slow speed']['time'] = self.average(
+            [d['Slow speed']['time'] for d in gameIndividualMovements])
+        self.Individual['Movement']['On the ground']['time'] = self.average(
+            [d['On the ground']['time'] for d in gameIndividualMovements])
+        self.Individual['Movement']['In low air']['time'] = self.average(
+            [d['In low air']['time'] for d in gameIndividualMovements])
+        self.Individual['Movement']['In high air']['time'] = self.average(
+            [d['In high air']['time'] for d in gameIndividualMovements])
+    # End of calculateSessionStats
 
     def addGame(self, game):
         self.Games.append(game)
 
         # General Stats for session
-        self.Wins += 1 if game.Win == 1 else 0
-        self.Losses += 1 if game.Win == -1 else 0
-        self.Overtime += game.Overtime if game.Overtime != -2 else 0
-        self.EndDate = game.Date + \
+        self.EndDate = getattr(game, 'Date', int(0)) + \
             datetime.timedelta(
-                seconds=game.Time_Played) if self.EndDate == 0 else self.EndDate
-        self.Time_Played += game.Time_Played
-        self.StartDate = game.Date
+                seconds=getattr(game, 'Time_Played', int(0))) if self.EndDate == int(0) else self.EndDate
+        self.StartDate = getattr(game, 'Date', int(0))
 
-        # Team
-        self.Team['Goals For'] += game.Team['Goals For']
-        self.Team['Goals Against'] += game.Team['Goals Against']
-        self.Team['Assists'] += game.Team['Assists']
-        self.Team['Shots'] += game.Team['Shots']
-        self.Team['Saves'] += game.Team['Saves']
-        self.Team['Demos Inflicted'] += game.Team['Demos Inflicted']
-        self.Team['Demos Received'] += game.Team['Demos Received']
-        self.Team['Total Score'] += game.Team['Total Score']
-        self.Team['Average Score'] = (
-            self.Team['Average Score'] + game.Team['Average Score'])/2
-        self.Team['Average Shooting Percent'] = (
-            self.Team['Average Shooting Percent'] + game.Team['Average Shooting Percent'])/2
-        self.Team['Time in possesion'] += game.Team['Time in possesion']
-        self.Team['Time ball in defensive half'] += game.Team['Time ball in defensive half']
-
-        # Opposition
-        self.Opposition['Goals For'] += game.Opposition['Goals For']
-        self.Opposition['Goals Against'] += game.Opposition['Goals Against']
-        self.Opposition['Assists'] += game.Opposition['Assists']
-        self.Opposition['Shots'] += game.Opposition['Shots']
-        self.Opposition['Saves'] += game.Opposition['Saves']
-        self.Opposition['Demos Inflicted'] += game.Opposition['Demos Inflicted']
-        self.Opposition['Demos Received'] += game.Opposition['Demos Received']
-        self.Opposition['Total Score'] += game.Opposition['Total Score']
-        self.Opposition['Average Score'] = (
-            self.Opposition['Average Score'] + game.Opposition['Average Score'])/2
-        self.Opposition['Average Shooting Percent'] = (
-            self.Opposition['Average Shooting Percent'] + game.Opposition['Average Shooting Percent'])/2
-        self.Opposition['Time in possesion'] += game.Opposition['Time in possesion']
-        self.Opposition['Time ball in defensive half'] += game.Opposition['Time ball in defensive half']
-
-        # Individual Stats
-        # General Stats
-        self.Individual['General']['Goals'] += game.Individual['General']['Goals']
-        self.Individual['General']['Saves'] += game.Individual['General']['Saves']
-        self.Individual['General']['Assists'] += game.Individual['General']['Assists']
-        self.Individual['General']['Shots'] += game.Individual['General']['Shots']
-        self.Individual['General']['Shots Against'] += game.Individual['General']['Shots Against']
-        self.Individual['General']['Demos Inflicted'] += game.Individual['General']['Demos Inflicted']
-        self.Individual['General']['Demos Received'] += game.Individual['General']['Demos Received']
-        self.Individual['General']['Score'] += game.Individual['General']['Score']
-        self.Individual['General']['Shooting Percent'] = (
-            self.Individual['General']['Shooting Percent'] + game.Individual['General']['Shooting Percent'])/2
-        self.Individual['General']['Goals Against Whilst Last Defender'] += game.Individual['General']['Goals Against Whilst Last Defender']
-        self.Individual['General']['MVP'] += 1 if game.Individual['General']['MVP'] else 0
-
-        # Boost Stats
-        # Averages
-        self.Individual['Boost']['Average boost used per minute'] = (
-            self.Individual['Boost']['Average boost used per minute'] + game.Individual['Boost']['Average boost used per minute'])/2
-        self.Individual['Boost']['Average boost collected per minute'] = (
-            self.Individual['Boost']['Average boost collected per minute'] + game.Individual['Boost']['Average boost collected per minute'])/2
-        self.Individual['Boost']['Average boost amount'] = (
-            self.Individual['Boost']['Average boost amount'] + game.Individual['Boost']['Average boost amount'])/2
-
-        # Absolutes
-        self.Individual['Boost']['Amount of boost collected'] += game.Individual['Boost']['Amount of boost collected']
-        self.Individual['Boost']['Amount of boost used at supersonic'] += game.Individual['Boost']['Amount of boost used at supersonic']
-        self.Individual['Boost']['Total stolen'] += getattr(
-            game.Individual['Boost'], 'Total stolen', 0)
-        self.Individual['Boost']['Total collected from big pads'] += getattr(
-            game.Individual['Boost'], 'Total collected from big pads', 0)
-        self.Individual['Boost']['Total stolen from big pads'] += getattr(
-            game.Individual['Boost'], 'Total stolen from big pads', 0)
-        self.Individual['Boost']['Total collected from small pads'] += getattr(
-            game.Individual['Boost'], 'Total collected from small pads', 0)
-        self.Individual['Boost']['Total stolen from small pads'] += getattr(
-            game.Individual['Boost'], 'Total stolen from small pads', 0)
-        self.Individual['Boost']['Boost overfill'] += getattr(
-            game.Individual['Boost'], 'Boost overfill', 0)
-        self.Individual['Boost']['Stolen overfill'] += getattr(
-            game.Individual['Boost'], 'Stolen overfill', 0)
-
-        # Count
-        self.Individual['Boost']['Big pads taken'] += game.Individual['Boost']['Big pads taken']
-        self.Individual['Boost']['Big pads stolen'] += game.Individual['Boost']['Big pads stolen']
-        self.Individual['Boost']['Small pads taken'] += game.Individual['Boost']['Small pads taken']
-        self.Individual['Boost']['Small pads stolen'] += game.Individual['Boost']['Small pads stolen']
-
-        # Time
-        self.Individual['Boost']['0 boost']['time'] += game.Individual['Boost']['0 boost']['time']
-        self.Individual['Boost']['100 boost']['time'] += game.Individual['Boost']['100 boost']['time']
-        self.Individual['Boost']['0-25% boost']['time'] += game.Individual['Boost']['0-25% boost']['time']
-        self.Individual['Boost']['25-50% boost']['time'] += game.Individual['Boost']['25-50% boost']['time']
-        self.Individual['Boost']['50-75% boost']['time'] += game.Individual['Boost']['50-75% boost']['time']
-        self.Individual['Boost']['75-100% boost']['time'] += game.Individual['Boost']['75-100% boost']['time']
-
-        # Percent
-        self.Individual['Boost']['0 boost']['percent'] = (
-            self.Individual['Boost']['0 boost']['percent'] + game.Individual['Boost']['0 boost']['percent'])/2
-        self.Individual['Boost']['100 boost']['percent'] = (
-            self.Individual['Boost']['100 boost']['percent'] + game.Individual['Boost']['100 boost']['percent'])/2
-        self.Individual['Boost']['0-25% boost']['percent'] = (
-            self.Individual['Boost']['0-25% boost']['percent'] + game.Individual['Boost']['0-25% boost']['percent'])/2
-        self.Individual['Boost']['25-50% boost']['percent'] = (
-            self.Individual['Boost']['25-50% boost']['percent'] + game.Individual['Boost']['25-50% boost']['percent'])/2
-        self.Individual['Boost']['50-75% boost']['percent'] = (
-            self.Individual['Boost']['50-75% boost']['percent'] + game.Individual['Boost']['50-75% boost']['percent'])/2
-        self.Individual['Boost']['75-100% boost']['percent'] = (
-            self.Individual['Boost']['75-100% boost']['percent'] + game.Individual['Boost']['75-100% boost']['percent'])/2
-
-        # Positioning stats
-        # Percentages
-        self.Individual['Positioning']['Most back']['percent'] = (
-            self.Individual['Positioning']['Most back']['percent'] + game.Individual['Positioning']['Most back']['percent'])/2
-        self.Individual['Positioning']['Most forward']['percent'] = (
-            self.Individual['Positioning']['Most forward']['percent'] + game.Individual['Positioning']['Most forward']['percent'])/2
-        self.Individual['Positioning']['Defensive third']['percent'] = (
-            self.Individual['Positioning']['Defensive third']['percent'] + game.Individual['Positioning']['Defensive third']['percent'])/2
-        self.Individual['Positioning']['Neutral third']['percent'] = (
-            self.Individual['Positioning']['Neutral third']['percent'] + game.Individual['Positioning']['Neutral third']['percent']) / 2
-        self.Individual['Positioning']['Offensive third']['percent'] = (
-            self.Individual['Positioning']['Offensive third']['percent'] + game.Individual['Positioning']['Offensive third']['percent'])/2
-        self.Individual['Positioning']['Defensive half']['percent'] = (
-            self.Individual['Positioning']['Defensive half']['percent'] + game.Individual['Positioning']['Defensive half']['percent'])/2
-        self.Individual['Positioning']['Offensive half']['percent'] = (
-            self.Individual['Positioning']['Offensive half']['percent'] + game.Individual['Positioning']['Offensive half']['percent'])/2
-        self.Individual['Positioning']['Closest to ball']['percent'] = (
-            self.Individual['Positioning']['Closest to ball']['percent'] + game.Individual['Positioning']['Closest to ball']['percent'])/2
-        self.Individual['Positioning']['Farthest from ball']['percent'] = (
-            self.Individual['Positioning']['Farthest from ball']['percent'] + game.Individual['Positioning']['Farthest from ball']['percent'])/2
-        self.Individual['Positioning']['Behind the ball']['percent'] = (
-            self.Individual['Positioning']['Behind the ball']['percent'] + game.Individual['Positioning']['Behind the ball']['percent'])/2
-        self.Individual['Positioning']['In front of the ball']['percent'] = (
-            self.Individual['Positioning']['In front of the ball']['percent'] + game.Individual['Positioning']['In front of the ball']['percent'])/2
-
-        # Absolutes
-        self.Individual['Positioning']['Most back']['time'] += game.Individual['Positioning']['Most back']['time']
-        self.Individual['Positioning']['Most forward']['time'] += game.Individual['Positioning']['Most forward']['time']
-        self.Individual['Positioning']['Defensive third']['time'] += game.Individual['Positioning']['Defensive third']['time']
-        self.Individual['Positioning']['Neutral third']['time'] += game.Individual['Positioning']['Neutral third']['time']
-        self.Individual['Positioning']['Offensive third']['time'] += game.Individual['Positioning']['Offensive third']['time']
-        self.Individual['Positioning']['Defensive half']['time'] += game.Individual['Positioning']['Defensive half']['time']
-        self.Individual['Positioning']['Offensive half']['time'] += game.Individual['Positioning']['Offensive half']['time']
-        self.Individual['Positioning']['Closest to ball']['time'] += game.Individual['Positioning']['Closest to ball']['time']
-        self.Individual['Positioning']['Farthest from ball']['time'] += game.Individual['Positioning']['Farthest from ball']['time']
-        self.Individual['Positioning']['Behind the ball']['time'] += game.Individual['Positioning']['Behind the ball']['time']
-        self.Individual['Positioning']['In front of the ball']['time'] += game.Individual['Positioning']['In front of the ball']['time']
-
-        # Averages
-        if(game.Player_Team_Size > 1):
-            self.Individual['Positioning']['Average distance to teammates'] = (
-                self.Individual['Positioning']['Average distance to teammates'] + game.Individual['Positioning']['Average distance to teammates'])/2
-        self.Individual['Positioning']['Average distance to the ball'] = (
-            self.Individual['Positioning']['Average distance to the ball'] + game.Individual['Positioning']['Average distance to the ball'])/2
-        self.Individual['Positioning']['Average distance to the ball in possesion'] = (
-            self.Individual['Positioning']['Average distance to the ball in possesion'] + game.Individual['Positioning']['Average distance to the ball in possesion'])/2
-        self.Individual['Positioning']['Average distance to the ball out of possesion'] = (
-            self.Individual['Positioning']['Average distance to the ball out of possesion'] + game.Individual['Positioning']['Average distance to the ball out of possesion'])/2
-
-        # Movement stats
-        # Averages
-        self.Individual['Movement']['Average speed']['absolute'] += game.Individual['Movement']['Average speed']['absolute']
-        self.Individual['Movement']['Average speed']['percent'] = (
-            self.Individual['Movement']['Average speed']['percent'] + game.Individual['Movement']['Average speed']['percent'])/2
-        self.Individual['Movement']['Average powerslide duration'] = (
-            self.Individual['Movement']['Average powerslide duration'] + game.Individual['Movement']['Average powerslide duration'])/2
-        self.Individual['Movement']['Total distance travelled'] += game.Individual['Movement']['Total distance travelled']
-        self.Individual['Movement']['Powerslide total duration'] += game.Individual['Movement']['Powerslide total duration']
-        self.Individual['Movement']['Number of powerslides'] += game.Individual['Movement']['Number of powerslides']
-
-        self.Individual['Movement']['Supersonic']['percent'] = (
-            self.Individual['Movement']['Supersonic']['percent'] + game.Individual['Movement']['Supersonic']['percent'])/2
-        self.Individual['Movement']['Boost speed']['percent'] = (
-            self.Individual['Movement']['Boost speed']['percent'] + game.Individual['Movement']['Boost speed']['percent'])/2
-        self.Individual['Movement']['Slow speed']['percent'] = (
-            self.Individual['Movement']['Slow speed']['percent'] + game.Individual['Movement']['Slow speed']['percent'])/2
-        self.Individual['Movement']['On the ground']['percent'] = (
-            self.Individual['Movement']['On the ground']['percent'] + game.Individual['Movement']['On the ground']['percent'])/2
-        self.Individual['Movement']['In low air']['percent'] = (
-            self.Individual['Movement']['In low air']['percent'] + game.Individual['Movement']['In low air']['percent'])/2
-        self.Individual['Movement']['In high air']['percent'] = (
-            self.Individual['Movement']['In high air']['percent'] + game.Individual['Movement']['In high air']['percent'])/2
-
-        self.Individual['Movement']['Supersonic']['time'] += game.Individual['Movement']['Supersonic']['time']
-        self.Individual['Movement']['Boost speed']['time'] += game.Individual['Movement']['Boost speed']['time']
-        self.Individual['Movement']['Slow speed']['time'] += game.Individual['Movement']['Slow speed']['time']
-        self.Individual['Movement']['On the ground']['time'] += game.Individual['Movement']['On the ground']['time']
-        self.Individual['Movement']['In low air']['time'] += game.Individual['Movement']['In low air']['time']
-        self.Individual['Movement']['In high air']['time'] += game.Individual['Movement']['In high air']['time']
+        self.calculateSessionStats()
     # End of addGame
 
     def checkGameInSession(self, game):
         if(len(self.Games) < 1):
             endSearchDate = game.Date
             startSearchDate = game.Date
+            self.GameMode = game.mode
         else:
             endSearchDate = self.Games[len(self.Games)-1].Date
             startSearchDate = self.Games[len(
                 self.Games)-1].Date + datetime.timedelta(minutes=-20)
 
-        if(startSearchDate <= game.Date <= endSearchDate):
+        if(startSearchDate <= game.Date <= endSearchDate and
+           game.Match_GUID not in [d.Match_GUID for d in self.Games]
+           and game.mode == self.GameMode):
             return True
         return False
     # End of checkGameInSession
@@ -328,9 +412,7 @@ class GameSession():
                 else:
                     value = str(rawValue)
             else:
-                # print(widget)
                 rawValue = self.returnValueFromKeyString(widget['tags'])
-                # print(rawValue)
                 value = f"{rawValue:{widget['precision']}}"
         else:
             value = ""

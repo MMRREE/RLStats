@@ -27,3 +27,9 @@ This is a repo to track the development of RLStats, a python program interfacing
   - [ ] Set the title properly
   - [ ] Bug fix displaying two keys on the same graph (e.g. Goals For/Against)
   - [ ] Graph selections from schema
+
+## Known Bugs
+
+- Search returning no games at all does not work properly with sessions
+- Games with lacking stats ruin individual game and overall session
+- Session stats not currently aggregating properly
