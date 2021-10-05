@@ -1,3 +1,16 @@
+'''
+RLStat.py
+
+Version 1.0.0
+Written By: Eamonn Trim (eamonntrim@gmail.com)
+Last update: 03/10/2021
+
+Generate a .exe from this by using the command
+pyinstaller --noconsole -F --hidden-import "babel.numbers" --add-data "icon.ico;." --icon=icon.ico RLStats.py
+
+Once the file has been made, needs games.json and icon.ico - These are loaded during the startup
+'''
+
 import matplotlib.pyplot as plt
 import GraphFormat as gf
 import requests as req
@@ -17,11 +30,91 @@ from tkcalendar import Calendar, DateEntry
 import datetime
 import time
 import json
+import os
+import sys
+import re
 
-gamesFile = open('games.json', 'r+')
-gamesData = gamesFile.read()
-games = json.loads(gamesData)
-gamesFile.close()
+RE_FILE = re.compile('\\w+\.\w+')
+
+
+# TODO: Figure out regex for the file parsing
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        directory = os.path.join(sys._MEIPASS, relative_path)
+    else:
+        directory = os.path.join(os.path.abspath("."), relative_path)
+    return directory
+# End of resource_path
+
+
+def local_storage_path(relative_path):
+    directory = os.path.join(os.path.abspath("."), relative_path)
+    return directory
+# End of local_storage_path
+
+
+def checkFolderOrFileExists(path):
+    path = path.replace("/", "\\")
+    lastWord = path.split("\\")[-1]
+    file = RE_FILE.search(path)
+    if(file is not None):
+        return os.path.isfile(path)
+    else:
+        return os.path.isdir(path)
+# End of checkFolderOrFileExists
+
+
+def checkExistsOrCreate(path):
+    path = path.replace("/", "\\")
+    file = RE_FILE.search(path.split('\\')[-1])
+    if(not checkFolderOrFileExists(path)):
+        # If does not exist check parent folder, if that does exist then create this folder
+        newPath = "\\".join(path.split("\\")[0:-1])
+        if(checkFolderOrFileExists(newPath)):
+            # If parent does exist
+            os.chmod(newPath, 0o777)
+            if(file is not None):
+                fileObj = open(path, 'w+')
+                fileObj.close()
+            else:
+                os.makedirs(path)
+        else:
+            # Parent does not exist
+            checkExistsOrCreate(newPath)
+            checkExistsOrCreate(path)
+    else:
+        print("Folder or file already exists")
+# End of checkExistsOrCreate
+
+
+def loadJson(path):
+    path = path.replace("/", "\\")
+    if(not checkFolderOrFileExists(path)):
+        checkExistsOrCreate(local_storage_path(path))
+        file = open(path, 'w+')
+        json.dump({}, file, indent=4, default=str)
+        file.close()
+        return {}
+    else:
+        file = open(path, 'r+')
+        fileData = file.read()
+        fileJson = json.loads(fileData)
+        return fileJson
+# End of loadJson
+
+
+def writeJson(path, data):
+    path = path.replace("/", "\\")
+    checkExistsOrCreate(local_storage_path(path))
+    file = open(path, 'w+')
+    json.dump(data, file, indent=4, default=str)
+    file.close()
+    return data
+# End of writeJson
+
+
+games = loadJson('rlstats/data/games.json')
 
 
 class Application(tk.Frame):
@@ -57,7 +150,8 @@ class Application(tk.Frame):
 
     def create_widgets(self):
         self.master.title("Rocket League Stats")
-        self.master.iconbitmap(default='./icon.ico')
+        defaultIco = resource_path('icon.ico')
+        self.master.iconbitmap(default=defaultIco)
 
         self.menu = tk.Menu(self)
         self.m_file = tk.Menu(self, tearoff=0)
@@ -864,9 +958,7 @@ class Application(tk.Frame):
             if fetched:
                 time.sleep(0.5)
 
-        gamesFile = open('games.json', 'w+')
-        json.dump(games, gamesFile, indent=4, default=str)
-        gamesFile.close()
+        writeJson('rlstats/data/games.json', games)
 
         for session in self.gameSessionsCache:
             sessionDict = session.__dict__

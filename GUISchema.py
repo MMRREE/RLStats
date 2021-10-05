@@ -131,7 +131,7 @@ SessionSidebar = [
                 'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Individual.General.MVP",
-                "precision": ".2f"
+                "precision": "g"
             },
             {
                 'name': 'SessionIndividualSore',
@@ -140,7 +140,7 @@ SessionSidebar = [
                 'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Individual.General.Score",
-                "precision": ".2f"
+                "precision": "g"
             },
             {
                 'name': 'SessionIndividualDemosReceived',
@@ -391,7 +391,10 @@ SessionSidebar = [
                         'title': 'Average Distance to: ',
                         'gridpos': (0, 0),
                         'gridspan': (1, 1),
-                        "type": "widget",
+                        "type": "Label",
+                        "sticky": "nw",
+                        "args":
+                            [{"text": "Average Distance to:"}]
                     },
                     {
                         'name': 'SessionIndividualPositioningTeammates',
@@ -488,7 +491,10 @@ SessionSidebar = [
                         'title': 'Ball: ',
                         'gridpos': (5, 0),
                         'gridspan': (1, 1),
-                        "type": "widget",
+                        "type": "Label",
+                        "sticky": "nw",
+                        "args":
+                            [{"text": "Ball:"}]
                     },
                     {
                         'name': 'SessionIndividualPositioningBallClosest',

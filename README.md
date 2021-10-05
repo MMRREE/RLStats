@@ -33,3 +33,4 @@ This is a repo to track the development of RLStats, a python program interfacing
 - Search returning no games at all does not work properly with sessions
 - Games with lacking stats ruin individual game and overall session
 - Session stats not currently aggregating properly
+- Average distance to N/A (should not be N/A but empty)

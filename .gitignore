@@ -3,3 +3,7 @@ __pycache__
 ballchasingplayer.js
 games.json
 *.code-workspace
+build
+*.spec
+icons
+dist
