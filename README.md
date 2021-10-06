@@ -14,11 +14,11 @@ This is a repo to track the development of RLStats, a python program interfacing
     - [x] Create an object as a schema
     - [x] Capture listed stats (initial query)
     - [x] Capture listed stats (independent query)
-  - [ ] Sessions:
+  - [x] Sessions:
     - [x] Accumulation of statistics for the session
     - [x] Zoom graph into session when selected
     - [x] Scrollable section to display session statistics
-    - [ ] Populate session GUI from a data structure (Still need to finish team aspects)
+    - x ] Populate session GUI from a data structure (Still need to finish team aspects)
 - [x] Graphing:
   - [x] Parse the schema so that choice of drop down options matches
   - [x] Group together categories that make sense (goals for/against) and graph in positive and negative direction
@@ -27,6 +27,15 @@ This is a repo to track the development of RLStats, a python program interfacing
   - [ ] Set the title properly
   - [ ] Bug fix displaying two keys on the same graph (e.g. Goals For/Against)
   - [ ] Graph selections from schema
+
+## Specifications for V2.0
+
+- [ ] Authentication:
+  - [x] Initialise Ballchasing Authentication with an initialisation window
+  - [ ] If the ballchasing authentication breaks, relaunch the authentication window
+- [ ] Settings between sessions
+  - [ ] Save settings for search bewtween sessions
+  - [ ] Save settings for a "default user"
 
 ## Known Bugs
 

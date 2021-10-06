@@ -174,7 +174,7 @@ SessionSidebar = [
                         'gridpos': (0, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Average boost used per minute",
+                        'tags': "Individual.Boost.Average Boost Used per Minute",
                         "precision": ".2f"
                     },
                     {
@@ -183,7 +183,7 @@ SessionSidebar = [
                         'gridpos': (0, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Average boost collected per minute",
+                        'tags': "Individual.Boost.Average Boost Collected per Minute",
                         "precision": ".2f"
                     },
                     {
@@ -192,7 +192,7 @@ SessionSidebar = [
                         'gridpos': (0, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Average boost amount",
+                        'tags': "Individual.Boost.Average Boost Amount",
                         "precision": ".2f"
                     },
                     {
@@ -201,7 +201,7 @@ SessionSidebar = [
                         'gridpos': (1, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.0-25% boost.percent",
+                        'tags': "Individual.Boost.0-25% Boost.percent",
                         "precision": ".2f"
                     },
                     {
@@ -210,7 +210,7 @@ SessionSidebar = [
                         'gridpos': (1, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.25-50% boost.percent",
+                        'tags': "Individual.Boost.25-50% Boost.percent",
                         "precision": ".2f"
                     },
                     {
@@ -219,7 +219,7 @@ SessionSidebar = [
                         'gridpos': (1, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.50-75% boost.percent",
+                        'tags': "Individual.Boost.50-75% Boost.percent",
                         "precision": ".2f"
                     },
                     {
@@ -228,7 +228,7 @@ SessionSidebar = [
                         'gridpos': (1, 3),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.75-100% boost.percent",
+                        'tags': "Individual.Boost.75-100% Boost.percent",
                         "precision": ".2f"
                     },
                     {
@@ -237,7 +237,7 @@ SessionSidebar = [
                         'gridpos': (2, 0),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Boost.0 boost.percent",
+                        'tags': "Individual.Boost.0 Boost.percent",
                         "precision": ".2f"
                     },
                     {
@@ -246,7 +246,7 @@ SessionSidebar = [
                         'gridpos': (2, 2),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Boost.100 boost.percent",
+                        'tags': "Individual.Boost.100 Boost.percent",
                         "precision": ".2f"
                     },
                     {
@@ -255,7 +255,7 @@ SessionSidebar = [
                         'gridpos': (3, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Amount of boost collected",
+                        'tags': "Individual.Boost.Amount of Boost Collected",
                         "precision": "g"
                     },
                     {
@@ -264,7 +264,7 @@ SessionSidebar = [
                         'gridpos': (3, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Total collected from big pads",
+                        'tags': "Individual.Boost.Total Collected from Big Pads",
                         "precision": "g"
                     },
                     {
@@ -273,7 +273,7 @@ SessionSidebar = [
                         'gridpos': (3, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Total collected from small pads",
+                        'tags': "Individual.Boost.Total Collected from Small Pads",
                         "precision": "g"
                     },
                     {
@@ -282,7 +282,7 @@ SessionSidebar = [
                         'gridpos': (3, 3),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Boost overfill",
+                        'tags': "Individual.Boost.Boost Overfill",
                         "precision": "g"
                     },
                     {
@@ -291,7 +291,7 @@ SessionSidebar = [
                         'gridpos': (4, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Big pads taken",
+                        'tags': "Individual.Boost.Big Pads Taken",
                         "precision": "g"
                     },
                     {
@@ -300,7 +300,7 @@ SessionSidebar = [
                         'gridpos': (4, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Small pads taken",
+                        'tags': "Individual.Boost.Small Pads Taken",
                         "precision": "g"
                     },
                     {
@@ -309,7 +309,7 @@ SessionSidebar = [
                         'gridpos': (4, 3),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Big pads taken",
+                        'tags': "Individual.Boost.Big Pads Taken",
                         "precision": "g"
                     },
                     {
@@ -328,7 +328,7 @@ SessionSidebar = [
                         'gridpos': (6, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Total stolen",
+                        'tags': "Individual.Boost.Total Stolen",
                         "precision": "g"
                     },
                     {
@@ -337,7 +337,7 @@ SessionSidebar = [
                         'gridpos': (6, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Total stolen from big pads",
+                        'tags': "Individual.Boost.Total Stolen from Big Pads",
                         "precision": "g"
                     },
                     {
@@ -346,7 +346,7 @@ SessionSidebar = [
                         'gridpos': (6, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Total stolen from small pads",
+                        'tags': "Individual.Boost.Total Stolen from Small Pads",
                         "precision": "g"
                     },
                     {
@@ -355,7 +355,7 @@ SessionSidebar = [
                         'gridpos': (6, 3),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Stolen overfill",
+                        'tags': "Individual.Boost.Stolen Overfill",
                         "precision": "g"
                     },
                     {
@@ -364,7 +364,7 @@ SessionSidebar = [
                         'gridpos': (7, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Big pads stolen",
+                        'tags': "Individual.Boost.Big Pads Stolen",
                         "precision": "g"
                     },
                     {
@@ -373,7 +373,7 @@ SessionSidebar = [
                         'gridpos': (7, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Boost.Small pads stolen",
+                        'tags': "Individual.Boost.Small Pads Stolen",
                         "precision": "g"
                     },
                 ]
@@ -402,7 +402,7 @@ SessionSidebar = [
                         'gridpos': (1, 0),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Average distance to teammates",
+                        'tags': "Individual.Positioning.Average Distance to Teammates",
                         "precision": ".2f"
                     },
                     {
@@ -411,16 +411,16 @@ SessionSidebar = [
                         'gridpos': (1, 2),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Average distance to the ball in possesion",
+                        'tags': "Individual.Positioning.Average Distance to the Ball in Possession",
                         "precision": ".2f"
                     },
                     {
                         'name': 'SessionIndividualPositioningBallOutOfPos',
-                        'title': 'Ball (Out of Possesion): ',
+                        'title': 'Ball (out of Possession): ',
                         'gridpos': (1, 4),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Average distance to the ball out of possesion",
+                        'tags': "Individual.Positioning.Average Distance to the Ball out of Possession",
                         "precision": ".2f"
                     },
                     {
@@ -429,7 +429,7 @@ SessionSidebar = [
                         'gridpos': (2, 1),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Most back.percent",
+                        'tags': "Individual.Positioning.Most Back.percent",
                         "precision": ".2f"
                     },
                     {
@@ -438,7 +438,7 @@ SessionSidebar = [
                         'gridpos': (2, 3),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Most forward.percent",
+                        'tags': "Individual.Positioning.Most Forward.percent",
                         "precision": ".2f"
                     },
                     {
@@ -447,7 +447,7 @@ SessionSidebar = [
                         'gridpos': (3, 1),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Defensive half.percent",
+                        'tags': "Individual.Positioning.Defensive Half.percent",
                         "precision": ".2f"
                     },
                     {
@@ -456,7 +456,7 @@ SessionSidebar = [
                         'gridpos': (3, 3),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Offensive half.percent",
+                        'tags': "Individual.Positioning.Offensive Half.percent",
                         "precision": ".2f"
                     },
                     {
@@ -465,7 +465,7 @@ SessionSidebar = [
                         'gridpos': (4, 0),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Defensive third.percent",
+                        'tags': "Individual.Positioning.Defensive Third.percent",
                         "precision": ".2f"
                     },
                     {
@@ -474,7 +474,7 @@ SessionSidebar = [
                         'gridpos': (4, 2),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Neutral third.percent",
+                        'tags': "Individual.Positioning.Neutral Third.percent",
                         "precision": ".2f"
                     },
                     {
@@ -483,7 +483,7 @@ SessionSidebar = [
                         'gridpos': (4, 4),
                         'gridspan': (1, 2),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Offensive third.percent",
+                        'tags': "Individual.Positioning.Offensive Third.percent",
                         "precision": ".2f"
                     },
                     {
@@ -502,7 +502,7 @@ SessionSidebar = [
                         'gridpos': (5, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Closest to ball.percent",
+                        'tags': "Individual.Positioning.Closest to Ball.percent",
                         "precision": ".2f"
                     },
                     {
@@ -511,7 +511,7 @@ SessionSidebar = [
                         'gridpos': (5, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Farthest from ball.percent",
+                        'tags': "Individual.Positioning.Farthest from Ball.percent",
                         "precision": ".2f"
                     },
                     {
@@ -520,7 +520,7 @@ SessionSidebar = [
                         'gridpos': (5, 3),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Positioning.Behind the ball.percent",
+                        'tags': "Individual.Positioning.Behind the Ball.percent",
                         "precision": ".2f"
                     },
                     {
@@ -529,7 +529,7 @@ SessionSidebar = [
                         'gridpos': (5, 4),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Positioning.In front of the ball.percent",
+                        'tags': "Individual.Positioning.In front of the Ball.percent",
                         "precision": ".2f"
                     },
                 ]
@@ -548,7 +548,7 @@ SessionSidebar = [
                         'gridpos': (0, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Average speed.percent",
+                        'tags': "Individual.Movement.Average Speed.percent",
                         "precision": ".2f"
                     },
                     {
@@ -557,7 +557,7 @@ SessionSidebar = [
                         'gridpos': (0, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Total distance travelled",
+                        'tags': "Individual.Movement.Total Distance Travelled",
                         "precision": ".2f"
                     },
                     {
@@ -566,7 +566,7 @@ SessionSidebar = [
                         'gridpos': (1, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Powerslide total duration",
+                        'tags': "Individual.Movement.Powerslide Total Duration",
                         "precision": ".2f"
                     },
                     {
@@ -575,7 +575,7 @@ SessionSidebar = [
                         'gridpos': (1, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Number of powerslides",
+                        'tags': "Individual.Movement.Number of Powerslides",
                         "precision": "g"
                     },
                     {
@@ -584,7 +584,7 @@ SessionSidebar = [
                         'gridpos': (1, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Average powerslide duration",
+                        'tags': "Individual.Movement.Average Powerslide Duration",
                         "precision": ".2f"
                     },
                     {
@@ -593,7 +593,7 @@ SessionSidebar = [
                         'gridpos': (2, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Slow speed.percent",
+                        'tags': "Individual.Movement.Slow Speed.percent",
                         "precision": ".2f"
                     },
                     {
@@ -602,7 +602,7 @@ SessionSidebar = [
                         'gridpos': (2, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.Boost speed.percent",
+                        'tags': "Individual.Movement.Boost Speed.percent",
                         "precision": ".2f"
                     },
                     {
@@ -620,7 +620,7 @@ SessionSidebar = [
                         'gridpos': (3, 0),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.On the ground.percent",
+                        'tags': "Individual.Movement.On the Ground.percent",
                         "precision": ".2f"
                     },
                     {
@@ -629,7 +629,7 @@ SessionSidebar = [
                         'gridpos': (3, 1),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.In low air.percent",
+                        'tags': "Individual.Movement.In Low Air.percent",
                         "precision": ".2f"
                     },
                     {
@@ -638,7 +638,7 @@ SessionSidebar = [
                         'gridpos': (3, 2),
                         'gridspan': (1, 1),
                         "type": "widget",
-                        'tags': "Individual.Movement.In high air.percent",
+                        'tags': "Individual.Movement.In High Air.percent",
                         "precision": ".2f"
                     },
                 ]
@@ -713,7 +713,7 @@ SessionSidebar = [
                 "title": "Time in Possession: ",
                 "gridpos": (1, 3),
                 "gridspan": (1, 1),
-                "tags": "Team.Time in possesion",
+                "tags": "Team.Time in Possession",
                 "precision": "g"
             },
             {
@@ -749,7 +749,116 @@ SessionSidebar = [
                 "title": "Time Ball in Defensive Half: ",
                 "gridpos": (2, 3),
                 "gridspan": (1, 1),
-                "tags": "Team.Time ball in defensive half",
+                "tags": "Team.Time Ball in Defensive Half",
+                "precision": "g"
+            }
+        ]
+    },
+    {
+        "name": "SessionOppositionStats",
+        "type": "collapsible",
+        "title": "Opposition",
+        "gridpos": (4, 0),
+        "gridspan": (1, 4),
+        "sticky": "nsew",
+        "widgets": [
+            {
+                "name": "SessionOppositionGoalsFor",
+                "type": "widget",
+                "title": "Goals For: ",
+                "gridpos": (0, 0),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Goals For",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionGoalsAgainst",
+                "type": "widget",
+                "title": "Goals Against: ",
+                "gridpos": (0, 1),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Goals Against",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionSaves",
+                "type": "widget",
+                "title": "Saves: ",
+                "gridpos": (0, 2),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Saves",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionScore",
+                "type": "widget",
+                "title": "Score: ",
+                "gridpos": (0, 3),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Total Score",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionShots",
+                "type": "widget",
+                "title": "Shots: ",
+                "gridpos": (1, 0),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Shots",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionAssists",
+                "type": "widget",
+                "title": "Assists: ",
+                "gridpos": (1, 2),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Assists",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionTimeInPossesion",
+                "type": "widget",
+                "title": "Time in Possession: ",
+                "gridpos": (1, 3),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Time in Possession",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionAccuracy",
+                "type": "widget",
+                "title": "Shooting Accuracy: ",
+                "gridpos": (2, 0),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Average Shooting Percent",
+                "precision": ".2f"
+            },
+            {
+                "name": "SessionOppositionDemosReceived",
+                "type": "widget",
+                "title": "Demos Received: ",
+                "gridpos": (2, 1),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Demos Received",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionDemosInflicted",
+                "type": "widget",
+                "title": "Demos Inflicted: ",
+                "gridpos": (2, 2),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Demos Inflicted",
+                "precision": "g"
+            },
+            {
+                "name": "SessionOppositionTimeDefensiveHalf",
+                "type": "widget",
+                "title": "Time Ball in Defensive Half: ",
+                "gridpos": (2, 3),
+                "gridspan": (1, 1),
+                "tags": "Opposition.Time Ball in Defensive Half",
                 "precision": "g"
             }
         ]

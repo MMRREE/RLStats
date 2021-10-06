@@ -19,7 +19,7 @@ import tkinter as tk
 from tkImageURL import tkLabelImageURL, tkRawImageURL
 from matplotlib.backends.backend_tkagg import *
 from matplotlib.ticker import MaxNLocator
-from GameStats import graphChoices, GameStat
+from GameStats import GameStat
 from GameSession import GameSession
 from tkinter import ttk
 from CollapsiblePane import CollapsiblePane
@@ -27,6 +27,7 @@ from GUISchema import SessionSidebar
 from Scrollable import ScrollableFrame
 from tkcalendar import Calendar, DateEntry
 from AuthenticationWindow import AuthenticationWindow
+from GraphSchema import graphConfiguration
 
 import datetime
 import time
@@ -59,7 +60,6 @@ class Application(tk.Frame):
                 'Authorization': self.authentication.get('bc')}
             self.create_widgets()
         else:
-            print("Authentication Window")
             self.master.withdraw()
             self.AuthenticationWindow = tk.Tk()
             self.AuthenticationFrame = AuthenticationWindow(
@@ -370,11 +370,8 @@ class Application(tk.Frame):
             master, textvariable=self.graphSelectionVar, indicatoron=True, borderwidth=1, relief="raised")
         self.gM = tk.Menu(self.graphMenu, tearoff=False)
 
-        # statMenuChoices = GameStat().__dict__
-        statMenuChoices = graphChoices
-
-        self.populateMenuFromDict(statMenuChoices, menu=self.gM,
-                                  variable=self.graphSelectionVar)
+        self.populateMenuFromKeysOfDict(graphConfiguration, menu=self.gM,
+                                        variable=self.graphSelectionVar)
         self.graphSelectionVar.trace('w', self.graphSelectionHandler)
 
         self.graphMenu.configure(menu=self.gM)
@@ -524,6 +521,44 @@ class Application(tk.Frame):
                 variable.set(dictionary)
     # End of populateMenuFromDict
 
+    def populateMenuFromKeysOfDict(self, dictionary, parentTags="", menu=None, variable=None):
+        if(menu == None):
+            menu = tk.Menu(self.graphMenu)
+        if(type(dictionary) is dict):
+            for tag, val in dictionary.items():
+                print(tag)
+                if(tag == "type"):
+                    continue
+                if(parentTags != ""):
+                    currentTags = parentTags + "." + tag
+                else:
+                    currentTags = tag
+
+                if(val.get('type') == "cascade"):
+                    newMenu = tk.Menu(self.graphMenu, tearoff=False)
+                    menu.add_cascade(label=tag, menu=newMenu)
+                    self.populateMenuFromKeysOfDict(
+                        val, currentTags, newMenu, variable)
+                else:
+                    menu.add_radiobutton(
+                        value=val.get('value'), label=val.get('label'), indicatoron=True, variable=variable)
+                    if(variable.get() == ""):
+                        variable.set(val.get('value'))
+        elif(type(dictionary) is list):
+            for obj in dictionary:
+                self.populateMenuFromKeysOfDict(obj, parentTags=parentTags,
+                                                variable=variable, menu=menu)
+        else:
+            if(parentTags == ""):
+                currentTags = dictionary
+            else:
+                currentTags = parentTags + "." + dictionary
+            menu.add_radiobutton(
+                value=currentTags, label=dictionary, indicatoron=True, variable=variable)
+            if(variable.get() == ""):
+                variable.set(dictionary)
+    # End of populateMenuFromKeysOfDict
+
     def graphDataArrayFromKeyString(self, keyString, originalDictionary):
         keys = keyString.split(".")
         returnData = originalDictionary
@@ -537,8 +572,26 @@ class Application(tk.Frame):
         return returnData
     # End of graphDataArrayFromKeyString
 
+    def findGraphConfiguration(self, menuSelectedValue="Win/Loss", currentLevel=None):
+        for tag, val in currentLevel.items():
+            if(tag == "type"):
+                continue
+            if(val.get('type') == "cascade"):
+                cascadedSearchResult = self.findGraphConfiguration(
+                    menuSelectedValue=menuSelectedValue, currentLevel=val)
+                if(cascadedSearchResult is not None):
+                    return cascadedSearchResult
+            elif(val.get('value') == menuSelectedValue):
+                return val
+    # End of findGraphConfiguration
+
     def refreshGraph(self):
         dataChoiceValue = self.graphSelectionVar.get()
+
+        graphConfig = self.findGraphConfiguration(
+            dataChoiceValue, graphConfiguration)
+
+        print(graphConfig)
 
         currentLow, currentHigh = self.goalsAx.get_xlim()
 
@@ -547,59 +600,8 @@ class Application(tk.Frame):
         self.goalsAx.get_yaxis().set_major_locator(
             MaxNLocator(integer=True))
 
-        if("/" in dataChoiceValue):
-            if(dataChoiceValue == "Win/Losses"):
-                self.goalsAx.bar(
-                    [d['Date'] for d in self.searchCache],
-                    [d['Win'] for d in self.searchCache],
-                    color=[d['Win_Loss_Color'] for d in self.searchCache],
-                    width=[d['Bar_Width'] for d in self.searchCache],
-                    align='edge',
-                    alpha=0.5)
-
-                self.goalsAx.yaxis.set_major_formatter(plt.FuncFormatter(
-                    lambda value, ticknumber: "Win" if value == 1 else "Loss" if value == -1 else ""))
-                self.goalsAx.set_ylabel("Wins/Loss")
-                self.goalsAx.set_title("Wins Vs Losses")
-            else:
-                choiceA, choiceB = dataChoiceValue.split("/")
-                if(" " in choiceA):
-                    tag, choiceA = choiceA.split(" ")
-                    choiceA = tag + " " + choiceA
-                    choiceB = tag + " " + choiceB
-
-                graphDataA = self.graphDataArrayFromKeyString(
-                    choiceA, self.searchCache)
-                graphDataB = self.graphDataArrayFromKeyString(
-                    choiceB, self.searchCache)
-
-                graphDataB = [-1*x for x in graphDataB]
-
-                self.goalsAx.bar(
-                    [d['Date'] for d in self.searchCache],
-                    graphDataA,
-                    color=[d['Win_Loss_Color']
-                           for d in self.searchCache],
-                    width=[d['Bar_Width'] for d in self.searchCache],
-                    align='edge',
-                    alpha=0.5)
-
-                self.goalsAx.bar(
-                    [d['Date'] for d in self.searchCache],
-                    graphDataB,
-                    color=[d['Win_Loss_Color']
-                           for d in self.searchCache],
-                    width=[d['Bar_Width'] for d in self.searchCache],
-                    align='edge',
-                    alpha=0.5)
-
-                self.goalsAx.set_ylabel(dataChoiceValue)
-                self.goalsAx.set_title(dataChoiceValue)
-        else:
-            if(dataChoiceValue == "Time Played"):
-                dataChoiceValue = "Time_Played"
-            graphData = self.graphDataArrayFromKeyString(
-                dataChoiceValue, self.searchCache)
+        for tag in graphConfig.get('tags'):
+            graphData = self.graphDataArrayFromKeyString(tag, self.searchCache)
 
             if(type(graphData[0]) is dict):
                 if(self.absoluteValues.get() is True):
@@ -609,19 +611,24 @@ class Application(tk.Frame):
                     choice = [x for x in graphData[0].keys() if x ==
                               "percent"][0]
                 graphData = [x[choice] for x in graphData]
-            self.goalsAx.bar(
-                [d['Date'] for d in self.searchCache],
-                graphData,
-                color=[d['Win_Loss_Color']
-                       for d in self.searchCache],
-                width=[d['Bar_Width'] for d in self.searchCache],
-                align='edge',
-                alpha=0.5)
-            # Format the axis and add a title
-            self.goalsAx.set_xticklabels(
-                self.goalsAx.get_xticks(), rotation=30)
-            self.goalsAx.set_ylabel(dataChoiceValue.replace("_", " "))
-            self.goalsAx.set_title(dataChoiceValue.replace("_", " "))
+
+            if(graphConfig.get('tags').index(tag) == 1 and graphConfig.get('invert')):
+                graphData = [d*-1 for d in graphData]
+
+            self.goalsAx.bar([d['Date'] for d in self.searchCache],
+                             graphData,
+                             color=[d['Win_Loss_Color']
+                                    for d in self.searchCache],
+                             width=[d['Bar_Width'] for d in self.searchCache],
+                             align='edge',
+                             alpha=0.5)
+
+        if(graphConfig.get('formatter') is not None):
+            self.goalsAx.yaxis.set_major_formatter(
+                plt.FuncFormatter(graphConfig['formatter']))
+
+        self.goalsAx.set_ylabel(graphConfig.get('yaxis'))
+        self.goalsAx.set_title(graphConfig.get('title'))
 
         self.goalsAx.set_xticklabels(
             self.goalsAx.get_xticks(), rotation=30)
@@ -633,7 +640,6 @@ class Application(tk.Frame):
             self.graph_init = False
 
         gf.dateGraphMajorTicksCalculation(self.goalsAx)
-        self.goalsAx.axhline(y=0, ls="--", color="black", lw=0.25)
         gf.repaintMajorTicks(self.goalsAx)
         self.goalsFigure.tight_layout()
 
