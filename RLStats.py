@@ -26,95 +26,12 @@ from CollapsiblePane import CollapsiblePane
 from GUISchema import SessionSidebar
 from Scrollable import ScrollableFrame
 from tkcalendar import Calendar, DateEntry
+from AuthenticationWindow import AuthenticationWindow
 
 import datetime
 import time
 import json
-import os
-import sys
-import re
-
-RE_FILE = re.compile('\\w+\.\w+')
-
-
-# TODO: Figure out regex for the file parsing
-
-def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        directory = os.path.join(sys._MEIPASS, relative_path)
-    else:
-        directory = os.path.join(os.path.abspath("."), relative_path)
-    return directory
-# End of resource_path
-
-
-def local_storage_path(relative_path):
-    directory = os.path.join(os.path.abspath("."), relative_path)
-    return directory
-# End of local_storage_path
-
-
-def checkFolderOrFileExists(path):
-    path = path.replace("/", "\\")
-    lastWord = path.split("\\")[-1]
-    file = RE_FILE.search(path)
-    if(file is not None):
-        return os.path.isfile(path)
-    else:
-        return os.path.isdir(path)
-# End of checkFolderOrFileExists
-
-
-def checkExistsOrCreate(path):
-    path = path.replace("/", "\\")
-    file = RE_FILE.search(path.split('\\')[-1])
-    if(not checkFolderOrFileExists(path)):
-        # If does not exist check parent folder, if that does exist then create this folder
-        newPath = "\\".join(path.split("\\")[0:-1])
-        if(checkFolderOrFileExists(newPath)):
-            # If parent does exist
-            os.chmod(newPath, 0o777)
-            if(file is not None):
-                fileObj = open(path, 'w+')
-                fileObj.close()
-            else:
-                os.makedirs(path)
-        else:
-            # Parent does not exist
-            checkExistsOrCreate(newPath)
-            checkExistsOrCreate(path)
-    else:
-        print("Folder or file already exists")
-# End of checkExistsOrCreate
-
-
-def loadJson(path):
-    path = path.replace("/", "\\")
-    if(not checkFolderOrFileExists(path)):
-        checkExistsOrCreate(local_storage_path(path))
-        file = open(path, 'w+')
-        json.dump({}, file, indent=4, default=str)
-        file.close()
-        return {}
-    else:
-        file = open(path, 'r+')
-        fileData = file.read()
-        fileJson = json.loads(fileData)
-        return fileJson
-# End of loadJson
-
-
-def writeJson(path, data):
-    path = path.replace("/", "\\")
-    checkExistsOrCreate(local_storage_path(path))
-    file = open(path, 'w+')
-    json.dump(data, file, indent=4, default=str)
-    file.close()
-    return data
-# End of writeJson
-
-
-games = loadJson('rlstats/data/games.json')
+import FileSystem
 
 
 class Application(tk.Frame):
@@ -125,32 +42,46 @@ class Application(tk.Frame):
 
         self._typing_after_id = None
         self._resizing_after_id = None
-        self.user_cache = {}
         self.graph_init = True
 
-        self.ballchasingHeaders = {
-            'Authorization': 'ZZrm3Av50XYFihxOW8t24pMeDRgHopHfwJJovVRF'}
+        self.user_cache = {}
+        self.searchCache = []
+        self.gameSessionsCache = []
+
+        self.loadedGames = FileSystem.loadJson('rlstats/data/games.json')
+
+        self.authentication = FileSystem.loadJson('rlstats/data/auth.json')
 
         self.pack(fill="both", expand=True)
 
-        self.create_widgets()
+        if(self.authentication.get('bc') is not None):
+            self.ballchasingHeaders = {
+                'Authorization': self.authentication.get('bc')}
+            self.create_widgets()
+        else:
+            print("Authentication Window")
+            self.master.withdraw()
+            self.AuthenticationWindow = tk.Tk()
+            self.AuthenticationFrame = AuthenticationWindow(
+                self.AuthenticationWindow, self.master)
 
         self.master.protocol("WM_DELETE_WINDOW", self.onExit)
         self.master.bind("<Configure>", self.resize)
     # End of __init__
 
     def resize(self, event):
-        if(event.widget == self.GraphBox):
-            if(self._resizing_after_id is not None):
-                self.after_cancel(self._resizing_after_id)
+        if(hasattr(self, 'GraphBox')):
+            if(event.widget == self.GraphBox):
+                if(self._resizing_after_id is not None):
+                    self.after_cancel(self._resizing_after_id)
 
-            self._resizing_after_id = self.after(150, self.refreshGraph)
+                self._resizing_after_id = self.after(150, self.refreshGraph)
 
     # End of resize
 
     def create_widgets(self):
         self.master.title("Rocket League Stats")
-        defaultIco = resource_path('icon.ico')
+        defaultIco = FileSystem.resource_path('icon.ico')
         self.master.iconbitmap(default=defaultIco)
 
         self.menu = tk.Menu(self)
@@ -867,10 +798,6 @@ class Application(tk.Frame):
         url += ('player-id=steam:' +
                 userId) if user['platformSlug'] == "steam" else ('player-name=' + userId)
 
-        '''
-        TODO: Add the variables here that are in the search bar so that replays can be filtered
-        '''
-
         if(self.OneVOneFilter.get()):
             url += "&playlist=" + "ranked-duels" if self.RankedFilter.get() else "unranked-duels"
         if(self.TwoVTwoFilter.get()):
@@ -929,14 +856,14 @@ class Application(tk.Frame):
             self.master.update()
             fetched = True
 
-            if (games.get(replay['id']) is not None):
-                replayResult = games.get(replay['id'])
+            if (self.loadedGames.get(replay['id']) is not None):
+                replayResult = self.loadedGames.get(replay['id'])
                 fetched = False
             else:
                 gameReplay = req.get(
                     replay['link'], headers=self.ballchasingHeaders)
                 replayResult = gameReplay.json()
-                games[replay['id']] = replayResult
+                self.loadedGames[replay['id']] = replayResult
 
             if(replayResult.get('match_guid', None) is not None and seenGUIDs.get(replayResult.get('match_guid', None), None) is None):
                 seenGUIDs[replayResult['match_guid']] = True
@@ -958,7 +885,7 @@ class Application(tk.Frame):
             if fetched:
                 time.sleep(0.5)
 
-        writeJson('rlstats/data/games.json', games)
+        FileSystem.writeJson('rlstats/data/games.json', self.loadedGames)
 
         for session in self.gameSessionsCache:
             sessionDict = session.__dict__
@@ -1087,7 +1014,10 @@ class Application(tk.Frame):
     # End of onMouseMove
 
     def onExit(self):
-        self.master.destroy()
+        if(self.master is not None):
+            self.master.destroy()
+        if(self.AuthenticationWindow is not None):
+            self.AuthenticationWindow.destroy()
     # End of onExit
 # End Application
 
