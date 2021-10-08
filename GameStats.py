@@ -135,23 +135,24 @@ class GameStat():
         self.Orange['Goals For'] = orangeStatsCore.get('goals', int(0))
         self.Blue['Goals For'] = blueStatsCore.get('goals', int(0))
 
-        targetUser = None
+        self.targetUser = None
         for player in blue.get('players', []):
             if(player['name'] == userName):
-                self.Win = 1 if self.Blue['Goals For'] < self.Orange['Goals For'] else 0
-                self.Win_Loss_Color = 'g' if self.Blue['Goals For'] < self.Orange['Goals For'] else 'r'
-                self.Target_Player_Team = "Blue"
-                targetUser = player
+                self.Win = 1 if self.Blue['Goals For'] > self.Orange['Goals For'] else 0
+                self.Win_Loss_Color = 'g' if self.Win == 1 else 'r'
+                self.Target_Player_Team = blue
+                self.Opposition_Team = orange
+                self.targetUser = player
 
         for player in orange.get('players', []):
             if(player['name'] == userName):
-                self.Win = 1 if self.Orange['Goals For'] < self.Blue['Goals For'] else 0
-                self.Win_Loss_Color = 'g' if self.Orange['Goals For'] < self.Blue['Goals For'] else 'r'
-                self.Target_Player_Team = "Orange"
-                targetUser = player
+                self.Win = 1 if self.Orange['Goals For'] > self.Blue['Goals For'] else 0
+                self.Win_Loss_Color = 'g' if self.Win == 1 else 'r'
+                self.Target_Player_Team = orange
+                self.Opposition_Team = blue
+                self.targetUser = player
 
         self.Loss = 0 if self.Win == 1 else 1
-        self.Opposition_Team = "Orange" if not "Orange" in self.Target_Player_Team else "Blue"
 
         self.Overtime = replayResult.get('overtime_seconds', int(0))
 
@@ -162,14 +163,11 @@ class GameStat():
 
         self.Bar_Width = self.Time_Played*0.00001157407
 
-        targetPlayerTeam = replayResult.get(
-            self.Target_Player_Team.lower(), None)
-        oppositionTeam = replayResult.get(self.Opposition_Team.lower(), None)
+        self.Player_Team_Size = len(self.Target_Player_Team.get('players', []))
+        self.Opposition_Team_Size = len(
+            self.Opposition_Team.get('players', []))
 
-        self.Player_Team_Size = len(targetPlayerTeam.get('players', []))
-        self.Opposition_Team_Size = len(oppositionTeam.get('players', []))
-
-        targetPlayerTeamStats = targetPlayerTeam.get('stats', None)
+        targetPlayerTeamStats = self.Target_Player_Team.get('stats', None)
         targetPlayerTeamStatsCore = targetPlayerTeamStats.get('core', None)
         self.Team['Goals For'] = targetPlayerTeamStatsCore.get('goals', int(0))
 
@@ -207,7 +205,7 @@ class GameStat():
         self.Team['Time Ball in Defensive Half'] = targetPlayerTeamStatsBall.get(
             'time_in_side', int(0))
 
-        oppositionTeamStats = oppositionTeam.get('stats', None)
+        oppositionTeamStats = self.Opposition_Team.get('stats', None)
         oppositionTeamStatsCore = oppositionTeamStats.get('core', None)
 
         self.Opposition['Goals For'] = oppositionTeamStatsCore.get(
@@ -247,8 +245,8 @@ class GameStat():
         self.Opposition['Time Ball in Defensive Half'] = oppositionTeamStatsBall.get(
             'time_in_side', int(0))
 
-        if(targetUser is not None):
-            targetUserStats = targetUser.get('stats', None)
+        if(self.targetUser is not None):
+            targetUserStats = self.targetUser.get('stats', None)
             targetUserStatsCore = targetUserStats.get('core', None)
             targetUserStatsDemo = targetUserStats.get('demo', None)
 

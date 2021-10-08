@@ -1022,7 +1022,7 @@ class Application(tk.Frame):
     def onExit(self):
         if(self.master is not None):
             self.master.destroy()
-        if(self.AuthenticationWindow is not None):
+        if(hasattr(self, 'AuthenticationWindow') and self.AuthenticationWindow is not None):
             self.AuthenticationWindow.destroy()
     # End of onExit
 # End Application

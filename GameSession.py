@@ -119,7 +119,7 @@ class GameSession():
 
     def calculateSessionStats(self):
         self.Wins = sum([1 for d in self.Games if d.Win == 1])
-        self.Losses = sum([1 for d in self.Games if d.Win == -1])
+        self.Losses = sum([1 for d in self.Games if d.Loss == 1])
         self.Overtime = sum([d.Overtime for d in self.Games])
         self.Time_Played = sum([d.Time_Played for d in self.Games])
 

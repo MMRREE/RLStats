@@ -23,19 +23,20 @@ This is a repo to track the development of RLStats, a python program interfacing
   - [x] Parse the schema so that choice of drop down options matches
   - [x] Group together categories that make sense (goals for/against) and graph in positive and negative direction
   - [x] Selection of data based on absoulte or percentage statistics (where applicable)
-  - [ ] Set the axis properly
-  - [ ] Set the title properly
-  - [ ] Bug fix displaying two keys on the same graph (e.g. Goals For/Against)
-  - [ ] Graph selections from schema
+  - [x] Set the axis properly
+  - [x] Set the title properly
+  - [x] Bug fix displaying two keys on the same graph (e.g. Goals For/Against)
+  - [x] Graph selections from schema
 
 ## Specifications for V2.0
 
 - [ ] Authentication:
   - [x] Initialise Ballchasing Authentication with an initialisation window
   - [ ] If the ballchasing authentication breaks, relaunch the authentication window
-- [ ] Settings between sessions
-  - [ ] Save settings for search bewtween sessions
+- [ ] Settings between launches
+  - [ ] Save settings for search bewtween launches
   - [ ] Save settings for a "default user"
+- [ ] Games list for each session
 
 ## Known Bugs
 
