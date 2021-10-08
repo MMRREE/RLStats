@@ -392,7 +392,8 @@ class Application(tk.Frame):
             master, text="Sessions")
         self.SessionBoxLabel.grid(row=0, column=0, sticky="nw", padx=2, pady=2)
 
-        self.sessionListBox = tk.Listbox(master, height=6)
+        self.sessionListBox = tk.Listbox(
+            master, height=6, exportselection=False)
         self.sessionListBox.bind('<<ListboxSelect>>', self.sessionSelect)
         self.sessionListBox.grid(
             row=1, column=0, sticky="nsew", padx=2, pady=2)
@@ -466,8 +467,25 @@ class Application(tk.Frame):
                 self.createWidgetFromSchema(
                     collapsible, self.SessionStatsScrollBox.contentFrame)
 
+        self.SessionStatsGamesList = tk.Listbox(
+            self.SessionStatsScrollBox.contentFrame, exportselection=False)
+        self.SessionStatsGamesList.bind("<Double-Button-1>", self.gameSelected)
+        self.SessionStatsGamesList.grid(
+            row=5, column=0, columnspan=4, sticky="nsew")
+
         self.SessionStatsScrollBox.recalculateScrollBox()
     # End of createSessionsStatsBox
+
+    def gameSelected(self, event):
+        widget = event.widget
+        index = int(widget.curselection()[0])
+        value = widget.get(index)
+        print(value)
+
+        sessionIndex = self.sessionListBox.curselection()[0]
+        session = self.gameSessionsCache[sessionIndex]
+        session.openGame(index)
+    # End of gameSelected
 
     def sessionSelect(self, event):
         widget = event.widget
@@ -475,7 +493,8 @@ class Application(tk.Frame):
         value = widget.get(index)
         index = (len(self.gameSessionsCache)-1)-index
         session = self.gameSessionsCache[index]
-        session.updateSessionStats(self, SessionSidebar)
+        session.updateSessionStats(
+            self, SessionSidebar, self.SessionStatsGamesList)
 
         lowerDate = session.StartDate + datetime.timedelta(minutes=-3)
         higherDate = session.EndDate + datetime.timedelta(minutes=3)

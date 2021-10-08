@@ -1,5 +1,7 @@
 from GameStats import GameStat
 import datetime
+import tkinter as tk
+from GameWindow import GameWindow
 
 
 class GameSession():
@@ -384,6 +386,13 @@ class GameSession():
         return False
     # End of checkGameInSession
 
+    def populateListboxWithGames(self, listbox):
+        listbox.delete(0, tk.END)
+        for game in self.Games:
+            listbox.insert(0, game.Date.strftime(
+                "%d/%m: %H:%M: ") + game.mode)
+    # End of populateListboxWithGames
+
     def updateStat(self, widget, Frame):
         if("tags" in widget.keys()):
             rawValue = self.returnValueFromKeyString(widget['tags'])
@@ -413,6 +422,12 @@ class GameSession():
         return returnData
     # End of returnValueFromKeyString
 
+    def openGame(self, index):
+        self.GameWindow = tk.Tk()
+        game = self.Games[index]
+        self.GameFrame = GameWindow(game=game, master=self.GameWindow)
+    # End of openGame
+
     def exploreSchemaAndUpdate(self, schema, Frame):
         if(type(schema) is dict):
             if(schema['type'] == "widget"):
@@ -424,9 +439,10 @@ class GameSession():
                 self.exploreSchemaAndUpdate(widget, Frame)
     # End of exploreSchemaAndUpdate
 
-    def updateSessionStats(self, Frame, schema):
+    def updateSessionStats(self, Frame, schema, listbox):
         self.WinRate = self.Wins/(self.Wins+self.Losses)*100
 
         self.exploreSchemaAndUpdate(schema, Frame)
+        self.populateListboxWithGames(listbox)
     # End of updateSessionStats
 # End of GameSession
