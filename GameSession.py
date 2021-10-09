@@ -403,7 +403,6 @@ class GameSession():
             else:
                 value = str(rawValue)
             Frame.updateWidgetFromSchema(widget, f"{value}")
-
     # End of updateStat
 
     def returnValueFromKeyString(self, keyString):
@@ -422,10 +421,11 @@ class GameSession():
         return returnData
     # End of returnValueFromKeyString
 
-    def openGame(self, index):
+    def openGame(self, index, mainWindow):
         self.GameWindow = tk.Tk()
         game = self.Games[index]
-        self.GameFrame = GameWindow(game=game, master=self.GameWindow)
+        self.GameFrame = GameWindow(
+            game=game, master=self.GameWindow, mainWindow=mainWindow)
     # End of openGame
 
     def exploreSchemaAndUpdate(self, schema, Frame):

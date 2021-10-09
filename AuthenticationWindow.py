@@ -13,6 +13,9 @@ class AuthenticationWindow(tk.Frame):
         super().__init__(master=master)
 
         self.master = master
+
+        self.master.withdraw()
+
         self.root = root
         self.Authenticated = False
         self._after_tooltip = None
@@ -20,6 +23,18 @@ class AuthenticationWindow(tk.Frame):
         self.create_widgets()
 
         self.pack(fill="both", expand=True)
+
+        self.master.deiconify()
+        self.update_idletasks()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        size = tuple([int(self.master.winfo_reqwidth()),
+                     int(self.master.winfo_reqheight())])
+
+        x = screen_width/2 - size[0]/2
+        y = screen_height/2 - size[1]/2
+
+        self.master.geometry("+%d+%d" % (x, y))
     # End of __init__
 
     def create_widgets(self):

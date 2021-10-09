@@ -41,6 +41,8 @@ class Application(tk.Frame):
 
         self.master = master
 
+        self.master.withdraw()
+
         self._typing_after_id = None
         self._resizing_after_id = None
         self.graph_init = True
@@ -64,6 +66,18 @@ class Application(tk.Frame):
             self.AuthenticationWindow = tk.Tk()
             self.AuthenticationFrame = AuthenticationWindow(
                 self.AuthenticationWindow, self.master)
+
+        self.master.deiconify()
+        self.update_idletasks()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        size = tuple([int(self.master.winfo_reqwidth()),
+                     int(self.master.winfo_reqheight())])
+
+        x = screen_width/2 - size[0]/2
+        y = screen_height/2 - size[1]/2
+
+        self.master.geometry("+%d+%d" % (x, y))
 
         self.master.protocol("WM_DELETE_WINDOW", self.onExit)
         self.master.bind("<Configure>", self.resize)
@@ -484,7 +498,7 @@ class Application(tk.Frame):
 
         sessionIndex = self.sessionListBox.curselection()[0]
         session = self.gameSessionsCache[sessionIndex]
-        session.openGame(index)
+        session.openGame(index, self.master)
     # End of gameSelected
 
     def sessionSelect(self, event):
