@@ -18,7 +18,7 @@ This is a repo to track the development of RLStats, a python program interfacing
     - [x] Accumulation of statistics for the session
     - [x] Zoom graph into session when selected
     - [x] Scrollable section to display session statistics
-    - x ] Populate session GUI from a data structure (Still need to finish team aspects)
+    - [x] Populate session GUI from a data structure (Still need to finish team aspects)
 - [x] Graphing:
   - [x] Parse the schema so that choice of drop down options matches
   - [x] Group together categories that make sense (goals for/against) and graph in positive and negative direction
@@ -41,6 +41,3 @@ This is a repo to track the development of RLStats, a python program interfacing
 ## Known Bugs
 
 - Search returning no games at all does not work properly with sessions
-- Games with lacking stats ruin individual game and overall session
-- Session stats not currently aggregating properly
-- Average distance to N/A (should not be N/A but empty)
