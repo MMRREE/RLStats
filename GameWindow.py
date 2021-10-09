@@ -4,6 +4,7 @@ import FileSystem
 from GUISchema import GameBar
 from CollapsiblePane import CollapsiblePane
 from Scrollable import ScrollableFrame
+import datetime
 
 
 class GameWindow(tk.Frame):
@@ -25,12 +26,14 @@ class GameWindow(tk.Frame):
         self.update_idletasks()
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
+        parentGeometry = "+".join(self.mainWindow.geometry().split("x")
+                                  ).split("+")
         size = tuple([int(self.master.winfo_reqwidth()),
                      int(self.master.winfo_reqheight())])
         widthOffset = self.mainWindow.winfo_width()
 
-        x = screen_width/2 - size[0]/2 + widthOffset/2
-        y = screen_height/2 - size[1]/2
+        x = int(parentGeometry[2]) + int(parentGeometry[0])+15
+        y = int(parentGeometry[3])
 
         self.master.geometry("+%d+%d" % (x, y))
     # End of __init__
@@ -46,18 +49,15 @@ class GameWindow(tk.Frame):
         self.GameStatsBoxLabel.grid(
             row=0, column=0, sticky="nw", padx=2, pady=2)
 
-        self.GameStatsScrollBox = ScrollableFrame(self)
-        self.GameStatsScrollBox.grid(row=1, column=0, sticky="nsew")
-
         for collapsible in GameBar:
             if(collapsible['type'] == "collapsible"):
                 self.createCollapsible(
-                    collapsible, self.GameStatsScrollBox.contentFrame)
+                    collapsible, self)
             elif(collapsible['type'] == "widget"):
                 self.createWidgetFromSchema(
-                    collapsible, self.GameStatsScrollBox.contentFrame)
+                    collapsible, self)
 
-        #self.exploreSchemaAndUpdate(widgetInfo, value)
+        self.exploreSchemaAndUpdate(GameBar, self)
 
         self.master.protocol("WM_DELETE_WINDOW", self.onExit)
     # End of createWidgets
@@ -132,6 +132,22 @@ class GameWindow(tk.Frame):
                 value = str(rawValue)
             Frame.updateWidgetFromSchema(widget, f"{value}")
     # End of updateStat
+
+    def returnValueFromKeyString(self, keyString):
+        returnData = self.game.__dict__
+        if("." in keyString):
+            keys = keyString.split(".")
+            for key in keys:
+                if("[" in key):
+                    tempLabel = key.split("]")[0]
+                    newKey, ind = tempLabel.split("[")
+                    returnData = returnData.get(newKey)
+                else:
+                    returnData = returnData.get(key)
+        else:
+            returnData = returnData.get(keyString)
+        return returnData
+    # End of returnValueFromKeyString
 
     def onExit(self):
         self.master.destroy()

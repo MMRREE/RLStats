@@ -63,7 +63,7 @@ class Application(tk.Frame):
             self.create_widgets()
         else:
             self.master.withdraw()
-            self.AuthenticationWindow = tk.Tk()
+            self.AuthenticationWindow = tk.Toplevel()
             self.AuthenticationFrame = AuthenticationWindow(
                 self.AuthenticationWindow, self.master)
 
@@ -148,8 +148,8 @@ class Application(tk.Frame):
 
         self.SessionStatsScrollBox.recalculateScrollBox()
 
-        self.searchReplays(
-            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785', 'platformUserHandle': 'Gavin8a2can'})
+        '''self.searchReplays(
+            {"platformSlug": "steam", "platformUserIdentifier": '76561198072178785', 'platformUserHandle': 'Gavin8a2can'})'''
         '''self.searchReplays({
             'platformSlug': "epic", "platformUserHandle": "MMRREE", "platformUserIdentifier": "MMRREE"
         })'''
@@ -494,7 +494,6 @@ class Application(tk.Frame):
         widget = event.widget
         index = int(widget.curselection()[0])
         value = widget.get(index)
-        print(value)
 
         sessionIndex = self.sessionListBox.curselection()[0]
         session = self.gameSessionsCache[sessionIndex]
@@ -559,7 +558,6 @@ class Application(tk.Frame):
             menu = tk.Menu(self.graphMenu)
         if(type(dictionary) is dict):
             for tag, val in dictionary.items():
-                print(tag)
                 if(tag == "type"):
                     continue
                 if(parentTags != ""):
@@ -623,8 +621,6 @@ class Application(tk.Frame):
 
         graphConfig = self.findGraphConfiguration(
             dataChoiceValue, graphConfiguration)
-
-        print(graphConfig)
 
         currentLow, currentHigh = self.goalsAx.get_xlim()
 

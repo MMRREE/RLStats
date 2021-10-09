@@ -422,7 +422,7 @@ class GameSession():
     # End of returnValueFromKeyString
 
     def openGame(self, index, mainWindow):
-        self.GameWindow = tk.Tk()
+        self.GameWindow = tk.Toplevel()
         game = self.Games[index]
         self.GameFrame = GameWindow(
             game=game, master=self.GameWindow, mainWindow=mainWindow)

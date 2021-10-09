@@ -305,30 +305,30 @@ class GameStat():
                 'count_stolen_small', int(0))
 
             self.Individual['Boost']['0 Boost']['time'] = targetUserStatsBoost.get(
-                'time_zero_Boost', int(0))
+                'time_zero_boost', int(0))
             self.Individual['Boost']['100 Boost']['time'] = targetUserStatsBoost.get(
-                'time_full_Boost', int(0))
+                'time_full_boost', int(0))
             self.Individual['Boost']['0-25% Boost']['time'] = targetUserStatsBoost.get(
-                'time_Boost_0_25', int(0))
+                'time_boost_0_25', int(0))
             self.Individual['Boost']['25-50% Boost']['time'] = targetUserStatsBoost.get(
-                'time_Boost_25_50', int(0))
+                'time_boost_25_50', int(0))
             self.Individual['Boost']['50-75% Boost']['time'] = targetUserStatsBoost.get(
-                'time_Boost_50_75', int(0))
+                'time_boost_50_75', int(0))
             self.Individual['Boost']['75-100% Boost']['time'] = targetUserStatsBoost.get(
-                'time_Boost_75_100', int(0))
+                'time_boost_75_100', int(0))
 
             self.Individual['Boost']['0 Boost']['percent'] = targetUserStatsBoost.get(
-                'percent_zero_Boost', int(0))
+                'percent_zero_boost', int(0))
             self.Individual['Boost']['100 Boost']['percent'] = targetUserStatsBoost.get(
-                'percent_full_Boost', int(0))
+                'percent_full_boost', int(0))
             self.Individual['Boost']['0-25% Boost']['percent'] = targetUserStatsBoost.get(
-                'percent_Boost_0_25', int(0))
+                'percent_boost_0_25', int(0))
             self.Individual['Boost']['25-50% Boost']['percent'] = targetUserStatsBoost.get(
-                'percent_Boost_25_50', int(0))
+                'percent_boost_25_50', int(0))
             self.Individual['Boost']['50-75% Boost']['percent'] = targetUserStatsBoost.get(
-                'percent_Boost_50_75', int(0))
+                'percent_boost_50_75', int(0))
             self.Individual['Boost']['75-100% Boost']['percent'] = targetUserStatsBoost.get(
-                'percent_Boost_75_100', int(0))
+                'percent_boost_75_100', int(0))
 
             targetUserStatsPositioning = targetUserStats.get(
                 'positioning', None)
@@ -407,7 +407,7 @@ class GameStat():
             self.Individual['Movement']['Supersonic']['percent'] = targetUserStatsMovement.get(
                 'percent_supersonic_speed', int(0))
             self.Individual['Movement']['Boost Speed']['percent'] = targetUserStatsMovement.get(
-                'percent_Boost_speed', int(0))
+                'percent_boost_speed', int(0))
             self.Individual['Movement']['Slow Speed']['percent'] = targetUserStatsMovement.get(
                 'percent_slow_speed', int(0))
             self.Individual['Movement']['On the Ground']['percent'] = targetUserStatsMovement.get(
@@ -420,7 +420,7 @@ class GameStat():
             self.Individual['Movement']['Supersonic']['time'] = targetUserStatsMovement.get(
                 'time_supersonic_speed', int(0))
             self.Individual['Movement']['Boost Speed']['time'] = targetUserStatsMovement.get(
-                'time_Boost_speed', int(0))
+                'time_boost_speed', int(0))
             self.Individual['Movement']['Slow Speed']['time'] = targetUserStatsMovement.get(
                 'time_slow_speed', int(0))
             self.Individual['Movement']['On the Ground']['time'] = targetUserStatsMovement.get(

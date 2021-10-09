@@ -36,7 +36,7 @@ This is a repo to track the development of RLStats, a python program interfacing
 - [ ] Settings between launches
   - [ ] Save settings for search bewtween launches
   - [ ] Save settings for a "default user"
-- [ ] Games list for each session
+- [x] Games list for each session
 
 ## Known Bugs
 

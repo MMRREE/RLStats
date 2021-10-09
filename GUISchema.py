@@ -867,49 +867,59 @@ SessionSidebar = [
 
 GameBar = [
     {
-        'name': 'GameWins',
+        "name": "GameGeneralStats",
+        "type": "collapsible",
+        "title": "General",
+        "gridpos": (1, 0),
+        "gridspan": (1, 4),
+        "sticky": "nsew",
+        "widgets": [
+            {
+                'name': 'GameWins',
                 "type": "widget",
                 'title': 'Win: ',
                 'gridpos': (1, 0),
                 'gridspan': (1, 1),
                 'tags': "Win",
                 "precision": "g"
-    },
-    {
-        'name': 'GameLoss',
+            },
+            {
+                'name': 'GameLoss',
                 'title': 'Loss: ',
                 'gridpos': (1, 1),
                 'gridspan': (1, 1),
                 'tags': "Loss",
                 "type": "widget",
                 "precision": "g"
-    },
-    {
-        'name': 'GameTimePlayed',
+            },
+            {
+                'name': 'GameTimePlayed',
                 'title': 'Total Time: ',
                 'gridpos': (2, 0),
                 'gridspan': (1, 2),
                 'tags': "Time_Played",
                 "type": "widget",
                 "precision": "g"
-    },
-    {
-        'name': 'GameOvertimePlayed',
+            },
+            {
+                'name': 'GameOvertimePlayed',
                 'title': 'Overtime: ',
                 'gridpos': (2, 2),
                 'gridspan': (1, 1),
                 "type": "widget",
                 'tags': "Overtime",
                 "precision": "g"
-    },
-    {
-        'name': 'GameStart',
+            },
+            {
+                'name': 'GameStart',
                 'title': 'Date: ',
                 'gridpos': (3, 0),
                 'gridspan': (1, 2),
                 "type": "widget",
                 'tags': "Date",
                 "precision": "g"
+            },
+        ],
     },
     {
         "name": "GameIndividualStats",
