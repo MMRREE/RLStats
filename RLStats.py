@@ -665,12 +665,16 @@ class Application(tk.Frame):
 
         if(self.graph_init is not True):
             self.goalsAx.set_xlim(currentLow, currentHigh)
+
         else:
             self.graph_init = False
 
         gf.dateGraphMajorTicksCalculation(self.goalsAx)
         gf.repaintMajorTicks(self.goalsAx)
         self.goalsFigure.tight_layout()
+        self.goalsAx.patch.set_alpha(0)
+
+        self.redrawIconBehindGraph()
 
         self.goalsCanvas.draw()
     # End of refreshGraph
@@ -930,6 +934,24 @@ class Application(tk.Frame):
         self.progressBar.pack_forget()
     # End of processReplays
 
+    def redrawIconBehindGraph(self):
+        xBottomLeft, yBottomLeft, xTopRight, yTopRight = self.goalsAx.bbox.extents
+
+        width = xTopRight - xBottomLeft
+        height = yTopRight - yBottomLeft
+
+        xOffset = xBottomLeft + width/2
+        yOffset = yBottomLeft + height/2
+
+        image = plt.imread(FileSystem.resource_path('icon.ico'))
+
+        yOffset -= len(image)/2
+        xOffset -= len(image)/2
+
+        self.goalsFigure.figimage(
+            image, alpha=0.25, zorder=-1, xo=xOffset, yo=yOffset)
+    # End of redrawIconBehindGraph
+
     def createGraph(self):
         graphWidth = self.UserBox.winfo_width()
         scaleFactor = graphWidth/100
@@ -938,6 +960,10 @@ class Application(tk.Frame):
         if (hasattr(self, 'goalsCanvas')):
             self.goalsCanvas.get_tk_widget().pack_forget()
         self.goalsAx = self.goalsFigure.add_subplot(111)
+
+        self.goalsAx.patch.set_alpha(0)
+
+        self.redrawIconBehindGraph()
 
         self.goalsCanvas = FigureCanvasTkAgg(self.goalsFigure, self.GraphBox)
         self.goalsCanvas.get_tk_widget().pack(
